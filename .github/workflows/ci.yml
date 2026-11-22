@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4.4.0
         with:
           node-version: 22
+      - name: Use current npm
+        run: npm install -g npm@11.19.1
       - name: Install
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
