@@ -81,3 +81,32 @@ export interface CourtPlusApi {
   stats(): Promise<unknown>;
   role(): Promise<'legal_aid'|'utrc'|'superintendent'|'dlsa'>;
 }
+
+export interface Profile {
+  fullName: string;
+  role: 'judge' | 'utrc_member' | 'jail_superintendent' | 'dlsa' | 'legal_aid_lawyer';
+  office: string;
+  district: string;
+  designation: string;
+  language: string;
+  employeeId?: string;
+  email?: string;
+}
+
+export interface DashboardActivity {
+  savedCases: { caseId: string; on: ISODate }[];
+  closedCards: { cardId: string; caseId: string; on?: ISODate }[];
+}
+
+export interface DesktopWorkspaceApi extends CourtPlusApi {
+  getProfile(): Promise<Profile | null>;
+  saveProfile(profile: Profile): Promise<void>;
+  clearProfile(): Promise<void>;
+  dashboardActivity(): Promise<DashboardActivity>;
+  previewDraft(...args: Parameters<CourtPlusApi['exportDraft']>): Promise<string>;
+}
+
+export * from './evidence.js';
+
+export * from './court.js';
+export * from './hearing.js';
