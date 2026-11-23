@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{lang}}" dir="{{direction}}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; font-src data:; img-src data:">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <style>{{fonts}}
+    @page { size: A4; margin: 16mm; }
+    * { box-sizing: border-box; }
+    body { color: #182331; margin: 0; font: 11pt/1.55 {{fontFamily}}, 'Noto Sans', sans-serif; }
+    main { position: relative; max-width: 180mm; margin: auto; overflow-wrap: anywhere; }
+    h1 { font-size: 20pt; line-height: 1.25; margin: 0 0 12pt; }
+    h2 { font-size: 13pt; margin: 18pt 0 5pt; break-after: avoid; }
+    p, ol, ul, blockquote { margin: 0 0 10pt; }
+    ol, ul { padding-inline-start: 22pt; }
+    li { margin-block: 5pt; white-space: pre-line; }
+    p { white-space: pre-line; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #c5ced7; padding: 5pt 8pt; vertical-align: top; text-align: start; }
+    th { width: 40%; font-weight: 700; }
+    tr, .signatures, .receipt { break-inside: avoid; }
+    blockquote { padding-inline-start: 10pt; border-inline-start: 2px solid #8493a4; white-space: pre-line; font-size: 9.5pt; }
+    .notice { border: 1px solid #936516; padding: 6pt 8pt; margin-bottom: 10pt; }
+    .watermark { position: fixed; inset: 39% 0 auto; transform: rotate(-29deg); text-align: center;
+      font: 700 65pt/1 sans-serif; color: rgba(120,35,40,.14); pointer-events: none; }
+    .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 16pt; margin-top: 20pt; }
+    .receipt { display: flex; align-items: center; gap: 8pt; border-top: 1px solid #c5ced7; padding-top: 6pt; }
+    .receipt img { width: 30mm; height: 30mm; }
+    .hash { direction: ltr; unicode-bidi: isolate; }
+    @media screen { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  {{watermark}}
+  <main>
+    {{notice}}
+    <h1>{{title}}</h1>
+    {{body}}
+    {{qr}}
+  </main>
+</body>
+</html>
