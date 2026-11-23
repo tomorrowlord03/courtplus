@@ -52,7 +52,7 @@ afterEach(() => { delete window.courtplusHearing; });
 describe('hearing recorder screens', () => {
   it('explains that recording needs the desktop app when no recorder bridge exists', () => {
     renderAt('/hearings');
-    expect(screen.getByText('Recording hearings works in the CourtPlus desktop app.')).toBeInTheDocument();
+    expect(screen.getByText('Recording hearings works in the Court+ desktop app.')).toBeInTheDocument();
   });
 
   it('lists recordings, offers recovery for interrupted ones and keeps markers disabled until recording', async () => {

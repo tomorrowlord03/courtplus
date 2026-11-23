@@ -7,6 +7,7 @@ import { diagnosticsPassed, runDiagnostics, type DiagnosticsReport } from './dia
 import { createAsrClient } from './asr/client';
 import { createHandlers } from './handlers';
 import { createRecorder, registerRecorder } from './handlers/recorder';
+import { createResearchHints, registerResearch } from './handlers/research-adapter';
 import { readSettings, saveSettings } from './handlers/settings';
 import { courtArguments } from './handlers/triage';
 import { registerHandlers } from './ipc';
@@ -83,6 +84,7 @@ async function start(): Promise<void> {
     print: html => printDocument(rendererSession, html),
     progress: event => mainWindow?.webContents.send('hearing:progress', event),
   }));
+  registerResearch(ipcMain, isTrusted, createResearchHints({ resourceDirectory, audit: database.audit }));
 
   function desktop<Args extends unknown[]>(name: string, schema: z.ZodType<Args>, run: (...args: NoInfer<Args>) => unknown) {
     ipcMain.handle('desktop:' + name, (event, ...args: unknown[]) => {
@@ -148,7 +150,7 @@ async function start(): Promise<void> {
       width: verifier ? 860 : 1280,
       height: verifier ? 740 : 820,
       show: !diagnosticsMode,
-      title: verifier ? 'CourtPlus Verifier' : 'CourtPlus',
+      title: verifier ? 'Court+ Verifier' : 'Court+',
       webPreferences: {
         ...webPreferences, session: rendererSession, preload: join(__dirname, 'preload.js'),
         additionalArguments: diagnosticsMode ? [diagnosticsFlag] : verifier ? ['--courtplus-verifier-window'] : [],

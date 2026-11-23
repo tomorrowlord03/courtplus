@@ -18,8 +18,12 @@ services:
       COURTPLUS_DB_PATH: /var/lib/courtplus/courtplus.sqlite3
       COURTPLUS_EVIDENCE_DIR: /var/lib/courtplus/evidence
       COURTPLUS_HANDOFF_MINUTES: "${COURTPLUS_HANDOFF_MINUTES:-60}"
+      COURTPLUS_EVIDENCE_KEY_FILE: /run/secrets/evidence_key
+      COURTPLUS_SIGNING_KEY_FILE: /run/secrets/signing_key
     secrets:
       - db_key
+      - evidence_key
+      - signing_key
     volumes:
       - courtplus_db:/var/lib/courtplus
       - courtplus_evidence:/var/lib/courtplus/evidence
@@ -66,3 +70,7 @@ volumes:
 secrets:
   db_key:
     file: "${COURTPLUS_DB_KEY_FILE:-./secrets/db_key}"
+  evidence_key:
+    file: "${COURTPLUS_EVIDENCE_KEY_SOURCE:-./secrets/evidence_key}"
+  signing_key:
+    file: "${COURTPLUS_SIGNING_KEY_SOURCE:-./secrets/signing_key}"

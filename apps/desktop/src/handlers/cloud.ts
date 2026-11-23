@@ -7,7 +7,7 @@ import { argumentSchemas } from '../validation';
 import { indiaDate, type CardPatch } from './board';
 import { cloudCase } from './cloud-data';
 
-const roles = z.enum(['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin']);
+const roles = z.enum(['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin', 'judge']);
 const loginResponse = z.object({ token: z.string().regex(/^[\w-]{43}$/), role: roles, expires: z.number().int() });
 const handoffSchema = z.object({
   id: z.uuidv4(), caseId: z.string(), kind: z.enum(['release_order', 'bail_granted', 'acquitted']),
@@ -26,7 +26,7 @@ const labels: Record<Handoff['kind'], string> = {
 };
 const releaseEvents = new Set(['released', 'bail_granted', 'acquitted']);
 const checksum = (value: string) => createHash('sha256').update(value).digest('hex');
-const readOnlyRoles: readonly CloudRole[] = ['admin', 'utrc_member'];
+const readOnlyRoles: readonly CloudRole[] = ['admin', 'utrc_member', 'judge'];
 
 class CloudError extends Error {
   constructor(readonly status: number, detail: string) {

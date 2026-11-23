@@ -70,7 +70,7 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
     dashboardActivity: async () => store.dashboardActivity(),
     role: async () => {
       const role = cloud.status().role;
-      return role === 'admin' || role === 'utrc_member' ? 'utrc' : role ?? store.role();
+      return role === 'admin' || role === 'utrc_member' || role === 'judge' ? 'utrc' : role ?? store.role();
     },
     importOrder: async file => {
       const intake = await import('@courtplus/intake');

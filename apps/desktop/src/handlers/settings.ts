@@ -27,7 +27,7 @@ export type DesktopSettings = z.output<typeof settingsSchema>;
 const profileField = z.string().trim().min(1).max(160);
 export const profileSchema = z.strictObject({
   fullName: profileField,
-  role: z.enum(['judge', 'utrc_member', 'jail_superintendent', 'dlsa', 'legal_aid_lawyer']),
+  role: z.enum(['judge', 'utrc_member', 'jail_superintendent', 'dlsa', 'legal_aid_lawyer', 'lawyer', 'citizen']),
   office: profileField,
   district: profileField,
   designation: profileField,

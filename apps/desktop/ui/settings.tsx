@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../../ui/src/components/ui';
+import { RoleSwitch } from '../../ui/src/components/RoleSwitch';
 import { shell, type CloudStatus, type DesktopSettings, type SignerStatus } from './bridge';
 
 const field = 'block w-full rounded border border-slate-400 px-2 py-1';
@@ -62,6 +63,7 @@ export function Settings() {
     <ErrorNote error={error} />
     {message && <p role="status" className="mb-2">{message}</p>}
     {settings && <div className="grid max-w-2xl gap-6">
+      <RoleSwitch />
       <form className="grid gap-3 rounded border bg-white p-4" onSubmit={event => {
         event.preventDefault();
         void run(async () => {
@@ -92,8 +94,8 @@ export function Settings() {
         </label>
         <button className={btnPrimary} disabled={busy}>Save settings</button>
       </form>
-      <section className="grid gap-3 rounded border bg-white p-4" aria-label="CourtPlus Cloud">
-        <h2 className="font-semibold">CourtPlus Cloud</h2>
+      <section className="grid gap-3 rounded border bg-white p-4" aria-label="Court+ Cloud">
+        <h2 className="font-semibold">Court+ Cloud</h2>
         {cloud?.error && <p role="status">{cloud.error}</p>}
         {cloud?.role ? <>
           <p>Signed in as {cloud.role}</p>

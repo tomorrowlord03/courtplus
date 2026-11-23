@@ -25,20 +25,31 @@ import { HearingRecorder } from './screens/HearingRecorder';
 import { HearingTranscript } from './screens/HearingTranscript';
 import { CaseAnalyzer } from './screens/CaseAnalyzer';
 import { SettlementAnalyzer, SettlementDraft } from './screens/SettlementAnalyzer';
+import { Research } from './screens/Research';
+import { RightsAdvisor } from './screens/RightsAdvisor';
+import { TrackCase } from './screens/TrackCase';
+import { dashboardTitle, ROLE_NAV, useRole } from './lib/roles';
 
-const NAV: { to: string; key: string; label: string; icon: IconName }[] = [
-  { to: '/', key: 'dashboard', label: 'Release Dashboard', icon: 'home' },
+type NavItem = { to: string; key: string; label: string; icon: IconName };
+const NAV: NavItem[] = [
+  { to: '/', key: 'dashboard', label: 'Dashboard', icon: 'home' },
   { to: '/calendar', key: 'calendar', label: 'Deadline Calendar', icon: 'calendar' },
   { to: '/triage', key: 'triage', label: 'Smart triage', icon: 'cases' },
+  { to: '/triage/adjournment', key: 'nav.adjournments', label: 'Adjournments', icon: 'calendar' },
+  { to: '/research', key: 'nav.research', label: 'Research', icon: 'search' },
+  { to: '/rights', key: 'nav.rights', label: 'Rights advisor', icon: 'shield' },
+  { to: '/track', key: 'nav.track', label: 'Track my case', icon: 'search' },
+  { to: '/file-evidence', key: 'nav.fileEvidence', label: 'File evidence', icon: 'import' },
   { to: '/board', key: 'nav.board', label: 'Action board', icon: 'board' },
   { to: '/import', key: 'nav.import', label: 'Import order', icon: 'import' },
   { to: '/cases', key: 'nav.cases', label: 'Cases', icon: 'cases' },
   { to: '/persons', key: 'nav.persons', label: 'People', icon: 'people' },
   { to: '/drafts', key: 'nav.drafts', label: 'Drafts', icon: 'drafts' },
-  { to: '/lawyer', key: 'lawyerTools', label: 'Lawyer tools', icon: 'cases' },
+  { to: '/lawyer/case', key: 'nav.caseAnalyzer', label: 'Case analyzer', icon: 'cases' },
+  { to: '/lawyer', key: 'nav.settlement', label: 'Settlement', icon: 'drafts' },
   { to: '/sc-return', key: 'nav.sc', label: 'SC return', icon: 'sheet' },
   { to: '/verify', key: 'nav.verify', label: 'Verifier', icon: 'verify' },
-  { to: '/evidence', key: 'nav.evidence', label: 'Evidence vault', icon: 'verify' },
+  { to: '/evidence', key: 'nav.evidence', label: 'Evidence inbox', icon: 'verify' },
   { to: '/submit-proof', key: 'nav.submitProof', label: 'Submit proof', icon: 'import' },
   { to: '/hearings', key: 'nav.hearings', label: 'Hearing recorder', icon: 'mic' },
   { to: '/stats', key: 'nav.stats', label: 'Statistics', icon: 'stats' },
@@ -56,6 +67,17 @@ export function App({ importScreen, settingsScreen }: { importScreen?: ReactNode
   const [collapsed, setCollapsed] = useState(false);
   const [dismissed, setDismissed] = useState(dismissedProfilePrompt);
   const { pathname } = useLocation();
+  const role = useRole();
+  // Triage and adjournments need the desktop court workspace.
+  const usable = NAV.filter(item => !item.to.startsWith('/triage') || window.courtplusJudge);
+  const primary = ROLE_NAV[role].flatMap(to => usable.filter(item => item.to === to))
+    .map(item => item.to === '/' ? { ...item, key: 'dashboard.' + role, label: dashboardTitle(role) } : item);
+  const more = role === 'citizen' ? [] : usable.filter(item => !ROLE_NAV[role].includes(item.to));
+  const navLink = ({ to, key, label, icon }: NavItem) => <li key={to}>
+    <NavLink to={to} end={to === '/' || to === '/triage' || to === '/lawyer'} title={t(key, label)} aria-label={t(key, label)} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
+      <Icon name={icon} /><span className="sidebar-label">{t(key, label)}</span>
+    </NavLink>
+  </li>;
 
   function dismissPrompt() {
     setDismissed(true);
@@ -71,14 +93,15 @@ export function App({ importScreen, settingsScreen }: { importScreen?: ReactNode
       <aside className="app-sidebar" aria-label="Primary navigation">
         <div className="brand">
           <span className="brand-mark"><Icon name="brand" size={20} /></span>
-          <strong className="sidebar-label">CourtPlus</strong>
+          <strong className="sidebar-label">Court+</strong>
         </div>
         <p className="nav-heading sidebar-label">Workspace</p>
-        <nav aria-label="Main"><ul className="nav-list">{NAV.filter(item => item.to !== '/triage' || (window.courtplusJudge && profile?.role === 'judge')).map(({ to, key, label, icon }) => <li key={to}>
-          <NavLink to={to} end={to === '/'} title={t(key, label)} aria-label={t(key, label)} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-            <Icon name={icon} /><span className="sidebar-label">{t(key, label)}</span>
-          </NavLink>
-        </li>)}</ul></nav>
+        <nav aria-label="Main"><ul className="nav-list">{primary.map(navLink)}</ul>
+          {more.length > 0 && <details className="nav-more">
+            <summary className="nav-item" title="More tools"><Icon name="board" /><span className="sidebar-label">More tools</span></summary>
+            <ul className="nav-list">{more.map(navLink)}</ul>
+          </details>}
+        </nav>
         <div className="sidebar-bottom">
           {settingsScreen && <NavLink to="/settings" title="Settings" aria-label="Settings" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
             <Icon name="settings" /><span className="sidebar-label">Settings</span>
@@ -92,7 +115,7 @@ export function App({ importScreen, settingsScreen }: { importScreen?: ReactNode
         <TopBar />
         <main id="main" tabIndex={-1} className="main-content">
           {profile === null && !dismissed && pathname === '/' && <aside className="profile-prompt" aria-label="Set up your profile">
-            <Icon name="person" /><p><strong>Personalise CourtPlus</strong><span>Set your role and preferred language.</span></p>
+            <Icon name="person" /><p><strong>Personalise Court+</strong><span>Set your role and preferred language.</span></p>
             <Link to="/profile" className="button secondary" onClick={dismissPrompt}>Set up profile</Link>
             <button className="text-button" onClick={dismissPrompt}>Skip for now</button>
           </aside>}
@@ -118,6 +141,9 @@ export function App({ importScreen, settingsScreen }: { importScreen?: ReactNode
             <Route path="/file-evidence" element={<SubmitProof initialRole="lawyer" />} />
             <Route path="/hearings" element={<HearingRecorder />} />
             <Route path="/hearings/:id" element={<HearingTranscript />} />
+            <Route path="/research" element={<Research />} />
+            <Route path="/rights" element={<RightsAdvisor />} />
+            <Route path="/track" element={<TrackCase />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/safeguards" element={<Safeguards />} />
             <Route path="/profile" element={<ProfileScreen />} />

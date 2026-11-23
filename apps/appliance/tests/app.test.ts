@@ -80,7 +80,7 @@ describe.sequential('CourtPlus Cloud', () => {
       const { token } = login.json<{ token: string }>();
       users.set(role, { authorization: 'Bearer ' + token });
     }
-  });
+  }, 30_000); // One argon2 hash and login per role; slow when test files run in parallel.
 
   afterAll(async () => {
     await app?.close();
@@ -107,7 +107,7 @@ describe.sequential('CourtPlus Cloud', () => {
     for (const role of roles.options) {
       expect((await api(role, 'POST', '/api/listPersons', [])).statusCode).toBe(200);
       expect((await api(role, 'POST', '/api/role', [])).json()).toBe(
-        role === 'utrc_member' || role === 'admin' ? 'utrc' : role,
+        role === 'utrc_member' || role === 'admin' || role === 'judge' ? 'utrc' : role,
       );
       const canEdit = ['dlsa', 'legal_aid', 'superintendent'].includes(role);
       expect((await api(role, 'POST', '/api/saveCase', [person, record])).statusCode).toBe(canEdit ? 204 : 403);
@@ -315,10 +315,11 @@ describe.sequential('CourtPlus Cloud', () => {
     const login = (username: string, remoteAddress: string) => app.inject({
       method: 'POST', url: '/api/auth/login', remoteAddress, payload: { username, password, client: 'desktop' },
     });
-    const sameIp = await Promise.all(roles.options.map(role => login(role, '192.0.2.44')));
+    // Five attempts: the login route also allows only five requests per IP per window.
+    const sameIp = await Promise.all(roles.options.slice(0, 5).map(role => login(role, '192.0.2.44')));
     expect(sameIp.map(result => result.statusCode).sort()).toEqual([200, 200, 429, 429, 429]);
     const separate = await Promise.all(roles.options.map((role, index) => login(role, '192.0.2.' + (51 + index))));
-    expect(separate.map(result => result.statusCode)).toEqual([200, 200, 200, 200, 200]);
+    expect(separate.map(result => result.statusCode)).toEqual(roles.options.map(() => 200));
     const sameAccount = await Promise.all([login('dlsa', '192.0.2.58'), login('dlsa', '192.0.2.59')]);
     expect(sameAccount.map(result => result.statusCode).sort()).toEqual([200, 429]);
   });

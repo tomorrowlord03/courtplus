@@ -19,6 +19,16 @@ const previewDirectory = process.env.COURTPLUS_THEME_PREVIEW_DIR;
 const launchBudget = (packaged ? startupTimeout(packaged) : 60_000) + 30_000;
 const folderTitle = 'Choose a folder for the signed draft bundle';
 const find = (page, name) => page.getByRole('heading', { name, exact: true });
+// Tools outside the role's own list sit under "More tools" in the sidebar.
+async function navTo(page, name) {
+  const nav = page.locator('nav[aria-label="Main"]');
+  const link = nav.getByRole('link', { name, exact: true });
+  if (!await link.isVisible()) {
+    const more = nav.locator('details.nav-more');
+    if (await more.count() && !await more.evaluate(node => node.open)) await more.locator('summary').click();
+  }
+  await link.click();
+}
 const started = Date.now();
 const log = message => console.log('[smoke +' + ((Date.now() - started) / 1000).toFixed(1) + 's] ' + message);
 
@@ -90,9 +100,9 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
       ? launchPackaged(packaged, profile, log).then(launched => ({ ...launched, pickFolder: pickWithAutomation }))
       : launchDevelopment(profile));
     page = await step('first window', 60_000, () => app.firstWindow());
-    await step('release dashboard renders', 60_000, async () => {
+    await step('judge dashboard renders', 60_000, async () => {
       if (previewDirectory) await page.setViewportSize({ width: 1366, height: 768 });
-      await find(page, 'Release Dashboard').waitFor({ timeout: 60_000 });
+      await find(page, 'Judge dashboard').waitFor({ timeout: 60_000 });
       await page.getByRole('button', { name: 'Skip for now' }).click();
       await page.getByText('No cases saved yet', { exact: true }).waitFor();
     });
@@ -109,7 +119,7 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
       await page.getByLabel('Designation').fill('test clerk');
       await page.getByRole('button', { name: 'Save profile' }).click();
       await page.getByText('Profile saved.', { exact: true }).waitFor();
-      await page.locator('nav').getByRole('link', { name: 'Release Dashboard' }).click();
+      await navTo(page, 'Lawyer workspace'); // DLSA is a Lawyer sub-role.
       await page.getByText('Hi, Smoke!', { exact: true }).waitFor();
       await avatar.click();
       await page.getByLabel('Full name').waitFor();
@@ -117,7 +127,7 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
     });
 
     await step('open import', 30_000, async () => {
-      await page.locator('nav').getByRole('link', { name: 'Import order' }).click();
+      await navTo(page, 'Import order');
       await page.getByLabel('Choose PDF or image').setInputFiles({
         name: 'fictional-order.pdf', mimeType: 'application/pdf', buffer: fictionalOrder(),
       });
@@ -142,20 +152,20 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
       await page.getByText('Days to clear: 1 (1 remaining)', { exact: true }).waitFor();
     });
     if (previewDirectory) await step('capture theme previews', 60_000, async () => {
-      await page.locator('nav').getByRole('link', { name: 'Release Dashboard' }).click();
+      await navTo(page, 'Lawyer workspace');
       await page.getByRole('region', { name: 'Needs attention' }).getByRole('link', { name: /Accused-901/ }).first().waitFor();
       await capture('dashboard');
-      await page.locator('nav').getByRole('link', { name: 'Deadline Calendar' }).click();
+      await navTo(page, 'Deadline Calendar');
       await page.getByRole('region', { name: 'Month view' }).waitFor();
       await capture('calendar');
-      await page.locator('nav').getByRole('link', { name: 'Action board' }).click();
+      await navTo(page, 'Action board');
       await page.getByRole('link', { name: /Accused-901.*Lawyer review/ }).click();
       await page.getByRole('heading', { name: /^Case / }).waitFor();
       await page.getByText(/Custody counted:/).waitFor();
       await capture('case-view');
     });
     await step('export signed PDF', 120_000, async () => {
-      await page.locator('nav').getByRole('link', { name: 'Drafts', exact: true }).click();
+      await navTo(page, 'Drafts');
       if (previewDirectory) {
         await page.getByRole('region', { name: 'Draft preview' }).getByText(/Smoke Tester/).first().waitFor();
         await capture('drafts');

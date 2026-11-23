@@ -60,6 +60,11 @@ contextBridge.exposeInMainWorld('courtplusHearing', {
   },
 });
 
+// Research and decision-support hints (see ResearchApi in contracts).
+const researchMethods = ['status', 'searchPrecedents', 'openPrecedent', 'suggestSections', 'classifyRoles', 'logHint'];
+contextBridge.exposeInMainWorld('courtplusResearch',
+  Object.fromEntries(researchMethods.map(name => [name, (...args: unknown[]) => ipcRenderer.invoke('research:' + name, ...args)])));
+
 contextBridge.exposeInMainWorld('courtplusDesktop', {
   verifier: process.argv.includes('--courtplus-verifier-window'),
   boardQueue: (asOf: string) => ipcRenderer.invoke('desktop:boardQueue', asOf),

@@ -341,6 +341,21 @@ main:focus { outline-offset: -3px; }
   .app-shell :where(section, article, form).bg-white { padding: 15px; }
   .calendar-day { min-height: 53px; padding: 3px; }
 }
+/* Research, hints and citizen screens (w35). */
+.nav-more > summary { cursor: pointer; list-style: none; }
+.nav-more > summary::-webkit-details-marker { display: none; }
+.nav-more[open] > summary { color: var(--muted); }
+.research-form, .rights-form { display: grid; gap: 10px; }
+.research-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.research-filters label { min-width: 120px; }
+.research-hit mark, .research-snippet mark { background: var(--review-bg); color: inherit; padding: 0 1px; border-radius: 3px; }
+.research-text { max-height: 60vh; overflow: auto; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+.hint-item { padding: 8px 0; border-top: 1px solid var(--border); }
+.hint-label { color: var(--review); }
+.chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--tile); font-size: 13px; }
+.chip:hover { border-color: var(--ink); }
+.hindi-unreviewed { margin-inline-start: 6px; font-size: 12px; font-weight: 500; color: var(--review); }
+.guide-card h3 { margin-top: 14px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }

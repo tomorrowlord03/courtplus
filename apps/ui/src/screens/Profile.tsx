@@ -3,11 +3,8 @@ import type { Profile as ProfileDetails } from '@courtplus/contracts';
 import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
 import { useApp } from '../lib/context';
 import { RIGHTS_CARD_LANGS } from '../lib/i18n';
-
-const roles: [ProfileDetails['role'], string][] = [
-  ['judge', 'Judge'], ['utrc_member', 'UTRC member'], ['jail_superintendent', 'Jail superintendent'],
-  ['dlsa', 'DLSA'], ['legal_aid_lawyer', 'Legal-aid lawyer'],
-];
+import { PROFILE_ROLES, setRoleOverride } from '../lib/roles';
+import { RoleSwitch } from '../components/RoleSwitch';
 
 export function ProfileScreen() {
   const { profileAvailable, profile, profileError, language, setLanguage } = useApp();
@@ -25,6 +22,7 @@ export function ProfileScreen() {
           <LanguageOptions />
         </select>
       </label>
+      <div className="mt-4"><RoleSwitch /></div>
     </div>}
     <p className="muted" role="status">{message}</p>
   </Page>;
@@ -53,6 +51,7 @@ function ProfileForm({ initial, onMessage }: { initial: ProfileDetails | null; o
         office: value('office'), district: value('district'), designation: value('designation'),
         language: value('language'), employeeId: value('employeeId') || undefined, email: value('email') || undefined,
       });
+      setRoleOverride(undefined); // The saved role now decides the menu.
       onMessage('Profile saved.');
     } catch (e) { setError(errMsg(e)); }
     finally { setBusy(false); }
@@ -76,7 +75,9 @@ function ProfileForm({ initial, onMessage }: { initial: ProfileDetails | null; o
       <label>Full name<input className="field-control" name="fullName" autoComplete="name" required maxLength={160} defaultValue={initial?.fullName} /></label>
       <label>Role<select className="field-control" name="role" required defaultValue={initial?.role ?? ''}>
         <option value="" disabled>Choose a role</option>
-        {roles.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        {PROFILE_ROLES.map(({ group, roles }) => <optgroup key={group} label={group}>
+          {roles.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </optgroup>)}
       </select></label>
       <label>Court or office<input className="field-control" name="office" autoComplete="organization" required maxLength={160} defaultValue={initial?.office} /></label>
       <label>District<input className="field-control" name="district" required maxLength={160} defaultValue={initial?.district ?? 'Raipur'} /></label>

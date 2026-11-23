@@ -1,12 +1,12 @@
-import { randomBytes } from 'node:crypto';
+import { generateKeyPairSync, randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { addAccount } from '../src/auth.js';
 import { openDb, verifyEvidenceLog, type Db } from '../src/db.js';
-import { detectMagicBytes, MAX_FILE_SIZE, validateFileBytes } from '../src/evidence.js';
+import { detectMagicBytes, MAX_FILE_SIZE, resolveEvidenceKey, resolveSigningKey, validateFileBytes } from '../src/evidence.js';
 
 describe('Evidence Vault and Citizen Bridge (w29)', () => {
   const origin = 'https://courtplus.example.test';
@@ -294,5 +294,103 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     expect(res.body).toContain('Anonymous Tip');
     expect(res.body).toContain('अनाम / गोपनीय');
     expect(res.body).toContain('viewport');
+  });
+});
+
+describe('Production key resolution fail-fast (w37)', () => {
+  const origEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env = { ...origEnv };
+  });
+
+  afterEach(() => {
+    process.env = { ...origEnv };
+  });
+
+  test('fails fast in production when evidence key is missing', () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.COURTPLUS_EVIDENCE_KEY;
+    delete process.env.COURTPLUS_EVIDENCE_KEY_FILE;
+
+    expect(() => resolveEvidenceKey()).toThrow(/Evidence encryption key required in production/i);
+  });
+
+  test('fails fast in production when evidence key file does not exist', () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.COURTPLUS_EVIDENCE_KEY;
+    process.env.COURTPLUS_EVIDENCE_KEY_FILE = '/nonexistent/evidence_key';
+
+    expect(() => resolveEvidenceKey()).toThrow(/not found/i);
+  });
+
+  test('fails fast in production when evidence key hex is invalid', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.COURTPLUS_EVIDENCE_KEY = 'invalid-hex';
+
+    expect(() => resolveEvidenceKey()).toThrow(/64-character hex/i);
+  });
+
+  test('fails fast in production when signing key file is missing', () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.COURTPLUS_SIGNING_KEY_FILE;
+
+    expect(() => resolveSigningKey()).toThrow(/Signing key file required in production/i);
+  });
+
+  test('fails fast in production when signing key file does not exist', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.COURTPLUS_SIGNING_KEY_FILE = '/nonexistent/signing_key.pem';
+
+    expect(() => resolveSigningKey()).toThrow(/not found/i);
+  });
+
+  test('succeeds in production when valid evidence key and signing key file are provided', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'courtplus-w37-test-'));
+    try {
+      const keyHex = randomBytes(32).toString('hex');
+      const keyFile = join(dir, 'evidence_key');
+      writeFileSync(keyFile, keyHex);
+
+      const { privateKey } = generateKeyPairSync('ed25519');
+      const pem = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+      const signingKeyFile = join(dir, 'signing_key.pem');
+      writeFileSync(signingKeyFile, pem);
+
+      process.env.NODE_ENV = 'production';
+      process.env.COURTPLUS_EVIDENCE_KEY_FILE = keyFile;
+      process.env.COURTPLUS_SIGNING_KEY_FILE = signingKeyFile;
+
+      const encKey = resolveEvidenceKey();
+      expect(encKey).toEqual(Buffer.from(keyHex, 'hex'));
+
+      const signer = resolveSigningKey();
+      expect(signer.publicKeyPem).toContain('BEGIN PUBLIC KEY');
+      expect(signer.keyId).toMatch(/^[a-f0-9]{64}$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('buildApp fails fast at startup in production when keys are missing', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'courtplus-w37-startup-'));
+    const secret = join(dir, 'db.key');
+    writeFileSync(secret, randomBytes(32).toString('hex'), { mode: 0o600 });
+    const testDb = openDb(join(dir, 'test.sqlite3'), secret);
+
+    try {
+      process.env.NODE_ENV = 'production';
+      delete process.env.COURTPLUS_EVIDENCE_KEY;
+      delete process.env.COURTPLUS_EVIDENCE_KEY_FILE;
+      delete process.env.COURTPLUS_SIGNING_KEY_FILE;
+
+      await expect(buildApp({
+        db: testDb,
+        origin: 'https://courtplus.example.test',
+      })).rejects.toThrow();
+    } finally {
+      testDb.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

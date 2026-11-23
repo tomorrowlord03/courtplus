@@ -74,8 +74,14 @@ export async function summarise(version: TranscriptVersion, load: (name: string)
   }
   if (!research) return local;
   const sentences = splitSentences(version);
-  const picked = await research(sentences.map(sentence => sentence.text).join('\n'), { sentences: local.sentences.length });
-  const texts = Array.isArray(picked) ? picked.filter((item): item is string => typeof item === 'string')
+  let picked: unknown;
+  try {
+    picked = await research(sentences.map(sentence => sentence.text).join('\n'), { sentences: local.sentences.length });
+  } catch {
+    return local; // The package is installed but its model files are not (yet).
+  }
+  const texts = Array.isArray(picked)
+    ? picked.map(item => typeof item === 'string' ? item : (item as { text?: unknown } | null)?.text).filter((item): item is string => typeof item === 'string')
     : typeof picked === 'string' ? picked.split('\n') : [];
   const chosen = local.sentences.length && texts.length
     ? sentences.filter(sentence => texts.some(text => text.trim() === sentence.text)) : [];

@@ -38,7 +38,7 @@ const caseRecord = z.object({
   pendingStatus: z.enum(['investigation', 'inquiry', 'trial', 'appeal', 'disposed']),
 });
 
-export const roles = z.enum(['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin']);
+export const roles = z.enum(['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin', 'judge']);
 export type Role = z.infer<typeof roles>;
 export const username = z.string().regex(/^[a-z0-9][a-z0-9_.-]{2,63}$/);
 export const password = z.string().min(12).max(256);

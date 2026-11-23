@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import type { CaseRecord, Person, ScreeningResult } from '@courtplus/contracts';
 import { addDays, daysBetween, todayIST, useApp } from '../lib/context';
 import { Empty, ErrorNote, Page, errMsg } from '../components/ui';
+import { HintsPanel } from '../components/HintsPanel';
+import { useRole } from '../lib/roles';
 
 const STATUS_TEXT: Record<ScreeningResult['status'], string> = {
   APPLY_NOW: '● Apply now',
@@ -32,6 +34,7 @@ export function CaseList() {
 export function CaseView() {
   const { caseId = '' } = useParams();
   const { api, view } = useApp();
+  const role = useRole();
   const [rec, setRec] = useState<CaseRecord | null | undefined>(undefined);
   const [person, setPerson] = useState<Person | null>(null);
   const [screening, setResult] = useState<ScreeningResult | null>(null);
@@ -134,6 +137,8 @@ export function CaseView() {
         </section>
 
         {trace}
+
+        {role === 'judge' && <HintsPanel key={rec.id} record={rec} />}
 
         <section aria-label="Alerts" className={`rounded border bg-white p-3 ${view === 'utrc' ? 'order-2' : 'order-1'}`}>
           <h2 className="text-lg font-semibold">Alerts</h2>

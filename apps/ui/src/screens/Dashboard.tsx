@@ -9,6 +9,9 @@ import { weeklyActivity } from '../lib/dashboard';
 import { useWorkData, type WorkData } from '../lib/deadlines';
 import { tomorrowIST, useCourt } from './Triage';
 import chhattisgarh from '../../../../data/stats/chhattisgarh.json';
+import { IndiaBacklog } from '../components/IndiaBacklog';
+import { dashboardTitle, useRole, type RoleGroup } from '../lib/roles';
+import { RightsAdvisor } from './RightsAdvisor';
 
 const regionIndicators = [
   { id: 'cg-undertrial-share', label: 'Undertrial share', max: 100 },
@@ -21,13 +24,22 @@ const axis = { fontSize: 11, fill: 'var(--muted)' };
 const tooltip = { border: '1px solid var(--border)', borderRadius: 12 };
 
 export function Dashboard() {
+  const role = useRole();
+  return role === 'citizen' ? <RightsAdvisor title={dashboardTitle(role)} /> : <WorkDashboard role={role} />;
+}
+
+function WorkDashboard({ role }: { role: RoleGroup }) {
   const { data, error } = useWorkData();
   const { profile } = useApp();
-  return <Page title="Release Dashboard">
+  return <Page title={dashboardTitle(role)}>
     <ErrorNote error={error} />
     {!data?.boardIncluded && !error && <p role="status">Loading dashboard…</p>}
-    {data?.boardIncluded && <DashboardContent data={data} />}
+    {data?.boardIncluded && <section aria-label="Undertrial release check">
+      <h2 className="mb-2 text-lg font-semibold">Undertrial release check</h2>
+      <DashboardContent data={data} />
+    </section>}
     {window.courtplusJudge && profile?.role === 'judge' && <CourtBacklogPanel />}
+    {role === 'judge' && <IndiaBacklog />}
   </Page>;
 }
 

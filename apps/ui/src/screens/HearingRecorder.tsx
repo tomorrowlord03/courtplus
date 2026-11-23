@@ -16,7 +16,7 @@ const preferredMime = 'audio/webm;codecs=opus';
 export function HearingRecorder() {
   const hearing = hearingBridge();
   if (!hearing) {
-    return <Page title="Hearing recorder"><Empty title="Recording hearings works in the CourtPlus desktop app." hint="Open the desktop app on the court computer." /></Page>;
+    return <Page title="Hearing recorder"><Empty title="Recording hearings works in the Court+ desktop app." hint="Open the desktop app on the court computer." /></Page>;
   }
   return <Recorder hearing={hearing} />;
 }

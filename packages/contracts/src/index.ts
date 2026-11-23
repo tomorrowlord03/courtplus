@@ -84,7 +84,7 @@ export interface CourtPlusApi {
 
 export interface Profile {
   fullName: string;
-  role: 'judge' | 'utrc_member' | 'jail_superintendent' | 'dlsa' | 'legal_aid_lawyer';
+  role: 'judge' | 'utrc_member' | 'jail_superintendent' | 'dlsa' | 'legal_aid_lawyer' | 'lawyer' | 'citizen';
   office: string;
   district: string;
   designation: string;
@@ -111,3 +111,4 @@ export * from './evidence.js';
 export * from './court.js';
 export * from './hearing.js';
 export * from './lawyer.js';
+export * from './research.js';

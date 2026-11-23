@@ -24,6 +24,8 @@ import type { Role } from './inputs.js';
 // Citation: Bharatiya Sakshya Adhiniyam, 2023 (Act No. 47 of 2023), Section 63(4)(c) and THE SCHEDULE (Part A & Part B) [indiacode.nic.in]
 
 export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+/** Roles that may read the evidence feed and act on items. */
+export const EVIDENCE_ROLES: readonly Role[] = ['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin', 'judge'];
 export const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'mp3', 'm4a', 'wav', 'webm', 'mp4'] as const;
 
 export interface MagicByteResult {
@@ -132,13 +134,26 @@ export function decryptBuffer(encryptedEnvelope: Buffer, key: Buffer): Buffer {
 
 export function resolveEvidenceKey(options?: Options): Buffer {
   const envKey = process.env.COURTPLUS_EVIDENCE_KEY;
-  if (envKey && /^[0-9a-f]{64}$/i.test(envKey)) {
-    return Buffer.from(envKey, 'hex');
+  if (envKey) {
+    if (/^[0-9a-f]{64}$/i.test(envKey)) return Buffer.from(envKey, 'hex');
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('COURTPLUS_EVIDENCE_KEY must be a 64-character hex string');
+    }
   }
   const keyFile = process.env.COURTPLUS_EVIDENCE_KEY_FILE;
-  if (keyFile && existsSync(keyFile)) {
-    const raw = readFileSync(keyFile, 'utf8').trim();
-    if (/^[0-9a-f]{64}$/i.test(raw)) return Buffer.from(raw, 'hex');
+  if (keyFile) {
+    if (existsSync(keyFile)) {
+      const raw = readFileSync(keyFile, 'utf8').trim();
+      if (/^[0-9a-f]{64}$/i.test(raw)) return Buffer.from(raw, 'hex');
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(`Invalid evidence key in ${keyFile}: must be a 64-character hex string`);
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      throw new Error(`COURTPLUS_EVIDENCE_KEY_FILE not found: ${keyFile}`);
+    }
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Evidence encryption key required in production: set COURTPLUS_EVIDENCE_KEY or COURTPLUS_EVIDENCE_KEY_FILE');
   }
   // In dev / test, use a deterministic or cached key file outside git
   const fallbackPath = join(process.env.TMPDIR || process.env.TEMP || tmpdir(), 'courtplus_evidence_vault.key');
@@ -161,12 +176,21 @@ export interface SigningKeyPair {
 }
 
 export function resolveSigningKey(options?: Options): SigningKeyPair {
-  if (options?.signingKeyFile && existsSync(options.signingKeyFile)) {
-    const pem = readFileSync(options.signingKeyFile, 'utf8');
-    const privateKey = createPrivateKey(pem);
-    const publicKey = createPublicKey(privateKey);
-    const keyId = sha256(publicKey.export({ type: 'spki', format: 'der' }));
-    return { keyId, privateKey, publicKey, publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString() };
+  const keyFile = options?.signingKeyFile ?? process.env.COURTPLUS_SIGNING_KEY_FILE;
+  if (keyFile) {
+    if (existsSync(keyFile)) {
+      const pem = readFileSync(keyFile, 'utf8');
+      const privateKey = createPrivateKey(pem);
+      const publicKey = createPublicKey(privateKey);
+      const keyId = sha256(publicKey.export({ type: 'spki', format: 'der' }));
+      return { keyId, privateKey, publicKey, publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString() };
+    }
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(`Signing key file not found: ${keyFile}`);
+    }
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Signing key file required in production: set COURTPLUS_SIGNING_KEY_FILE or options.signingKeyFile');
   }
   // In-memory Ed25519 key for server signing
   const { privateKey, publicKey } = generateKeyPairSync('ed25519');
@@ -890,7 +914,7 @@ export function registerEvidenceRoutes(
 
   // 4. Authenticated Feed GET /api/evidence
   app.get('/api/evidence', async (request) => {
-    authorize(request, ['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin']);
+    authorize(request, EVIDENCE_ROLES);
     const query = request.query as EvidenceQuery;
     let sql = 'SELECT * FROM evidence WHERE 1=1';
     const params: unknown[] = [];
@@ -928,7 +952,7 @@ export function registerEvidenceRoutes(
 
   // 5. Download Decrypted Evidence File GET /api/evidence/:id/file
   app.get('/api/evidence/:id/file', async (request, reply) => {
-    authorize(request, ['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin']);
+    authorize(request, EVIDENCE_ROLES);
     const { id } = request.params as { id: string };
     const row = selectEvidenceById.get(id);
     if (!row) throw new HttpError(404, 'EVIDENCE_NOT_FOUND');
@@ -943,7 +967,7 @@ export function registerEvidenceRoutes(
 
   // 6. Action on Evidence POST /api/evidence/:id/action
   app.post('/api/evidence/:id/action', async (request) => {
-    const session = authorize(request, ['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin'], true);
+    const session = authorize(request, EVIDENCE_ROLES, true);
     const { id } = request.params as { id: string };
     const body = request.body as { action: EvidenceStatus; note?: string };
     if (!body || !['seen', 'taken_on_record', 'shared_with_parties'].includes(body.action)) {
@@ -976,7 +1000,7 @@ export function registerEvidenceRoutes(
 
   // 7. Re-verify Hash, Signature, and Chain Integrity GET /api/evidence/:id/verify
   app.get('/api/evidence/:id/verify', async (request) => {
-    authorize(request, ['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin']);
+    authorize(request, EVIDENCE_ROLES);
     const { id } = request.params as { id: string };
     const row = selectEvidenceById.get(id);
     if (!row) throw new HttpError(404, 'EVIDENCE_NOT_FOUND');
@@ -1032,7 +1056,7 @@ export function registerEvidenceRoutes(
 
   // 8. BSA s.63 Certificate GET /api/evidence/:id/certificate
   app.get('/api/evidence/:id/certificate', async (request, reply) => {
-    authorize(request, ['superintendent', 'dlsa', 'legal_aid', 'utrc_member', 'admin']);
+    authorize(request, EVIDENCE_ROLES);
     const { id } = request.params as { id: string };
     const query = request.query as { format?: string };
     const row = selectEvidenceById.get(id);

@@ -141,7 +141,7 @@ export async function buildApp(options: Options) {
     exportScReturn: exports.return,
     verify: (_, bundle) => receipts.verifyBundle(bundle),
     stats: () => ({ peopleCount: cases.listPersons().length, caseCount: cases.listCases().length, figures }),
-    role: ({ role }) => ['utrc_member', 'admin'].includes(role) ? 'utrc'
+    role: ({ role }) => ['utrc_member', 'admin', 'judge'].includes(role) ? 'utrc'
       : role as Awaited<ReturnType<CourtPlusApi['role']>>,
   };
 

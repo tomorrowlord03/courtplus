@@ -9,7 +9,7 @@ import { clock, decodeTo16k, hearingBridge, speakerOptions, wordDiff } from './h
 export function HearingTranscript() {
   const hearing = hearingBridge();
   const { id = '' } = useParams();
-  if (!hearing) return <Page title="Hearing transcript"><Empty title="Hearing transcripts open in the CourtPlus desktop app." /></Page>;
+  if (!hearing) return <Page title="Hearing transcript"><Empty title="Hearing transcripts open in the Court+ desktop app." /></Page>;
   return <Transcript hearing={hearing} id={id} />;
 }
 
