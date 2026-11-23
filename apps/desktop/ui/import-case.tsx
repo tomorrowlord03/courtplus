@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CaseRecord, Charge, CourtPlusApi, Person, Tri } from '@courtplus/contracts';
 import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../../ui/src/components/ui';
+import { useApp } from '../../ui/src/lib/context';
 import { api } from './bridge';
 import {
   applySuggestion, bailOutcomes, buildCaseRecord, otherEvents, reviewFields, suggestionTarget,
@@ -24,13 +25,15 @@ function tri(data: FormData, name: string): Tri {
 }
 
 export function ImportCase() {
+  const { profile } = useApp();
   const navigate = useNavigate();
   const [doc, setDoc] = useState<Order>();
   const [facts, setFacts] = useState<Facts>({});
   const [people, setPeople] = useState<Person[]>([]);
   const [selected, setSelected] = useState('');
   const [used, setUsed] = useState<number[]>([]);
-  const [confirmedBy, setConfirmedBy] = useState(rememberedConfirmer);
+  const [confirmerOverride, setConfirmerOverride] = useState<string>();
+  const confirmedBy = confirmerOverride ?? (profile ? `${profile.fullName}, ${profile.designation}` : rememberedConfirmer());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => { void api.listPersons().then(setPeople, error => setError(errMsg(error))); }, []);
@@ -68,9 +71,8 @@ export function ImportCase() {
         judicialEnd: get('judicialEnd'), ongoing: data.has('ongoing'),
         otherEvent: otherKind ? { kind: otherKind, on: get('otherEventOn') } : undefined,
       });
-      try { localStorage.setItem(confirmerKey, confirmedBy.trim()); } catch { /* storage is a convenience only */ }
       await api.saveCase({ ...person, caseIds: [...person.caseIds, record.id] }, record);
-      navigate('/');
+      navigate('/board');
     } catch (error) { setError(errMsg(error)); }
     finally { setBusy(false); }
   }
@@ -80,14 +82,14 @@ export function ImportCase() {
 
   return <Page title="Import order" note="Review the extracted order and save confirmed facts. Exclude sealed, in-camera and other protected orders.">
     <ErrorNote error={error} />
-    {!doc ? <label className={btn}>
+    {!doc ? <label className="panel import-picker">
       {busy ? 'Reading order…' : 'Choose PDF or image'}
       <input className="ml-3" type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy}
         onChange={event => void read(event.target.files?.[0])} />
     </label> : <>
       <button className={btn + ' mb-4'} onClick={() => setDoc(undefined)}>Import another</button>
       {doc.aiUnavailable && <p role="status" className="mb-4 rounded bg-amber-50 p-2 text-sm text-amber-800">
-        ▲ {doc.aiUnavailable}. The model could not run, so names are masked by rules only and the suggestions
+        ▲ Automated reading is unavailable. Names are masked by rules only and the suggestions
         below come from text patterns. Check the masking and enter every fact from the order by hand.
       </p>}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -157,7 +159,7 @@ export function ImportCase() {
             {['investigation', 'inquiry', 'trial', 'appeal', 'disposed'].map(stage => <option key={stage}>{stage}</option>)}
           </select></label>
           <label>Confirmed by<input className={fieldStyle} required value={confirmedBy}
-            placeholder="Name and role of the person confirming" onChange={event => setConfirmedBy(event.target.value)} /></label>
+            placeholder="Name and role of the person confirming" onChange={event => setConfirmerOverride(event.target.value)} /></label>
           <button className={btnPrimary} disabled={busy}>Save confirmed case</button>
         </form>
       </div>

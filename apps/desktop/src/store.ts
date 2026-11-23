@@ -1,11 +1,12 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Card, CaseRecord, CourtPlusApi, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+import type { Card, CaseRecord, CourtPlusApi, DashboardActivity, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import Database from 'better-sqlite3-multiple-ciphers';
 import { appendAudit, type AuditEntry } from './audit';
 import { roleSchema } from './validation';
 import type { CardPatch } from './handlers/board';
+import { courtMigration, courtStore } from './handlers/triage';
 
 const databaseFile = 'courtplus.sqlite3';
 const keyFile = 'database.key.dpapi';
@@ -51,7 +52,10 @@ const migrations = [`
     BEGIN SELECT RAISE(ABORT, 'audit log is append-only'); END;
   CREATE TABLE settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL) STRICT;
   INSERT INTO settings (key, value) VALUES ('role', 'legal_aid');
-`];
+`, `
+  ALTER TABLE cases ADD COLUMN saved_at TEXT;
+  ALTER TABLE cards ADD COLUMN closed_at TEXT;
+`, courtMigration];
 
 type KeyStorage = Pick<typeof import('electron').safeStorage,
   'isAsyncEncryptionAvailable' | 'encryptStringAsync' | 'decryptStringAsync'>;
@@ -108,6 +112,7 @@ export async function openEncryptedDatabase(
 }
 
 type Role = Awaited<ReturnType<CourtPlusApi['role']>>;
+const civilDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' });
 
 export async function openStore(directory: string, keyStorage: KeyStorage) {
   const db = await openEncryptedDatabase(directory, keyStorage);
@@ -128,8 +133,8 @@ export async function openStore(directory: string, keyStorage: KeyStorage) {
     ON CONFLICT (id) DO UPDATE SET profile_json = excluded.profile_json
   `);
   const writeCase = db.prepare(`
-    INSERT INTO cases (id, person_id, details_json, charges_json, custody_json, events_json)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO cases (id, person_id, details_json, charges_json, custody_json, events_json, saved_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT (id) DO UPDATE SET person_id = excluded.person_id, details_json = excluded.details_json,
       charges_json = excluded.charges_json, custody_json = excluded.custody_json,
       events_json = excluded.events_json
@@ -140,7 +145,7 @@ export async function openStore(directory: string, keyStorage: KeyStorage) {
     if (ownerId !== personId) throw new Error('Case must belong to the supplied person');
     writePerson.run(personId, JSON.stringify(profile));
     writeCase.run(id, ownerId, JSON.stringify(details), JSON.stringify(charges),
-      JSON.stringify(custody), JSON.stringify(events));
+      JSON.stringify(custody), JSON.stringify(events), new Date().toISOString());
     appendAudit(db, role(), 'case.save', { person: { id: personId, ...profile }, case: record });
   });
 
@@ -157,17 +162,26 @@ export async function openStore(directory: string, keyStorage: KeyStorage) {
     for (const [key, value] of changed) writeSetting.run(key, value);
     audit(action, payload ?? Object.fromEntries(changed));
   });
+  const deleteSetting = db.prepare<[string]>('DELETE FROM settings WHERE key = ?');
+  const clearSetting = db.transaction((key: string, action: string) => {
+    if (deleteSetting.run(key).changes) audit(action, {});
+  });
   const readCards = db.prepare<[], { id: string; card_json: string }>('SELECT id, card_json FROM cards');
-  const readCard = db.prepare<[string], { card_json: string }>('SELECT card_json FROM cards WHERE id = ?');
+  const readCard = db.prepare<[string], { card_json: string; closed_at: string | null }>(
+    'SELECT card_json, closed_at FROM cards WHERE id = ?',
+  );
   const writeCard = db.prepare(
-    'INSERT INTO cards VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET ' +
-      'person_id = excluded.person_id, case_id = excluded.case_id, card_json = excluded.card_json',
+    'INSERT INTO cards (id, person_id, case_id, card_json, closed_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET ' +
+      'person_id = excluded.person_id, case_id = excluded.case_id, card_json = excluded.card_json, closed_at = excluded.closed_at',
   );
   const updateCard = db.transaction((card: Card, patch: CardPatch) => {
     const previous = readCard.get(card.id);
     const prior = previous ? JSON.parse(previous.card_json) as CardPatch : {};
     if (Object.entries(patch).every(([key, value]) => card[key as keyof CardPatch] === value)) return card;
-    writeCard.run(card.id, card.personId, card.caseId, JSON.stringify({ ...prior, ...patch }));
+    const closedAt = patch.state === 'closed' && card.state !== 'closed'
+      ? new Date().toISOString()
+      : patch.state && patch.state !== 'closed' ? null : previous?.closed_at ?? null;
+    writeCard.run(card.id, card.personId, card.caseId, JSON.stringify({ ...prior, ...patch }), closedAt);
     audit('card.update', { id: card.id, patch });
     return { ...card, ...patch };
   });
@@ -181,11 +195,25 @@ export async function openStore(directory: string, keyStorage: KeyStorage) {
   });
   const document = db.prepare<[string], { metadata_json: string }>('SELECT metadata_json FROM documents WHERE id = ?');
   const auditEntries = db.prepare<[], AuditEntry>('SELECT * FROM audit_log ORDER BY id');
+  const savedCases = db.prepare<[], { caseId: string; saved_at: string }>(
+    'SELECT id AS caseId, saved_at FROM cases WHERE saved_at IS NOT NULL',
+  );
+  const closedCards = db.prepare<[], { cardId: string; caseId: string; closed_at: string | null }>(
+    "SELECT id AS cardId, case_id AS caseId, closed_at FROM cards WHERE json_extract(card_json, '$.state') = 'closed'",
+  );
 
   return {
+    court: courtStore(db),
     readSetting: (key: string): string | undefined => setting.get(key)?.value,
     writeSettings: (changes: Record<string, string>, action = 'settings.update', payload?: unknown) =>
       writeSettings.immediate(changes, action, payload),
+    clearSetting: clearSetting.immediate,
+    dashboardActivity: (): DashboardActivity => ({
+      savedCases: savedCases.all().map(({ caseId, saved_at }) => ({ caseId, on: civilDate.format(new Date(saved_at)) })),
+      closedCards: closedCards.all().map(({ cardId, caseId, closed_at }) => ({
+        cardId, caseId, on: closed_at ? civilDate.format(new Date(closed_at)) : undefined,
+      })),
+    }),
     readCards: () => new Map(readCards.all().map(row => [row.id, JSON.parse(row.card_json) as CardPatch])),
     updateCard: updateCard.immediate,
     recordDocument: recordDocument.immediate,

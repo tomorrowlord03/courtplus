@@ -113,7 +113,9 @@ export function CaseView() {
           </div>
           {result && (
             <div className="mt-3" aria-live="polite">
-              <p className="text-xl font-bold">{STATUS_TEXT[result.status]}</p>
+              <p className={`screening-status screening-${result.status.toLowerCase()}`}>
+                {STATUS_TEXT[result.status]}
+              </p>
               <p className="text-sm">
                 Custody counted: {result.countedCustodyDays} days (raw {result.rawCustodyDays}).
                 {result.thresholdFraction && ` Threshold ${result.thresholdFraction}`}
@@ -140,7 +142,7 @@ export function CaseView() {
             {result?.alerts.map((a, i) => <li key={i}>▲ {a.message}{a.dueOn && ` (due ${a.dueOn})`}</li>)}
           </ul>
           {view === 'legal_aid'
-            ? <Link to={{ pathname: '/drafts', search: new URLSearchParams({ caseId }).toString() }} className="mt-2 inline-block text-blue-800 underline">Prepare drafts for this case</Link>
+            ? <Link to={{ pathname: '/drafts', search: new URLSearchParams({ caseId }).toString() }} className="button primary mt-3">Prepare drafts for this case</Link>
             : <p className="mt-2 text-sm text-slate-600">Review queue: check the proof trace below each alert before the committee meets.</p>}
         </section>
 

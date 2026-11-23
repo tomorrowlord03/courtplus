@@ -1,4 +1,5 @@
-import type { CourtPlusApi } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+import type { DesktopWorkspaceApi } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+import { profileSchema } from './handlers/settings';
 import { z } from 'zod';
 
 const id = z.string().min(1);
@@ -82,11 +83,21 @@ const cardPatch = z.strictObject({
 
 export const roleSchema = z.enum(['legal_aid', 'utrc', 'superintendent', 'dlsa']);
 
-type ApiSchemas = { [K in keyof CourtPlusApi]: z.ZodType<Parameters<CourtPlusApi[K]>> };
+type ApiSchemas = { [K in keyof DesktopWorkspaceApi]: z.ZodType<Parameters<DesktopWorkspaceApi[K]>> };
+const draftRequest = z.tuple([
+  z.enum(['S479_3_APPLICATION', 'DLSA_7_DAY', 'AI_ASSISTANCE_NOTE', 'RIGHTS_CARD']),
+  id,
+  z.string().min(1),
+]);
 
 export const argumentSchemas = {
   listPersons: z.tuple([]),
   listCases: z.tuple([]),
+  getProfile: z.tuple([]),
+  saveProfile: z.tuple([profileSchema]),
+  clearProfile: z.tuple([]),
+  dashboardActivity: z.tuple([]),
+  previewDraft: draftRequest,
   importOrder: z.tuple([z.strictObject({ name: z.string().min(1), bytes })]),
   saveCase: z.tuple([person, caseRecord]).refine(([p, c]) => p.id === c.personId, {
     path: [1, 'personId'],
@@ -94,11 +105,7 @@ export const argumentSchemas = {
   screen: z.tuple([id, civilDate]),
   board: z.tuple([civilDate]),
   updateCard: z.tuple([id, cardPatch]),
-  exportDraft: z.tuple([
-    z.enum(['S479_3_APPLICATION', 'DLSA_7_DAY', 'AI_ASSISTANCE_NOTE', 'RIGHTS_CARD']),
-    id,
-    z.string().min(1),
-  ]),
+  exportDraft: draftRequest,
   exportScReturn: z.tuple([civilDate, z.enum(['xlsx', 'csv'])]),
   verify: z.tuple([z.strictObject({ pdf: bytes, receipt: z.string().min(1), manifest: z.string().min(1) })]),
   stats: z.tuple([]),

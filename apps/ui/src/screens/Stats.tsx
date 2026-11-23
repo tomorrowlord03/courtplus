@@ -25,12 +25,12 @@ export function Stats() {
       {figs && figs.length === 0 && <Empty title="No statistics yet" hint="Figures appear once cases are imported and official sources are loaded." />}
       {figs && figs.length > 0 && (
         <>
-          <div className="h-72 rounded border bg-white p-2" role="img" aria-label="Bar chart of figures; the table below has the same numbers">
+          <div className="panel h-72" role="img" aria-label="Bar chart of figures; the table below has the same numbers">
             <ResponsiveContainer>
               <BarChart data={figs}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                 <XAxis dataKey="label" /><YAxis /><Tooltip />
-                <Bar dataKey="value" fill="#1d4ed8" />
+                <Bar dataKey="value" fill="var(--ink)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

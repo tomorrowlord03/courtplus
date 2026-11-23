@@ -421,5 +421,5 @@ export function createCloud(store: Store, changed: () => void) {
     return schema.safeParse(response).data;
   }
 
-  return { login, signOut, disconnect, status, schedule, records, cards, handoffState, updateHandoff, publish, verifyDigest };
+  return { login, signOut, disconnect, status, schedule, records, cards, handoffState, updateHandoff, publish, verifyDigest, token: () => session?.token };
 }

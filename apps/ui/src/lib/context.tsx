@@ -1,15 +1,78 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { CourtPlusApi } from '@courtplus/contracts';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import type { Profile } from '@courtplus/contracts';
+import type { WorkspaceApi } from './api';
+import { useLang } from './i18n';
 
 export type View = 'legal_aid' | 'utrc';
 
-interface Ctx { api: CourtPlusApi; view: View; setView: (v: View) => void }
+interface Ctx {
+  api: WorkspaceApi;
+  view: View;
+  setView: (v: View) => void;
+  language: string;
+  setLanguage: (language: string) => void;
+  profile: Profile | null | undefined;
+  profileError: string | null;
+  profileAvailable: boolean;
+  saveProfile: (value: Profile) => Promise<void>;
+  clearProfile: () => Promise<void>;
+}
 const AppCtx = createContext<Ctx | null>(null);
 
-export function AppProvider({ api, children }: { api: CourtPlusApi; children: ReactNode }) {
+export function AppProvider({ api, children }: { api: WorkspaceApi; children: ReactNode }) {
   const [view, setView] = useState<View>('legal_aid');
-  const value = useMemo(() => ({ api, view, setView }), [api, view]);
+  const [language, setLanguage] = useLang();
+  const [profile, setProfile] = useState<Profile | null>();
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const { getProfile, role } = api;
+  const profileAvailable = Boolean(getProfile && api.saveProfile && api.profileAvailable !== false);
+
+  function applyProfile(value: Profile) {
+    setView(value.role === 'judge' || value.role === 'utrc_member' ? 'utrc' : 'legal_aid');
+    setLanguage(value.language);
+  }
+
+  useEffect(() => {
+    let live = true;
+    if (!profileAvailable) return;
+    void Promise.resolve().then(() => getProfile?.()).then(async value => {
+      if (!live) return;
+      setProfile(value ?? null);
+      if (value) {
+        applyProfile(value);
+      } else {
+        const currentRole = await role();
+        if (live && currentRole === 'utrc') setView('utrc');
+      }
+    }).catch(() => { if (live) setProfileError('Could not load your profile.'); });
+    return () => { live = false; };
+  }, [getProfile, profileAvailable, role]);
+
+  async function saveProfile(value: Profile) {
+    if (!api.saveProfile) throw new Error('Profiles can be saved in the desktop app.');
+    await api.saveProfile(value);
+    setProfile(value);
+    setProfileError(null);
+    applyProfile(value);
+    clearLegacyConfirmer();
+  }
+
+  async function clearProfile() {
+    if (!api.clearProfile) throw new Error('Profiles can be cleared in the desktop app.');
+    await api.clearProfile();
+    setProfile(null);
+    setProfileError(null);
+    setView('legal_aid');
+    setLanguage('en');
+    clearLegacyConfirmer();
+  }
+
+  const value = { api, view, setView, language, setLanguage, profile, profileError, profileAvailable, saveProfile, clearProfile };
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
+}
+
+function clearLegacyConfirmer() {
+  try { localStorage.removeItem('courtplus.confirmedBy'); } catch { /* Storage may be disabled. */ }
 }
 
 export function useApp(): Ctx {

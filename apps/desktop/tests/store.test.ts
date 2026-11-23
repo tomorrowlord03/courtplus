@@ -1,9 +1,10 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, expect, it } from 'vitest';
-import type { CaseRecord, Person } from '@courtplus/contracts';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import type { Card, CaseRecord, Person, Profile } from '@courtplus/contracts';
 import { type AuditEntry, verifyAuditChain } from '../src/audit';
+import { clearProfile, readProfile, writeProfile } from '../src/handlers/settings';
 import { openEncryptedDatabase, openStore } from '../src/store';
 
 const testKeyStorage = {
@@ -36,6 +37,51 @@ const record: CaseRecord = {
 let directory: string;
 beforeEach(() => { directory = mkdtempSync(join(tmpdir(), 'courtplus-test-')); });
 afterEach(() => { rmSync(directory, { recursive: true, force: true }); });
+
+it('saves, loads and clears a fictional profile in encrypted settings', async () => {
+  const profile: Profile = {
+    fullName: 'Fictional Test Officer', role: 'judge', office: 'Fictional office', district: 'Raipur',
+    designation: 'Test clerk', language: 'hi', employeeId: 'fictional-id', email: 'fictional@example.invalid',
+  };
+  const first = await openStore(directory, testKeyStorage);
+  try {
+    expect(readProfile(first)).toBeNull();
+    writeProfile(first, profile);
+  } finally { first.close(); }
+  const reopened = await openStore(directory, testKeyStorage);
+  try {
+    expect(readProfile(reopened)).toEqual(profile);
+    expect(reopened.role()).toBe('legal_aid');
+    clearProfile(reopened);
+    expect(readProfile(reopened)).toBeNull();
+    expect(reopened.auditEntries().map(entry => entry.action)).toEqual(['profile.save', 'profile.clear']);
+  } finally { reopened.close(); }
+});
+
+it('keeps first-save and closure dates across edits in the local dashboard activity', async () => {
+  const store = await openStore(directory, testKeyStorage);
+  const card: Card = {
+    id: 'fictional-card', caseId: record.id, personId: person.id, title: 'Fictional card',
+    lane: 'LAWYER_REVIEW', state: 'holds_checked', tags: [],
+  };
+  try {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-01T19:00:00Z'));
+    store.saveCase(person, record);
+    vi.setSystemTime(new Date('2026-11-09T19:00:00Z'));
+    const closed = store.updateCard(card, { state: 'closed' });
+    vi.setSystemTime(new Date('2026-11-16T19:00:00Z'));
+    store.saveCase(person, { ...record, pendingStatus: 'appeal' });
+    store.updateCard(closed, { owner: 'Fictional staff' });
+    expect(store.dashboardActivity()).toEqual({
+      savedCases: [{ caseId: record.id, on: '2026-11-02' }],
+      closedCards: [{ cardId: card.id, caseId: record.id, on: '2026-11-10' }],
+    });
+  } finally {
+    vi.useRealTimers();
+    store.close();
+  }
+});
 
 it('reopens persisted cases, derives membership, and appends one audit entry per save', async () => {
   const store = await openStore(directory, testKeyStorage);

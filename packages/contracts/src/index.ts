@@ -110,3 +110,4 @@ export * from './evidence.js';
 
 export * from './court.js';
 export * from './hearing.js';
+export * from './lawyer.js';

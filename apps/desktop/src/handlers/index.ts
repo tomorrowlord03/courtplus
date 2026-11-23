@@ -1,4 +1,4 @@
-import type { CaseRecord, CourtPlusApi, ISODate, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+import type { CaseRecord, DesktopWorkspaceApi, ISODate, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import { join } from 'node:path';
 import type { Store } from '../store';
 import { createAnchor } from './anchor';
@@ -6,7 +6,10 @@ import { buildBoard, checkCardStep, indiaDate } from './board';
 import { createCloud } from './cloud';
 import { loadFigures } from './documents';
 import { createExports } from './exports';
-import { readSettings } from './settings';
+import { clearProfile, readProfile, readSettings, writeProfile } from './settings';
+import { createEvidenceHandlers } from './evidence';
+import { createCourtHandler } from './triage';
+import { createLawyerHandlers, registerLawyerHandlers } from './lawyer';
 
 interface HandlerPorts {
   resourceDirectory: string;
@@ -56,9 +59,15 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
     ...ports, localizationRoot: ports.resourceDirectory,
   }, cloud, context, listCases);
   const anchor = createAnchor(store, exports, { ...ports, localizationRoot: ports.resourceDirectory });
-  const handlers: CourtPlusApi = {
+  const evidence = createEvidenceHandlers(store, ports, cloud);
+  registerLawyerHandlers(createLawyerHandlers(store, engine, exports, signer, ports));
+  const handlers: DesktopWorkspaceApi = {
     listPersons: async () => listPersons(),
     listCases: async () => listCases(),
+    getProfile: async () => readProfile(store),
+    saveProfile: async profile => writeProfile(store, profile),
+    clearProfile: async () => clearProfile(store),
+    dashboardActivity: async () => store.dashboardActivity(),
     role: async () => {
       const role = cloud.status().role;
       return role === 'admin' || role === 'utrc_member' ? 'utrc' : role ?? store.role();
@@ -75,6 +84,7 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
       }
       store.saveCase(person, record);
       cloud.schedule();
+      ports.boardChanged();
     },
     screen: async (caseId, asOf) => {
       const { person, cases } = context(caseId);
@@ -95,7 +105,7 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
       checkCardStep(card, patch, await handlers.role());
       const updated = store.updateCard(card, patch);
       cloud.schedule();
-      if (card.lane === 'NO_UPDATE_180' && updated.state === 'closed') ports.boardChanged();
+      ports.boardChanged();
       return updated;
     },
     stats: async () => ({
@@ -105,5 +115,7 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
     ...exportHandlers,
   };
 
-  return { handlers, cloud, signer, anchor, boardQueue: (asOf: ISODate) => board(asOf).queue };
+  return { handlers, cloud, signer, anchor, evidence, courtWorkspace: createCourtHandler(store, engine, ports,
+    () => readProfile(store)?.role === 'judge'),
+    boardQueue: (asOf: ISODate) => board(asOf).queue };
 }

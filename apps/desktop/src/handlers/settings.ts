@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Profile } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import type { Store } from '../store';
 import { defaultDailyCap } from './board';
 
@@ -22,6 +23,33 @@ export const settingsSchema = z.strictObject({
   district: z.string().trim().max(160),
 });
 export type DesktopSettings = z.output<typeof settingsSchema>;
+
+const profileField = z.string().trim().min(1).max(160);
+export const profileSchema = z.strictObject({
+  fullName: profileField,
+  role: z.enum(['judge', 'utrc_member', 'jail_superintendent', 'dlsa', 'legal_aid_lawyer']),
+  office: profileField,
+  district: profileField,
+  designation: profileField,
+  language: z.enum(['en', 'hi', 'bn', 'mr', 'ta', 'te', 'gu', 'kn', 'ml', 'pa', 'or', 'as', 'ur']),
+  employeeId: profileField.optional(),
+  email: z.email().max(254).optional(),
+}) satisfies z.ZodType<Profile>;
+
+const profileKey = 'personalProfile';
+
+export function readProfile(store: Store): Profile | null {
+  const value = store.readSetting(profileKey);
+  return value ? profileSchema.parse(JSON.parse(value)) : null;
+}
+
+export function writeProfile(store: Store, profile: Profile): void {
+  store.writeSettings({ [profileKey]: JSON.stringify(profileSchema.parse(profile)) }, 'profile.save', {});
+}
+
+export function clearProfile(store: Store): void {
+  store.clearSetting(profileKey, 'profile.clear');
+}
 
 export function readSettings(store: Store): DesktopSettings {
   return {

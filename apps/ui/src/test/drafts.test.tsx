@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import type { CaseRecord, CourtPlusApi, Status } from '@courtplus/contracts';
+import type { WorkspaceApi } from '../lib/api';
 import { AppProvider } from '../lib/context';
 import { Drafts } from '../screens/Drafts';
 
@@ -14,7 +15,7 @@ const rec = (id: string): CaseRecord => ({
   custody: [{ kind: 'judicial', start: '2025-01-01', ongoing: true }], events: [], pendingStatus: 'trial',
 });
 
-function renderDrafts(status: Status) {
+function renderDrafts(status: Status, previewDraft?: WorkspaceApi['previewDraft']) {
   const screenFn = vi.fn(async (caseId: string, asOf: string) => ({
     personId: 'p', caseId, asOf, ruleVersion: 't', dayConvention: 't', status,
     rawCustodyDays: 1, countedCustodyDays: 1, ceilingUrgent: false, reasons: [], alerts: [], nalsaCategories: [], trace: [],
@@ -24,13 +25,19 @@ function renderDrafts(status: Status) {
     saveCase: vi.fn(), screen: screenFn, board: vi.fn(async () => []), updateCard: vi.fn(),
     exportDraft: vi.fn(), exportScReturn: vi.fn(), verify: vi.fn(), stats: vi.fn(), role: vi.fn(async () => 'legal_aid'),
   } as unknown as CourtPlusApi;
-  render(<AppProvider api={api}><MemoryRouter><Drafts /></MemoryRouter></AppProvider>);
+  render(<AppProvider api={{ ...api, previewDraft }}><MemoryRouter><Drafts /></MemoryRouter></AppProvider>);
   return screenFn;
 }
 
 const options = () => screen.getAllByRole('option').map((o) => o.textContent);
 
 describe('Drafts s.479(3) offer', () => {
+  it('preserves isolated names and references in the live draft preview', async () => {
+    renderDrafts('NEEDS_LAWYER_REVIEW', async () => '<main><p>Confirmed by <bdi>Fictional officer</bdi></p><p>Reference <code>FICTIONAL-1</code></p></main>');
+    const preview = screen.getByRole('region', { name: 'Draft preview' });
+    expect(await within(preview).findByText('Fictional officer')).toBeVisible();
+    expect(within(preview).getByText('FICTIONAL-1')).toBeVisible();
+  });
   it('hides the application and says why when the engine routes the case to review', async () => {
     const screenFn = renderDrafts('NEEDS_LAWYER_REVIEW');
     expect(await screen.findByTestId('s479-hidden')).toHaveTextContent('NEEDS LAWYER REVIEW');

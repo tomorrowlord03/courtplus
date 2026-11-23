@@ -1,9 +1,28 @@
-import type { CourtPlusApi } from '@courtplus/contracts';
+import type { CourtPlusApi, DesktopWorkspaceApi } from '@courtplus/contracts';
+
+export type WorkspaceApi = CourtPlusApi & Partial<DesktopWorkspaceApi> & { profileAvailable?: false };
 
 declare global {
   interface Window {
-    courtplus?: CourtPlusApi;
+    courtplus?: WorkspaceApi;
   }
+}
+
+// The desktop preload exposes the evidence bridge; the web build has none.
+export type EvidenceBridge = {
+  verifier?: boolean;
+  evidenceList?: (query: unknown) => Promise<import('@courtplus/contracts').EvidenceItem[]>;
+  evidenceSubmit?: (data: unknown) => Promise<import('@courtplus/contracts').EvidenceReceiptResponse>;
+  evidenceStatus?: (code: string) => Promise<import('@courtplus/contracts').EvidenceStatusResponse>;
+  evidenceAction?: (id: string, action: string, note?: string) => Promise<import('@courtplus/contracts').EvidenceItem>;
+  evidenceVerify?: (id: string) => Promise<import('@courtplus/contracts').EvidenceVerification>;
+  evidenceFile?: (id: string) => Promise<{ data: string; mime: string; filename: string }>;
+  evidenceCertificate?: (id: string) => Promise<{ html: string; pdfPath?: string }>;
+  [key: string]: unknown;
+};
+
+export function evidenceBridge(): EvidenceBridge | undefined {
+  return typeof window === 'undefined' ? undefined : (window as unknown as { courtplusDesktop?: EvidenceBridge }).courtplusDesktop;
 }
 
 const METHODS = [
@@ -24,7 +43,7 @@ function encodeArg(v: unknown): unknown {
   return v;
 }
 
-export function createHttpApi(base = '/api'): CourtPlusApi {
+export function createHttpApi(base = '/api'): WorkspaceApi {
   const api: Record<string, unknown> = {};
   for (const m of METHODS) {
     api[m] = async (...args: unknown[]) => {
@@ -38,7 +57,11 @@ export function createHttpApi(base = '/api'): CourtPlusApi {
       return text ? JSON.parse(text) : undefined;
     };
   }
-  return api as unknown as CourtPlusApi;
+  return Object.assign(api as unknown as CourtPlusApi, {
+    profileAvailable: false as const,
+    getProfile: async () => null,
+    saveProfile: async () => { throw new Error('Profiles can be saved in the desktop app.'); },
+  });
 }
 
 // Development-only stub: empty lists, no people, no cases.
@@ -60,7 +83,7 @@ export function createDevStub(): CourtPlusApi {
   };
 }
 
-export function getApi(): CourtPlusApi {
+export function getApi(): WorkspaceApi {
   if (typeof window !== 'undefined' && window.courtplus) return window.courtplus;
   if (import.meta.env.DEV && !new URLSearchParams(window.location.search).has('http')) return createDevStub();
   return createHttpApi();

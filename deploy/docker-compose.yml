@@ -16,11 +16,13 @@ services:
     environment:
       APP_ORIGIN: "https://${COURTPLUS_SITE:-localhost}"
       COURTPLUS_DB_PATH: /var/lib/courtplus/courtplus.sqlite3
+      COURTPLUS_EVIDENCE_DIR: /var/lib/courtplus/evidence
       COURTPLUS_HANDOFF_MINUTES: "${COURTPLUS_HANDOFF_MINUTES:-60}"
     secrets:
       - db_key
     volumes:
       - courtplus_db:/var/lib/courtplus
+      - courtplus_evidence:/var/lib/courtplus/evidence
     tmpfs:
       - /tmp:size=256m,mode=1777
     networks: [backend]
@@ -57,6 +59,7 @@ networks:
 
 volumes:
   courtplus_db:
+  courtplus_evidence:
   caddy_data:
   caddy_config:
 

@@ -26,6 +26,7 @@ extraResources:
       - "diag/**/*"
       - "ui/**/*"
       - "model/**/*"
+      - "asr/**/*"
       - "data/**/*"
       - "assets/**/*"
       - "templates/**/*"

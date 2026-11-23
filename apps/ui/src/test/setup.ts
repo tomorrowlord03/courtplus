@@ -1,5 +1,16 @@
 import '@testing-library/jest-dom/vitest';
 
+if (!globalThis.ResizeObserver) {
+  // JSDOM supplies no layout measurements for responsive charts.
+  Object.assign(globalThis, {
+    ResizeObserver: class {
+      constructor(private readonly callback: (entries: { contentRect: DOMRect }[]) => void) {}
+      observe() { this.callback([{ contentRect: new DOMRect(0, 0, 480, 220) }]); }
+      disconnect() {}
+    },
+  });
+}
+
 if (typeof Blob !== 'undefined' && !Blob.prototype.arrayBuffer) {
   Blob.prototype.arrayBuffer = function () {
     return new Promise((resolve, reject) => {

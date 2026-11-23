@@ -1,4 +1,4 @@
-import type { CourtPlusApi } from '@courtplus/contracts';
+import type { DesktopWorkspaceApi } from '@courtplus/contracts';
 import type { DesktopSettings } from '../src/handlers/settings';
 
 export type { DesktopSettings };
@@ -22,12 +22,19 @@ interface ShellBridge {
   retireSigner(passphrase?: string): Promise<SignerStatus>;
   exportHandoff(lang: 'en' | 'hi'): Promise<{ file: string; head: string } | undefined>;
   checkAnchor(anchor: string): Promise<{ chain: 'intact' | 'mismatch'; entries: number }>;
+  evidenceList?(query?: unknown): Promise<any[]>;
+  evidenceSubmit?(data: unknown): Promise<any>;
+  evidenceStatus?(code: string): Promise<any>;
+  evidenceAction?(id: string, action: string, note?: string): Promise<any>;
+  evidenceVerify?(id: string): Promise<any>;
+  evidenceFile?(id: string): Promise<any>;
+  evidenceCertificate?(id: string): Promise<any>;
   onBoardChanged(callback: () => void): () => void;
 }
 
 declare global {
-  interface Window { courtplusDesktop: ShellBridge; courtplus?: CourtPlusApi }
+  interface Window { courtplusDesktop: ShellBridge }
 }
 
 export const shell = window.courtplusDesktop;
-export const api: CourtPlusApi = window.courtplus!;
+export const api = window.courtplus as DesktopWorkspaceApi;

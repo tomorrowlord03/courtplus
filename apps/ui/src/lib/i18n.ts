@@ -26,17 +26,7 @@ export function t(key: string, fallback?: string): string {
 
 /** Loads data/i18n/<lang>.json if present. Missing file is fine. */
 export async function loadLang(lang: string): Promise<void> {
-  if (translations[lang]) {
-    strings = translations[lang];
-    return;
-  }
-  try {
-    const res = await fetch(`./data/i18n/${lang}.json`);
-    if (!res.ok) throw new Error('missing');
-    strings = (await res.json()) as Translation;
-  } catch {
-    strings = {};
-  }
+  strings = translations[lang] ?? {};
 }
 
 /** Adds assets/fonts/fonts.css when it exists; ignored otherwise. */

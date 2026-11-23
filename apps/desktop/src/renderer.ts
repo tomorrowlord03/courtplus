@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { app, BrowserWindow, net, protocol, session, type Session } from 'electron';
+import { microphoneAllowed } from './handlers/recorder';
 
 export const appUrl = 'courtplus://app/';
 export const pdfUrl = 'courtplus://diagnostics/devanagari.html';
@@ -92,8 +93,12 @@ function assetPath(root: string, pathname: string): string | undefined {
 export async function makeRendererSession(devUrl?: URL, backend = () => ''): Promise<Session> {
   const isolated = session.fromPartition('courtplus');
   await isolated.setProxy({ mode: 'direct' });
-  isolated.setPermissionCheckHandler(() => false);
-  isolated.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
+  // Only the hearing recorder's microphone, only for the app's own pages; everything else is denied.
+  const appOrigins = devUrl ? [appUrl, devUrl.href] : [appUrl];
+  isolated.setPermissionCheckHandler((_contents, permission, origin, details) =>
+    microphoneAllowed(permission, origin, [details.mediaType ?? ''], appOrigins));
+  isolated.setPermissionRequestHandler((_contents, permission, callback, details) => callback(microphoneAllowed(
+    permission, details.requestingUrl, 'mediaTypes' in details ? details.mediaTypes ?? [] : [], appOrigins)));
   isolated.setDevicePermissionHandler(() => false);
   isolated.setDisplayMediaRequestHandler((_request, respond) => respond({}));
   isolated.on('will-download', event => event.preventDefault());

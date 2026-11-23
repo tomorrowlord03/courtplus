@@ -4,8 +4,11 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { app, BrowserWindow, dialog, ipcMain, Menu, safeStorage, type IpcMainInvokeEvent } from 'electron';
 import { z } from 'zod';
 import { diagnosticsPassed, runDiagnostics, type DiagnosticsReport } from './diagnostics';
+import { createAsrClient } from './asr/client';
 import { createHandlers } from './handlers';
+import { createRecorder, registerRecorder } from './handlers/recorder';
 import { readSettings, saveSettings } from './handlers/settings';
+import { courtArguments } from './handlers/triage';
 import { registerHandlers } from './ipc';
 import { appUrl, developmentUrl, isSameOrigin, lockDownWindow, makeRendererSession, printDocument, webPreferences } from './renderer';
 import { openStore, type Store } from './store';
@@ -31,6 +34,7 @@ let mainWindow: BrowserWindow | undefined;
 let verifierWindow: BrowserWindow | undefined;
 let showVerifier: (() => void) | undefined;
 let stopCloud: (() => unknown) | undefined;
+let stopAsr: (() => unknown) | undefined;
 
 function chooseFolder(): Promise<string | undefined> {
   return dialog.showOpenDialog(mainWindow!, {
@@ -56,7 +60,7 @@ async function start(): Promise<void> {
   const notify = () => {
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('courtplus:boardChanged');
   };
-  const { handlers, cloud, signer, anchor, boardQueue } = await createHandlers(database, {
+  const { handlers, cloud, signer, anchor, evidence, boardQueue, courtWorkspace } = await createHandlers(database, {
     resourceDirectory, boardChanged: notify, folder: chooseFolder, savePath,
     print: html => printDocument(rendererSession, html),
   });
@@ -70,6 +74,15 @@ async function start(): Promise<void> {
       ? event.sender === verifierWindow.webContents : false;
   };
   registerHandlers(handlers, isTrusted);
+  const asr = createAsrClient(join(resourceDirectory, 'asr'));
+  stopAsr = asr.stop;
+  const { encodeReceiptQr } = await import('@courtplus/export');
+  registerRecorder(ipcMain, isTrusted, createRecorder(database, signer, {
+    directory: join(directory, 'hearings'), findCase: id => database.listCases().find(item => item.id === id),
+    transcribe: asr.transcribe, modelStatus: asr.status, folder: chooseFolder, encodeQr: encodeReceiptQr,
+    print: html => printDocument(rendererSession, html),
+    progress: event => mainWindow?.webContents.send('hearing:progress', event),
+  }));
 
   function desktop<Args extends unknown[]>(name: string, schema: z.ZodType<Args>, run: (...args: NoInfer<Args>) => unknown) {
     ipcMain.handle('desktop:' + name, (event, ...args: unknown[]) => {
@@ -79,6 +92,7 @@ async function start(): Promise<void> {
   }
 
   const noArgs = z.tuple([]);
+  desktop('courtWorkspace', courtArguments, courtWorkspace);
   desktop('boardQueue', argumentSchemas.board, boardQueue);
   desktop('settings', noArgs, () => ({ ...readSettings(database), cloud: cloud.status() }));
   desktop('saveSettings', z.tuple([z.unknown()]), input => {
@@ -112,6 +126,13 @@ async function start(): Promise<void> {
   desktop('retireSigner', z.tuple([passphrase.optional()]), signer.retire);
   desktop('exportHandoff', z.tuple([z.enum(['en', 'hi'])]), anchor.exportHandoff);
   desktop('checkAnchor', z.tuple([z.string().regex(/^[0-9a-f]{64}$/)]), anchor.checkAnchor);
+  desktop('evidenceList', z.tuple([z.unknown()]), (query: unknown) => evidence.listEvidence((query || {}) as any));
+  desktop('evidenceSubmit', z.tuple([z.unknown()]), (input: unknown) => evidence.submitEvidence(input as any));
+  desktop('evidenceStatus', z.tuple([z.string()]), (code: string) => evidence.checkEvidenceStatus(code));
+  desktop('evidenceAction', z.tuple([z.string(), z.string(), z.string().optional()]), (id: string, action: string, note?: string) => evidence.updateEvidenceAction(id, action as any, note));
+  desktop('evidenceVerify', z.tuple([z.string()]), (id: string) => evidence.verifyEvidence(id));
+  desktop('evidenceFile', z.tuple([z.string()]), (id: string) => evidence.getEvidenceFile(id));
+  desktop('evidenceCertificate', z.tuple([z.string()]), (id: string) => evidence.exportEvidenceCertificate(id));
   desktop('trustSigner', noArgs, async () => {
     const parent = BrowserWindow.getFocusedWindow() ?? mainWindow ?? verifierWindow;
     const options = { title: 'Trust a verified office’s public key', properties: ['openFile' as const],
@@ -189,6 +210,7 @@ async function start(): Promise<void> {
 app.on('window-all-closed', () => app.quit());
 app.on('will-quit', () => {
   stopCloud?.();
+  stopAsr?.();
   store?.close();
 });
 if (app.requestSingleInstanceLock()) {

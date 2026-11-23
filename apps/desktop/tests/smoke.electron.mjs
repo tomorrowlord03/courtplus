@@ -15,6 +15,7 @@ const root = resolve(fileURLToPath(new URL('../', import.meta.url)));
 // Git-ignored (apps/desktop/.gitignore): failure screenshots and the app's last output.
 const results = join(root, 'test-results');
 const packaged = process.env.COURTPLUS_SMOKE_EXE;
+const previewDirectory = process.env.COURTPLUS_THEME_PREVIEW_DIR;
 const launchBudget = (packaged ? startupTimeout(packaged) : 60_000) + 30_000;
 const folderTitle = 'Choose a folder for the signed draft bundle';
 const find = (page, name) => page.getByRole('heading', { name, exact: true });
@@ -76,6 +77,12 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
     }
   }
 
+  async function capture(name) {
+    if (!previewDirectory) return;
+    await mkdir(previewDirectory, { recursive: true });
+    await page.screenshot({ path: join(previewDirectory, `theme-${name}.png`), fullPage: true });
+  }
+
   try {
     const profile = join(directory, 'profile');
     log('mode: ' + (packaged ? 'packaged ' + packaged : 'development tree'));
@@ -83,7 +90,31 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
       ? launchPackaged(packaged, profile, log).then(launched => ({ ...launched, pickFolder: pickWithAutomation }))
       : launchDevelopment(profile));
     page = await step('first window', 60_000, () => app.firstWindow());
-    await step('board renders', 60_000, () => find(page, 'Action board').waitFor({ timeout: 60_000 }));
+    await step('release dashboard renders', 60_000, async () => {
+      if (previewDirectory) await page.setViewportSize({ width: 1366, height: 768 });
+      await find(page, 'Release Dashboard').waitFor({ timeout: 60_000 });
+      await page.getByRole('button', { name: 'Skip for now' }).click();
+      await page.getByText('No cases saved yet', { exact: true }).waitFor();
+    });
+
+    await step('save and reopen local profile', 60_000, async () => {
+      const avatar = page.getByRole('link', { name: 'My profile' });
+      await avatar.click();
+      await find(page, 'My profile').waitFor();
+      await page.getByLabel('Full name').waitFor();
+      await capture('profile');
+      await page.getByLabel('Full name').fill('Smoke Tester');
+      await page.getByRole('combobox', { name: /^Role\b/ }).selectOption('dlsa');
+      await page.getByLabel('Court or office').fill('Fictional test office');
+      await page.getByLabel('Designation').fill('test clerk');
+      await page.getByRole('button', { name: 'Save profile' }).click();
+      await page.getByText('Profile saved.', { exact: true }).waitFor();
+      await page.locator('nav').getByRole('link', { name: 'Release Dashboard' }).click();
+      await page.getByText('Hi, Smoke!', { exact: true }).waitFor();
+      await avatar.click();
+      await page.getByLabel('Full name').waitFor();
+      assert.equal(await page.getByLabel('Full name').inputValue(), 'Smoke Tester');
+    });
 
     await step('open import', 30_000, async () => {
       await page.locator('nav').getByRole('link', { name: 'Import order' }).click();
@@ -98,20 +129,37 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
     });
     await step('confirm and save case', 60_000, async () => {
       await page.getByLabel('Person alias').fill('Accused-901');
+      await page.getByLabel('Case reference').fill('FICTIONAL-901');
       await page.getByLabel('Charges', { exact: true }).fill('IPC 379');
       await page.getByLabel('First remand date').fill('2024-01-10');
       await page.getByLabel('Judicial custody start').fill('2024-01-10');
       await page.getByLabel('Judicial custody is ongoing').check();
-      // Saving requires a named confirmer since w19; the form blocks submit without one.
-      await page.getByLabel('Confirmed by').fill('Smoke Tester, test clerk');
+      assert.equal(await page.getByLabel('Confirmed by').inputValue(), 'Smoke Tester, test clerk');
       await page.getByRole('button', { name: 'Save confirmed case' }).click();
     });
     await step('board card', 60_000, async () => {
       await page.getByRole('link', { name: /Accused-901.*Lawyer review/ }).waitFor({ timeout: 60_000 });
       await page.getByText('Days to clear: 1 (1 remaining)', { exact: true }).waitFor();
     });
+    if (previewDirectory) await step('capture theme previews', 60_000, async () => {
+      await page.locator('nav').getByRole('link', { name: 'Release Dashboard' }).click();
+      await page.getByRole('region', { name: 'Needs attention' }).getByRole('link', { name: /Accused-901/ }).first().waitFor();
+      await capture('dashboard');
+      await page.locator('nav').getByRole('link', { name: 'Deadline Calendar' }).click();
+      await page.getByRole('region', { name: 'Month view' }).waitFor();
+      await capture('calendar');
+      await page.locator('nav').getByRole('link', { name: 'Action board' }).click();
+      await page.getByRole('link', { name: /Accused-901.*Lawyer review/ }).click();
+      await page.getByRole('heading', { name: /^Case / }).waitFor();
+      await page.getByText(/Custody counted:/).waitFor();
+      await capture('case-view');
+    });
     await step('export signed PDF', 120_000, async () => {
-      await page.getByRole('link', { name: 'Drafts' }).click();
+      await page.locator('nav').getByRole('link', { name: 'Drafts', exact: true }).click();
+      if (previewDirectory) {
+        await page.getByRole('region', { name: 'Draft preview' }).getByText(/Smoke Tester/).first().waitFor();
+        await capture('drafts');
+      }
       const picked = app.pickFolder(exportDirectory);
       await page.getByRole('button', { name: 'Export signed PDF' }).click();
       await picked;

@@ -34,6 +34,18 @@ const schema = [
   "CREATE TRIGGER audit_no_delete BEFORE DELETE ON audit_log BEGIN SELECT RAISE(ABORT, 'audit log is append-only'); END",
 ];
 
+export const evidenceSchema = [
+  'CREATE TABLE evidence (id TEXT PRIMARY KEY, case_ref TEXT NOT NULL, description TEXT NOT NULL, mode TEXT NOT NULL CHECK (mode IN (\'identified\', \'anonymous\')), filename TEXT NOT NULL, mime TEXT NOT NULL, size INTEGER NOT NULL, sha256 TEXT NOT NULL, received_at TEXT NOT NULL, status TEXT NOT NULL CHECK (status IN (\'received\', \'seen\', \'taken_on_record\', \'shared_with_parties\')), submitter_name TEXT, submitter_phone TEXT, submitter_email TEXT, status_code_hash TEXT, receipt TEXT NOT NULL, receipt_signature TEXT NOT NULL, prev_hash TEXT NOT NULL, entry_hash TEXT NOT NULL, parent_id TEXT REFERENCES evidence(id), court TEXT, file_path TEXT NOT NULL) STRICT',
+  'CREATE INDEX evidence_case_ref ON evidence(case_ref)',
+  'CREATE INDEX evidence_mode ON evidence(mode)',
+  'CREATE INDEX evidence_status_code_hash ON evidence(status_code_hash)',
+  "CREATE TRIGGER evidence_no_delete BEFORE DELETE ON evidence BEGIN SELECT RAISE(ABORT, 'evidence is append-only'); END",
+  'CREATE TABLE evidence_log (id INTEGER PRIMARY KEY, evidence_id TEXT NOT NULL, ts TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL, payload_hash TEXT NOT NULL, prev_hash TEXT NOT NULL, hash TEXT NOT NULL) STRICT',
+  "CREATE TRIGGER evidence_log_no_update BEFORE UPDATE ON evidence_log BEGIN SELECT RAISE(ABORT, 'evidence log is append-only'); END",
+  "CREATE TRIGGER evidence_log_no_delete BEFORE DELETE ON evidence_log BEGIN SELECT RAISE(ABORT, 'evidence log is append-only'); END",
+  'CREATE TABLE evidence_actions (id INTEGER PRIMARY KEY AUTOINCREMENT, evidence_id TEXT NOT NULL REFERENCES evidence(id), action TEXT NOT NULL, actor TEXT NOT NULL, ts TEXT NOT NULL, note TEXT) STRICT',
+];
+
 export type Db = Database.Database;
 
 export function openDb(path: string, secretPath: string): Db {
@@ -48,10 +60,19 @@ export function openDb(path: string, secretPath: string): Db {
     db.pragma('recursive_triggers=ON');
     db.transaction(() => {
       const version = db.pragma('user_version', { simple: true });
-      if (version === 1) return;
-      if (version !== 0) throw new Error('Unsupported CourtPlus Cloud database version');
-      for (const sql of schema) db.exec(sql);
-      db.pragma('user_version=1');
+      if (version === 2) return;
+      if (version === 0) {
+        for (const sql of schema) db.exec(sql);
+        for (const sql of evidenceSchema) db.exec(sql);
+        db.pragma('user_version=2');
+        return;
+      }
+      if (version === 1) {
+        for (const sql of evidenceSchema) db.exec(sql);
+        db.pragma('user_version=2');
+        return;
+      }
+      throw new Error('Unsupported CourtPlus Cloud database version');
     }).immediate();
     return db;
   } catch (error) {
@@ -62,7 +83,7 @@ export function openDb(path: string, secretPath: string): Db {
 
 type AuditDetails = { ts: string; actor: string; action: string; payload_hash: string; prev_hash: string };
 type AuditRow = AuditDetails & { id: number; hash: string };
-const genesis = '0'.repeat(64);
+export const genesis = '0'.repeat(64);
 
 export function audit(db: Db, actor: string, action: string, payload: unknown): void {
   if (!db.inTransaction) throw new Error('Audit entries must share the write transaction');
@@ -89,3 +110,18 @@ export function verifyAudit(db: Db): { valid: boolean; entries: number; head: st
   }
   return { valid: true, entries, head: previous };
 }
+
+export function verifyEvidenceLog(db: Db): { valid: boolean; entries: number; head: string } {
+  let previous = genesis;
+  let entries = 0;
+  const rows = db.prepare<[], { id: number; evidence_id: string; ts: string; actor: string; action: string; payload_hash: string; prev_hash: string; hash: string }>('SELECT * FROM evidence_log ORDER BY id').iterate();
+  for (const { hash, ...fields } of rows) {
+    if (fields.id !== entries + 1 || fields.prev_hash !== previous || hash !== sha256(canonical(fields))) {
+      return { valid: false, entries, head: previous };
+    }
+    entries += 1;
+    previous = hash;
+  }
+  return { valid: true, entries, head: previous };
+}
+

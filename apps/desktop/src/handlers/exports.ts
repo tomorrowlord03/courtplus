@@ -8,7 +8,7 @@ import QRCode from 'qrcode';
 import type { Store } from '../store';
 import { indiaDate } from './board';
 import type { createCloud } from './cloud';
-import { readSettings } from './settings';
+import { readProfile, readSettings } from './settings';
 import { createSigner } from './signer';
 
 interface ExportPorts {
@@ -54,27 +54,24 @@ export function createExports(
 ) {
   const signer = createSigner(store, exports);
 
-  const exportDraft: CourtPlusApi['exportDraft'] = async (kind, caseId, lang) => {
+  function prepareDraft(kind: Parameters<CourtPlusApi['exportDraft']>[0], caseId: string, lang: string) {
     const { person, record, cases } = context(caseId);
     const asOf = record.orderDate ?? indiaDate();
     const result = engine.screen(person, cases, caseId, asOf);
     const settings = readSettings(store);
-    const { issuer, backendUrl, prison, district } = settings;
+    const profile = readProfile(store);
+    const prison = settings.prison || profile?.office || '';
+    const district = settings.district || profile?.district || '';
     if (kind === 'S479_3_APPLICATION' && result.status !== 'APPLY_NOW') {
       throw new Error('The engine result as of ' + asOf + ' is ' + result.status
         + ', not APPLY_NOW. Send this case for lawyer review instead of drafting a s.479(3) application.');
     }
     if (kind === 'DLSA_7_DAY' && !record.bailGrantedOn) throw new Error('Record the confirmed bail grant date first.');
-    // Offline (or signed out) exports stay possible: the QR then carries the offline receipt lookup.
-    const online = Boolean(backendUrl && cloud.status().role);
     const sources = [...record.charges, ...record.custody, ...record.events].flatMap(item => item.source ? [item.source] : []);
     const confirmedBy = sources.find(source => source.verifiedBy?.trim())?.verifiedBy?.trim();
-    // Checked before the folder dialog so the officer is not asked where to save a draft that cannot be made.
     if (kind === 'AI_ASSISTANCE_NOTE' && !confirmedBy) {
       throw new Error('This case has no recorded confirmer. Import the order again and enter who confirmed the facts.');
     }
-    const directory = await ports.folder();
-    if (!directory) throw new Error('Export cancelled.');
     const options = { localizationRoot: ports.localizationRoot };
     const drafts: Record<typeof kind, () => string> = {
       S479_3_APPLICATION: () => exports.renderHtml('S479_3_APPLICATION', {
@@ -85,14 +82,22 @@ export function createExports(
         prison, district, custodyCheckedOn: asOf,
       }, lang, options),
       AI_ASSISTANCE_NOTE: () => exports.renderHtml('AI_ASSISTANCE_NOTE', {
-        model: 'CourtPlus LegalNER',
+        model: 'CourtPlus order reader',
         orderReference: sources[0]?.docId ?? '',
         suggestedFields: [...new Set(sources.flatMap(source => store.document(source.docId)?.suggestedFields ?? []))],
         confirmedBy: confirmedBy ?? '',
       }, lang, options),
       RIGHTS_CARD: () => exports.renderHtml('RIGHTS_CARD', { dlsaName: district }, lang, options),
     };
-    const html = drafts[kind]();
+    return { html: drafts[kind](), person, record, result, settings };
+  }
+
+  const previewDraft = async (...args: Parameters<CourtPlusApi['exportDraft']>) => prepareDraft(...args).html;
+  const exportDraft: CourtPlusApi['exportDraft'] = async (kind, caseId, lang) => {
+    const { html, person, record, result, settings: { issuer, backendUrl } } = prepareDraft(kind, caseId, lang);
+    const directory = await ports.folder();
+    if (!directory) throw new Error('Export cancelled.');
+    const online = Boolean(backendUrl && cloud.status().role);
     const key = signer.key(issuer);
     const { receipt, receiptId, receiptDigest } = exports.createReceipt({
       issuer, result, inputs: { person, record, kind, lang, htmlDigest: createHash('sha256').update(html).digest('hex') },
@@ -143,5 +148,5 @@ export function createExports(
     return await cloud.verifyDigest({ receipt, manifest, pdfDigest: createHash('sha256').update(pdf).digest('hex') }) ?? local;
   };
 
-  return { exportDraft, exportScReturn, verify, signer };
+  return { exportDraft, previewDraft, exportScReturn, verify, signer };
 }

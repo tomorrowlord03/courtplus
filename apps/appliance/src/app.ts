@@ -17,6 +17,7 @@ import { HttpError, missingFeature, page, parse } from './http.js';
 import { apiInputs, date, digest, envelopes, id, maxVerifyBase64, roles, type Role } from './inputs.js';
 import { createReceipts, receiptRoutes } from './receipts.js';
 import { exportRoutes } from './exports.js';
+import { registerEvidenceRoutes } from './evidence.js';
 
 const all = roles.options;
 const editors = ['superintendent', 'dlsa', 'legal_aid'] as const;
@@ -78,6 +79,9 @@ export async function buildApp(options: Options) {
   await app.register(cookie);
   await app.register(cors, { origin, credentials: true, methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'] });
   await app.register(rateLimit, { max: 180, timeWindow: '1 minute' });
+  app.addContentTypeParser('multipart/form-data', (_req, _payload, done) => {
+    done(null);
+  });
   app.addHook('onRequest', async (_, reply) => { reply.header('cache-control', 'no-store'); });
   app.setErrorHandler((error, _, reply) => {
     if (error instanceof HttpError) return reply.code(error.statusCode).send({ error: error.code });
@@ -100,6 +104,7 @@ export async function buildApp(options: Options) {
     return receipts.verifyDigest(parse(envelopes.extend({ pdfDigest: digest }), request.body));
   });
   const exports = await exportRoutes(app, options, cases, receipts, authenticate);
+  registerEvidenceRoutes(app, db, options, authenticate, authorize);
   const statsPath = options.statsDir ?? join(root, 'data', 'stats');
   const figures = ['india.json', 'chhattisgarh.json'].flatMap(file => {
     const path = join(statsPath, file);
@@ -212,7 +217,7 @@ export async function buildApp(options: Options) {
     }
   }
   app.setNotFoundHandler(async (request, reply) => {
-    if (request.method !== 'GET' || !/^\/(?:$|(?:board|cases?|persons?|person|import|drafts|return|sc-return|verify|stats|about|safeguards)(?:\/[^.]+)?\/?$)/.test(request.url.split('?')[0])) {
+    if (request.method !== 'GET' || !/^\/(?:$|(?:board|cases?|persons?|person|import|drafts|return|sc-return|verify|stats|about|safeguards|evidence|submit-proof|file-evidence)(?:\/[^.]+)?\/?$)/.test(request.url.split('?')[0])) {
       return reply.code(404).send({ error: 'NOT_FOUND' });
     }
     try {
