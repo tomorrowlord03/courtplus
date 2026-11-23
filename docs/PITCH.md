@@ -2,7 +2,7 @@
 
 **Track:** Cybersecurity, with civic impact. **Prepared:** 23 November 2026.
 
-**Sources:** every number below comes from `docs/FINDINGS.md`, `FEATURES.md`, `docs/LEGAL_RULES.md`, `ml/ner/METRICS.md` or `data/stats/*.json`. Public sources are cited for the Devilal Gond case and the draft Supreme Court AI Regulations. Each number keeps its date and denominator. Figures marked `verified: false` in `data/stats` (Raipur RTI and the India-wide totals) stay off the slides.
+**Sources:** every number below comes from `docs/FINDINGS.md`, `FEATURES.md`, `docs/LEGAL_RULES.md`, `ml/ner/METRICS.md` or `data/stats/*.json`. Official sources are cited for the Devilal Gond case and the draft Supreme Court AI Regulations. Each number keeps its date and denominator. Figures marked `verified: false` in `data/stats` (Raipur RTI and the India-wide totals) stay off the slides.
 
 **Language rules for everyone presenting:**
 - Use "could apply", "screen", "route to review" and "draft for a human to sign".
@@ -22,7 +22,7 @@
 - In para 55(xii) (paraphrased), the Court asks High Courts to consider safeguards and a system like Madhya Pradesh's.
 - This was a communication and verification failure. It was not a gap in the law.
 
-**Speaker note:** Para 55(xii) is not quoted word for word because the verbatim text was not available to us; we paraphrase and cite it. Be accurate here: Devilal had been convicted and was an appellant, not an undertrial. Present the case as a missed handoff, not as an s.479 case. The judgment gives conflicting exact durations, so quote only the two dates. Sources: SC judgment of 16 Nov 2026 (sci.gov.in), cross-checked against a second source.
+**Speaker note:** Para 55(xii) is paraphrased and cited rather than quoted verbatim. Be accurate here: Devilal had been convicted and was an appellant, not an undertrial. Present the case as a missed handoff, not as an s.479 case. The judgment gives conflicting exact durations, so quote only the two dates. Sources: SC judgment of 16 Nov 2026 (sci.gov.in).
 
 ### Slide 2: Chhattisgarh in numbers
 
@@ -44,7 +44,7 @@
 - **Stale FIR sections.** Records keep the FIR sections even after charges are framed differently. The maximum sentence, and so the threshold, depends on the charge actually framed.
 - **IPC to BNS.** Old and new codes now run side by side in pending cases.
 
-**Speaker note:** The stale-section point comes from `docs/LEGAL_RULES.md` rule 1: framed charges override FIR sections, and an unframed charge is flagged. Our own audit had to use FIR charges provisionally because no framing orders were verified (`docs/FINDINGS.md`).
+**Speaker note:** Framed charges override FIR sections, and an unframed charge is flagged (`docs/LEGAL_RULES.md`). Our own audit had to use FIR charges provisionally because no framing orders were verified (`docs/FINDINGS.md`).
 
 ### Slide 4: CourtPlus in one sentence
 
@@ -118,7 +118,7 @@
 
 **Message:** Built for a real-order audit, with a clear next step.
 
-- **Team:** the presenter introduces the actual builders and their roles; names are supplied by the team before judging.
+- **Team:** [Team members]
 - **Built:** PDF and OCR order reader (real scans not yet validated), name masker with a required human check, IPC-to-BNS crosswalk, rule engine with proof trace, action board, per-person case list, signed drafts and verifier, statistics page, and the optional online handoff backend.
 - **Next:** validate scanned orders, add a date-role model (arrest, remand or bail), obtain fluent legal review of Hindi drafts, and validate the existing "no court update for 180 days" lane in practice.
 - **Never:** bail outcome prediction, automated eCourts scraping past the CAPTCHA, and WhatsApp/SMS alerts that could reveal custody.
@@ -130,7 +130,7 @@
 ## 2. Three-minute demo script
 
 **Setup before going on stage:**
-- Rebuild and smoke-test the portable app from current source with the model bundled; the jury review found the earlier packaged executable stale. Rehearse this script on that build before using it live.
+- Rehearse this script on the portable app with the bundled model before using it live.
 - Use the actual desktop build in **Legal-aid view**. Keep one real published order that a second person has checked for names, addresses, relatives and identifiers ready locally. Keep that case already saved as an import fallback. Never display an unchecked masked order.
 - Preselect an empty export folder for the native save dialog. If using laptop B, open **Verifier** there and use **Trust an office public key** with the key exported from laptop A's **Settings** → **Export office public key**; verify the key fingerprint before the demo.
 - Keep the signed PDF, receipt `.json`, manifest `.json`, a one-byte-edited PDF copy, and the backup video on a local USB stick. Test both bundles before the presentation.
