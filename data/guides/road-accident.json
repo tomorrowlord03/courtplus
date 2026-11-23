@@ -1,0 +1,171 @@
+{
+  "id": "road-accident",
+  "title_en": "Road Accident Injury or Death: Compensation, MACT Claims & Good Samaritan Rights",
+  "title_hi": "सड़क दुर्घटना में चोट या मृत्यु: मुआवजा, दावा (MACT) और मददगार (गुड सेमेरिटन) के अधिकार",
+  "keywords_en": [
+    "road accident",
+    "motor accident",
+    "MACT",
+    "claims tribunal",
+    "hit and run",
+    "grievous hurt",
+    "accident compensation",
+    "good samaritan",
+    "third party insurance",
+    "vehicle accident",
+    "traffic crash",
+    "motor vehicle claim",
+    "fatal accident claim",
+    "injured on road"
+  ],
+  "keywords_hi": [
+    "सड़क दुर्घटना",
+    "गाड़ी से टक्कर",
+    "एक्सीडेंट",
+    "मोटर दुर्घटना दावा",
+    "मुआवजा",
+    "गंभीर चोट",
+    "सड़क हादसे में मौत",
+    "हिट एंड रन",
+    "नेक मददगार",
+    "गुड सेमेरिटन",
+    "अस्पताल",
+    "बीमा दावा",
+    "ट्रिब्यूनल"
+  ],
+  "laws": [
+    {
+      "act": "Motor Vehicles Act, 1988",
+      "section": "Section 166",
+      "plain_meaning": "Application for compensation can be filed before the Motor Accident Claims Tribunal (MACT) by the injured person or by legal representatives of the deceased against the driver, vehicle owner, and insurer.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1798"
+    },
+    {
+      "act": "Motor Vehicles Act, 1988",
+      "section": "Section 164 (No-Fault Liability / Fixed Compensation)",
+      "plain_meaning": "Owner or insurer is liable to pay fixed compensation in case of death (Rs. 5,00,000) or grievous hurt (Rs. 2,50,000) without the claimant having to prove negligence or wrongful act.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1798"
+    },
+    {
+      "act": "Motor Vehicles Act, 1988",
+      "section": "Section 161 (Compensation in Hit and Run Cases)",
+      "plain_meaning": "Special scheme (Compensation to Victims of Hit and Run Motor Accidents Scheme, 2022) provides Rs. 2,00,000 in case of death and Rs. 50,000 for grievous hurt where the offending vehicle identity cannot be ascertained.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1798"
+    },
+    {
+      "act": "Motor Vehicles Act, 1988",
+      "section": "Section 134A (Protection of Good Samaritans)",
+      "plain_meaning": "A bystander or Good Samaritan who assists an accident victim shall not be liable for any civil or criminal action for injury or death resulting from negligence in rendering emergency medical care, and cannot be forced to disclose identity or testify.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1798"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 106(1) [old IPC Section 304A]",
+      "plain_meaning": "Causing death of any person by doing any rash or negligent act not amounting to culpable homicide is punishable with imprisonment up to 5 years and fine.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 281 [old IPC Section 279]",
+      "plain_meaning": "Rash driving or riding on a public way so as to endanger human life or cause hurt is punishable with imprisonment up to 6 months, fine up to Rs. 1,000, or both.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Provide immediate medical care to the injured person at the nearest government or private hospital. Good Samaritans are protected under s.134A from harassment.",
+      "action_hi": "घायल व्यक्ति को तुरंत निकटतम सरकारी या निजी अस्पताल पहुंचाएं। गुड सेमेरिटन कानून (धारा 134A) के तहत मदद करने वाले से कोई जबरन पूछताछ नहीं होगी।",
+      "where": "Nearest hospital / trauma center (Call 108 / 112)",
+      "deadline_or_limitation": "Immediate (Golden Hour is within 1 hour of accident)",
+      "documents_needed": ["Medico-Legal Certificate (MLC)", "Emergency admission receipt"]
+    },
+    {
+      "order": 2,
+      "action_en": "Report accident to police station having jurisdiction over accident spot to register FIR under BNS s.281/s.125A/s.106. In hit-and-run, mention vehicle details if partially seen.",
+      "action_hi": "दुर्घटना स्थल के क्षेत्राधिकार वाले थाने में प्राथमिकी (FIR) दर्ज कराएं। यदि वाहन चालक भाग गया है तो वाहन का रंग, प्रकार या आंशिक नंबर दर्ज कराएं।",
+      "where": "Local Police Station or online zero FIR (BNSS s.173)",
+      "deadline_or_limitation": "Promptly (preferably within 24 to 48 hours)",
+      "documents_needed": ["Accident spot details", "Vehicle numbers", "Eyewitness contact", "Hospital MLC"]
+    },
+    {
+      "order": 3,
+      "action_en": "Obtain Detailed Accident Report (DAR / First Accident Report FAR) prepared by investigating officer and submitted to MACT within 90 days under Motor Vehicles Rules.",
+      "action_hi": "जांच अधिकारी द्वारा तैयार की जाने वाली विस्तृत दुर्घटना रिपोर्ट (DAR / FAR) की प्रति प्राप्त करें जो पुलिस द्वारा ट्रिब्यूनल को भेजी जाती है।",
+      "where": "Investigating Police Officer / MACT Registry",
+      "deadline_or_limitation": "Police must file DAR within 90 days of accident",
+      "documents_needed": ["FIR copy", "Site inspection report", "Mechanical inspection report", "Insurance policy of offending vehicle"]
+    },
+    {
+      "order": 4,
+      "action_en": "File claim petition before the Motor Accident Claims Tribunal (MACT) having jurisdiction over the area where accident occurred or where claimant/defendant resides.",
+      "action_hi": "मोटर दुर्घटना दावा अधिकरण (MACT) के समक्ष मुआवजे हेतु धारा 166 या 164 के तहत दावा याचिका दायर करें।",
+      "where": "Motor Accident Claims Tribunal (District Court)",
+      "deadline_or_limitation": "Claim application must be made within 6 months of the occurrence of accident (s.166(3) MV Act as amended)",
+      "documents_needed": [
+        "Certified copy of FIR and chargesheet",
+        "Medico-Legal Certificate and discharge summary",
+        "Permanent disability certificate (from District Medical Board)",
+        "Proof of age (Aadhaar / Voter ID / Birth Certificate)",
+        "Proof of income/employment of victim",
+        "Original medical bills and pharmacy receipts",
+        "Death certificate and post-mortem report (in case of death)"
+      ]
+    },
+    {
+      "order": 5,
+      "action_en": "For Hit-and-Run accidents where vehicle cannot be traced, apply to the Sub-Divisional Magistrate (Claims Inquiry Officer) for solatium compensation.",
+      "action_hi": "अज्ञात वाहन (हिट एंड रन) के मामले में उपखंड दंडाधिकारी (एसडीएम / दावा जांच अधिकारी) को धारा 161 के तहत मुआवजे हेतु आवेदन दें।",
+      "where": "Office of the Sub-Divisional Magistrate (SDM) / Tehsildar",
+      "deadline_or_limitation": "Preferably within 6 months of incident",
+      "documents_needed": [
+        "Form I application under Hit and Run Scheme 2022",
+        "FIR copy mentioning vehicle untraced",
+        "Post-mortem report / Disability certificate",
+        "Legal heir certificate / Bank passbook"
+      ]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "National Emergency Helpline",
+      "number": "112",
+      "description": "24x7 all-in-one emergency service for police, fire, and ambulance"
+    },
+    {
+      "name": "Ambulance / Emergency Medical Care",
+      "number": "108",
+      "description": "Toll-free emergency medical transport service"
+    },
+    {
+      "name": "Highway Emergency Helpline (NHAI)",
+      "number": "1033",
+      "description": "Emergency road assistance and ambulance on National Highways"
+    },
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free legal aid assistance for MACT filing through DLSA"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Every accident victim or family unable to afford legal representation, women, children, industrial workmen, and persons with annual income below the state threshold (typically Rs. 3,00,000) are entitled to free legal aid under Section 12 of the Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Visit the District Legal Services Authority (DLSA) office located in the District Court complex or call NALSA 15100. Front office will assign an empaneled advocate at zero cost.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "When insurance company denies third-party policy coverage or alleges fake license/permit breach",
+    "When victim has suffered permanent partial or total disability requiring structured actuarial calculation under Sarla Verma principles",
+    "When police fails to file the Detailed Accident Report (DAR) within statutory time",
+    "When there are multiple conflicting vehicles or contributory negligence allegations"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/1798",
+    "https://morth.nic.in/sites/default/files/Scheme-compensation-victims-Hit-Run-Motor-Accidents.pdf",
+    "https://nalsa.gov.in",
+    "https://main.sci.gov.in/supremecourt/2018/1652/1652_2018_Order_15-Dec-2022.pdf"
+  ],
+  "hi_reviewed": false
+}

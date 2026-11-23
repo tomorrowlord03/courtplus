@@ -1,0 +1,172 @@
+{
+  "id": "arrest-rights",
+  "title_en": "Arrest Rights & Safeguards: BNSS Provisions, D.K. Basu Guidelines & Free Legal Aid",
+  "title_hi": "गिरफ्तारी के समय अधिकार और सुरक्षा: बीएनएसएस प्रावधान, डी.के. बसु दिशानिर्देश और निःशुल्क कानूनी सहायता",
+  "keywords_en": [
+    "arrest rights",
+    "rights of arrested person",
+    "DK Basu guidelines",
+    "Section 35 BNSS",
+    "Section 41 CrPC",
+    "Section 47 BNSS",
+    "Section 50 CrPC",
+    "Section 48 BNSS",
+    "Section 50A CrPC",
+    "Section 58 BNSS",
+    "Section 57 CrPC",
+    "24 hours magistrate production",
+    "grounds of arrest",
+    "intimation to relative",
+    "medical examination",
+    "Section 53 BNSS",
+    "memo of arrest",
+    "right to lawyer",
+    "Article 22 Constitution",
+    "Arnesh Kumar",
+    "illegal detention",
+    "police custody",
+    "picked up by police",
+    "police lockup",
+    "24 hours",
+    "produce before magistrate",
+    "not produced in court",
+    "arrested without reason"
+  ],
+  "keywords_hi": [
+    "गिरफ्तारी के अधिकार",
+    "पुलिस द्वारा गिरफ्तारी",
+    "डीके बसु गाइडलाइंस",
+    "गिरफ्तारी का मेमो",
+    "अरेस्ट मेमो",
+    "अरेस्ट",
+    "24 घंटे में मजिस्ट्रेट के सामने पेशी",
+    "24 घंटे",
+    "कोर्ट में पेश नहीं किया",
+    "अवैध हिरासत",
+    "पुलिस हिरासत",
+    "गिरफ्तारी का कारण",
+    "पकड़कर ले गई",
+    "थाने में बंद",
+    "हवालात",
+    "रिश्तेदार को सूचना",
+    "मेडिकल जांच",
+    "धारा 35 बीएनएसएस",
+    "धारा 47 बीएनएसएस",
+    "धारा 48 बीएनएसएस",
+    "धारा 58 बीएनएसएस",
+    "वकील से मिलने का अधिकार",
+    "मुफ्त वकील",
+    "बिना वारंट गिरफ्तारी"
+  ],
+  "laws": [
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 35 [old CrPC Section 41]",
+      "plain_meaning": "When police may arrest without warrant: For offences punishable with imprisonment up to 7 years, arrest is not automatic. Police officer must record reasons for arrest and satisfaction of statutory conditions. Notice of appearance under Section 35(3) must be issued where arrest is not required.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 47 & Section 48 [old CrPC Section 50 & 50A]",
+      "plain_meaning": "Section 47: Every police officer arresting any person without warrant shall forthwith communicate full particulars of the offence or other grounds of arrest, and inform about right to bail in bailable cases. Section 48: Police officer must immediately inform a nominated friend, relative, or person of the arrest and the place where the arrested person is being held.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 53 & Section 58 [old CrPC Section 54 & 57]",
+      "plain_meaning": "Section 53: Mandatory medical examination of the arrested person by a registered medical officer immediately after arrest. Section 58: No police officer shall detain in custody a person arrested without warrant for longer than 24 hours (excluding journey time) without a special order of a Magistrate under Section 187.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Constitution of India",
+      "section": "Article 21 & Article 22",
+      "plain_meaning": "Fundamental right to life and personal liberty (Art. 21). Article 22(1) guarantees right to be informed of grounds of arrest and right to consult and be defended by a legal practitioner. Article 22(2) mandates production before nearest magistrate within 24 hours of arrest.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1540"
+    },
+    {
+      "act": "Supreme Court Precedent",
+      "section": "D.K. Basu v. State of West Bengal (1997) 1 SCC 416 & Arnesh Kumar (2014) 8 SCC 273",
+      "plain_meaning": "11 mandatory arrest guidelines: arresting officers must display clear name tags; prepare Arrest Memo attested by at least one witness/family member and countersigned by arrestee; right to be medically examined every 48 hours; right to meet advocate during interrogation; guidelines apply strictly under contempt of court.",
+      "source_url": "https://main.sci.gov.in"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Ask the arresting officer politely for their identification, badge name, and the specific grounds of arrest and section under which the arrest is made. In offences punishable up to 7 years, inquire whether Section 35(3) BNSS notice was given.",
+      "action_hi": "गिरफ्तार करने वाले अधिकारी से उनका नाम, पद और गिरफ्तारी का स्पष्ट कारण तथा धारा पूछें। 7 साल से कम सजा वाले मामलों में नोटिस दिए बिना सीधी गिरफ्तारी का कारण पूछें।",
+      "where": "Place of arrest / Police station",
+      "deadline_or_limitation": "At the exact time of arrest",
+      "documents_needed": ["Arrest Memo copy (Mandatory under law)"]
+    },
+    {
+      "order": 2,
+      "action_en": "Demand preparation of a formal Arrest Memo on the spot. The memo must state the exact time, date, place of arrest, and must be signed by at least one witness (a respectable local citizen or family member) and countersigned by the arrestee.",
+      "action_hi": "मौके पर ही 'गिरफ्तारी मेमो' (Arrest Memo) बनाने की मांग करें। इसमें समय, तारीख, स्थान लिखा होना चाहिए और एक गवाह व गिरफ्तार व्यक्ति के हस्ताक्षर होने चाहिए।",
+      "where": "Place of arrest",
+      "deadline_or_limitation": "At the time of arrest",
+      "documents_needed": ["Signed Arrest Memo copy given free of cost to arrestee/relative"]
+    },
+    {
+      "order": 3,
+      "action_en": "Exercise right to have a relative, friend, or nominated person informed of the arrest and the exact police station where you are detained under Section 48 BNSS. The police must record this intimation in the station diary (GD).",
+      "action_hi": "धारा 48 BNSS के तहत अपने किसी रिश्तेदार या मित्र को पुलिस द्वारा तुरंत फोन कराकर गिरफ्तारी और थाने के स्थान की सूचना दिलवाएं।",
+      "where": "Police Station general diary (Rojnamcha)",
+      "deadline_or_limitation": "Within 8 to 12 hours of arrest (or immediately)",
+      "documents_needed": ["General Diary (GD) entry details"]
+    },
+    {
+      "order": 4,
+      "action_en": "Insist on mandatory medical examination under Section 53 BNSS before being lodged in lockup and before production before Magistrate. Point out all pre-existing marks, illnesses, or any physical force used by police.",
+      "action_hi": "धारा 53 BNSS के तहत सरकारी डॉक्टर से मेडिकल जांच की मांग करें। यदि पुलिस ने कोई दुर्व्यवहार या मारपीट की है, तो डॉक्टर को साफ-साफ दर्ज करवाएं।",
+      "where": "Government Hospital / Casualty ward",
+      "deadline_or_limitation": "Immediately upon arrest and before magistrate remand",
+      "documents_needed": ["Medical Examination Report (MLC) copy"]
+    },
+    {
+      "order": 5,
+      "action_en": "Demand production before the nearest Judicial Magistrate within strictly 24 hours of arrest (Section 58 BNSS / Art. 22(2)). When produced, tell the Magistrate directly if rights were violated, if lawyer was denied, or if ill-treatment occurred.",
+      "action_hi": "24 घंटे के भीतर मजिस्ट्रेट के समक्ष पेशी का अधिकार। पेशी के समय यदि वकील नहीं मिला या मारपीट हुई हो, तो सीधे मजिस्ट्रेट को बताएं।",
+      "where": "Court of Judicial Magistrate / Magistrate residence (if after hours)",
+      "deadline_or_limitation": "Strictly within 24 hours (excluding journey time)",
+      "documents_needed": ["Remand application", "Arrest memo", "Medical certificate"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "NALSA 24x7 Legal Aid Helpline",
+      "number": "15100",
+      "description": "Call to request immediate remand advocate / legal aid counsel at police station or court"
+    },
+    {
+      "name": "National Human Rights Commission (NHRC)",
+      "number": "14433",
+      "description": "For reporting illegal custodial detention, torture, or encounter threats"
+    },
+    {
+      "name": "Police Control Room / Vigilance",
+      "number": "112",
+      "description": "Emergency control room"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Every person in custody or facing arrest is entitled to free legal aid at state expense under Section 12(g) of the Legal Services Authorities Act, 1987, and Supreme Court rulings in Khatri v. State of Bihar and Suk Das v. UT of Arunachal Pradesh.",
+    "how_to_apply": "Inform the police officer or tell the Judicial Magistrate at first production that you do not have a private lawyer and request the DLSA Remand Advocate / Legal Aid Defense Counsel (LADC). The court is legally duty-bound to assign counsel before passing remand orders.",
+    "authority": "District Legal Services Authority (DLSA) / Legal Aid Defense Counsel System (LADCS)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "Immediately upon arrest or detention — demand to speak with an advocate under Section 38 BNSS [old CrPC s.41D] during interrogation",
+    "At first production before the Magistrate to oppose police custody remand under Section 187 BNSS and move for regular or interim bail",
+    "If police detains anyone in custody beyond 24 hours without producing before a Magistrate (illegal detention actionable via Habeas Corpus under Art. 226/32)"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/21920",
+    "https://www.indiacode.nic.in/handle/123456789/1540",
+    "https://nalsa.gov.in",
+    "https://main.sci.gov.in/jonew/judis/13596.pdf",
+    "https://main.sci.gov.in/supremecourt/2013/37905/37905_2013_Judgement_02-Jul-2014.pdf"
+  ],
+  "hi_reviewed": false
+}

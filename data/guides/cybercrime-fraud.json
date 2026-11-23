@@ -1,0 +1,150 @@
+{
+  "id": "cybercrime-fraud",
+  "title_en": "Cybercrime, Online Financial Fraud & UPI Scam: 1930 Helpline, Freeze & FIR",
+  "title_hi": "साइबर अपराध, ऑनलाइन वित्तीय धोखाधड़ी और यूपीआई फ्रॉड: 1930 हेल्पलाइन, खाता फ्रीज और एफआईआर",
+  "keywords_en": [
+    "cybercrime",
+    "online fraud",
+    "financial fraud",
+    "UPI scam",
+    "cyber fraud",
+    "1930 helpline",
+    "cybercrime.gov.in",
+    "unauthorized transaction",
+    "bank account hacked",
+    "phishing",
+    "identity theft",
+    "Section 66 IT Act",
+    "Section 66C IT Act",
+    "Section 66D IT Act",
+    "Section 318(4) BNS",
+    "Section 420 IPC",
+    "SIM swap",
+    "OTP fraud",
+    "golden hour"
+  ],
+  "keywords_hi": [
+    "साइबर फ्रॉड",
+    "ऑनलाइन ठगी",
+    "खाते से पैसे कट गए",
+    "यूपीआई फ्रॉड",
+    "1930 हेल्पलाइन",
+    "साइबर सेल शिकायत",
+    "ओटीपी फ्रॉड",
+    "फिशिंग लिंक",
+    "बैंक खाता खाली",
+    "साइबर अपराध पोर्टल",
+    "धारा 66 आईटी एक्ट",
+    "धारा 318(4) बीएनएस",
+    "गोल्डन आवर"
+  ],
+  "laws": [
+    {
+      "act": "Information Technology Act, 2000",
+      "section": "Sections 66, 66C & 66D",
+      "plain_meaning": "Section 66 punishes computer related hacking/tampering; Section 66C punishes identity theft (fraudulent use of electronic signature, password, or unique identification feature) with imprisonment up to 3 years and fine up to Rs. 1 lakh; Section 66D punishes cheating by personation by using computer resource.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1999"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 318(4) [old IPC Section 420]",
+      "plain_meaning": "Cheating and dishonestly inducing delivery of property or alteration of valuable security is punishable with imprisonment up to 7 years and fine.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 316 [old IPC Section 405 / 406]",
+      "plain_meaning": "Criminal breach of trust: dishonestly misappropriating or converting to one's own use property entrusted.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    },
+    {
+      "act": "Reserve Bank of India Circular DBR.No.Leg.BC.78/09.07.005/2017-18",
+      "section": "Customer Protection – Limiting Liability of Customers in Unauthorised Electronic Banking Transactions",
+      "plain_meaning": "Zero liability of customer where unauthorised transaction occurs through contributory fraud/negligence of bank, or third party breach where customer notifies bank within 3 working days.",
+      "source_url": "https://www.rbi.org.in"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Immediately dial National Cybercrime Helpline 1930 (Golden Hour action) to report financial fraud. Provide bank name, account number, UPI reference ID, transaction date, and amount. The CFCFRMS system flags and freezes stolen funds across intermediary recipient wallets and accounts before cash withdrawal.",
+      "action_hi": "ठगी होते ही बिना देर किए तुरंत 1930 हेल्पलाइन पर कॉल करें (गोल्डन आवर)। बैंक, खाता नंबर, यूपीआई ट्रांजैक्शन आईडी और समय बताएं ताकि पैसा आगे ट्रांसफर होने से पहले फ्रीज किया जा सके।",
+      "where": "National Cyber Crime Helpline (Dial 1930)",
+      "deadline_or_limitation": "Within 2 to 3 hours of fraud (Golden Hour maximizes money recovery)",
+      "documents_needed": ["Bank transaction SMS / UTR reference number", "Bank account number / UPI ID", "Mobile number linked to account"]
+    },
+    {
+      "order": 2,
+      "action_en": "Call your bank customer care to block debit card, internet banking, UPI credentials, and obtain an official dispute Acknowledgement / Ticket Number.",
+      "action_hi": "अपने बैंक को तुरंत सूचित कर खाता/कार्ड/नेट बैंकिंग ब्लॉक करवाएं और अनधिकृत लेन-देन का विवाद टिकट नंबर लें।",
+      "where": "Bank 24x7 Customer Helpline / Branch",
+      "deadline_or_limitation": "Within 3 working days under RBI guidelines for zero customer liability",
+      "documents_needed": ["Debit card number", "Account details", "Dispute form signed"]
+    },
+    {
+      "order": 3,
+      "action_en": "Register a detailed formal complaint on the National Cyber Crime Reporting Portal (cybercrime.gov.in) under 'Report Financial Fraud' or 'Report Other Cyber Crime'. Download the official complaint PDF acknowledgement.",
+      "action_hi": "साइबर क्राइम पोर्टल (cybercrime.gov.in) पर जाकर पूरी घटना, स्क्रीनशॉट और बैंक स्टेटमेंट अपलोड कर पावती (Acknowledgement) डाउनलोड करें।",
+      "where": "cybercrime.gov.in portal",
+      "deadline_or_limitation": "Promptly within 24 hours",
+      "documents_needed": [
+        "Bank account statement highlighting fraudulent debit",
+        "Screenshots of fake SMS, phishing website, or WhatsApp chat",
+        "Transaction UTR / IMPS / UPI reference numbers",
+        "Caller ID screenshot / suspected mobile numbers"
+      ]
+    },
+    {
+      "order": 4,
+      "action_en": "Submit the cybercrime portal acknowledgement slip and bank statement to the local Cyber Police Station or local police station to register a regular FIR under Section 66D IT Act and Section 318(4) BNS.",
+      "action_hi": "स्थानीय साइबर थाना या संबंधित थाने में जाकर पोर्टल रसीद जमा करें और धारा 66D IT Act तथा 318(4) BNS में एफआईआर दर्ज करवाएं।",
+      "where": "Cyber Crime Police Station / Local Police Station",
+      "deadline_or_limitation": "Promptly upon receiving acknowledgment",
+      "documents_needed": ["Cybercrime complaint PDF copy", "Certified bank statement", "Identity proof"]
+    },
+    {
+      "order": 5,
+      "action_en": "Once money is frozen by police in suspected accounts, file an application under Section 503 BNSS [old CrPC s.457] before the Judicial Magistrate for defreezing and release of money (supurdnama) back to your bank account.",
+      "action_hi": "फ्रीज हुए पैसे को वापस अपने खाते में पाने के लिए मजिस्ट्रेट की अदालत में धारा 503 BNSS (पुराना 457 CrPC) के तहत आवेदन दें।",
+      "where": "Court of Judicial Magistrate First Class having jurisdiction",
+      "deadline_or_limitation": "After police files status report confirming frozen amount",
+      "documents_needed": ["Magistrate application draft", "Police status report on seized/frozen funds", "Bank indemnity bond"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "Citizen Financial Cyber Fraud Reporting Helpline",
+      "number": "1930",
+      "description": "24x7 dedicated national hotline for immediate freeze of defrauded electronic funds"
+    },
+    {
+      "name": "National Cyber Crime Reporting Portal",
+      "number": "cybercrime.gov.in",
+      "description": "Ministry of Home Affairs official portal for lodging cyber complaints"
+    },
+    {
+      "name": "RBI Banking Ombudsman",
+      "number": "14448 / cms.rbi.org.in",
+      "description": "For resolving bank non-cooperation or unauthorized electronic transaction liability disputes"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Citizens needing court intervention (such as filing Section 503 BNSS property release petitions or when bank refuses RBI circular adherence) are eligible for free DLSA counsel if under state income limit, or as women/senior citizens under s.12 LSAA.",
+    "how_to_apply": "Approach District Legal Services Authority (DLSA) in District Court complex or call 15100.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "To file a Section 503 BNSS application before the Magistrate for court order releasing frozen funds from intermediary bank accounts",
+    "If bank refuses to reimburse unauthorized transaction within RBI stipulated timelines",
+    "In cross-border hacking, sextortion, or corporate identity impersonation involving large amounts"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/1999",
+    "https://www.indiacode.nic.in/handle/123456789/21921",
+    "https://cybercrime.gov.in",
+    "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=11040"
+  ],
+  "hi_reviewed": false
+}

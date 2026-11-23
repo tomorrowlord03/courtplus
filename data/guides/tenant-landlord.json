@@ -1,0 +1,136 @@
+{
+  "id": "tenant-landlord",
+  "title_en": "Tenant & Landlord Rights: Eviction, Rent Control, Essential Services & Chhattisgarh Act",
+  "title_hi": "किरायेदार और मकान मालिक के अधिकार: बेदखली, किराया नियंत्रण, बिजली-पानी और छत्तीसगढ़ किराया नियंत्रण कानून",
+  "keywords_en": [
+    "tenant rights",
+    "landlord rights",
+    "unlawful eviction",
+    "rent agreement",
+    "Chhattisgarh Rent Control Act",
+    "Rent Controller",
+    "Transfer of Property Act",
+    "disconnection of water electricity",
+    "security deposit refund",
+    "Section 106 Transfer of Property",
+    "rent receipt",
+    "quiet enjoyment",
+    "notice to vacate",
+    "house rent dispute",
+    "forcible eviction"
+  ],
+  "keywords_hi": [
+    "किरायेदार के अधिकार",
+    "मकान मालिक का विवाद",
+    "जबरन मकान खाली कराना",
+    "किराया अनुबंध",
+    "छत्तीसगढ़ किराया नियंत्रण अधिनियम 2011",
+    "रेंट कंट्रोलर",
+    "पानी बिजली काटना",
+    "सुरक्षा निधि वापसी",
+    "सिक्योरिटी डिपॉजिट",
+    "खाली करने का नोटिस",
+    "संपत्ति अंतरण अधिनियम धारा 106",
+    "मकान का किराया"
+  ],
+  "laws": [
+    {
+      "act": "Chhattisgarh Rent Control Act, 2011 (CG Act No. 19 of 2012)",
+      "section": "Section 4 & 5",
+      "plain_meaning": "Mandates that every tenancy agreement must be in writing and submitted to the Rent Controller. Rent payable is strictly as agreed between parties, and landlord must issue a signed rent receipt on payment.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/10041"
+    },
+    {
+      "act": "Chhattisgarh Rent Control Act, 2011",
+      "section": "Section 8 & Schedule 2 / Schedule 3",
+      "plain_meaning": "Provides exclusive jurisdiction to the Rent Controller and Rent Control Tribunal; civil court jurisdiction is barred. Schedule 2 outlines landlord rights (recovery of agreed rent and grounds for eviction with prescribed notice). Schedule 3 guarantees tenant rights: right to enjoy accommodation without landlord cutting off or withholding essential supplies like water and electricity.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/10041"
+    },
+    {
+      "act": "Transfer of Property Act, 1882",
+      "section": "Section 106 & 108",
+      "plain_meaning": "General law on leases: in the absence of a written contract, lease of immovable property for purposes other than agriculture/manufacturing is deemed month-to-month, terminable by 15 days' notice expiring with the end of a month of tenancy. Section 108 secures lessee's right to quiet possession and prohibits landlord interference.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2338"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 329 & 351 [old IPC Section 441 & 506]",
+      "plain_meaning": "Criminal trespass (entering into or upon property in possession of another with intent to commit an offence or intimidate/insult/annoy) and criminal intimidation (threat to injure person or property). Landlord cannot throw out tenant belongings without due process of law.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Execute a written rent agreement specifying duration, monthly rent, due date, maintenance charges, and security deposit terms. In Chhattisgarh, submit agreement copy to Rent Controller per s.4 of CG Rent Control Act.",
+      "action_hi": "किरायानामा (रेंट एग्रीमेंट) हमेशा लिखित में बनवाएं जिसमें किराया, अवधि, बिजली-पानी बिल और सिक्योरिटी राशि स्पष्ट हो। छत्तीसगढ़ में इसे रेंट कंट्रोलर कार्यालय में प्रस्तुत करना आवश्यक है।",
+      "where": "Sub-Registrar Office / Notary / Office of the Rent Controller",
+      "deadline_or_limitation": "At the start of tenancy or renewal",
+      "documents_needed": ["Rental Agreement on non-judicial stamp paper", "ID and address proof of both parties", "Ownership proof / tax receipt of premises"]
+    },
+    {
+      "order": 2,
+      "action_en": "Always pay rent via traceable electronic modes (UPI/NEFT) or obtain a written signed receipt. Under tenant rights schedules, tenant has an absolute right to receive written rent receipts.",
+      "action_hi": "किराया बैंक ट्रांसफर/यूपीआई से दें या भुगतान की लिखित रसीद लें। रसीद मांगना किरायेदार का कानूनी अधिकार है।",
+      "where": "Banking transactions / Signed receipt vouchers",
+      "deadline_or_limitation": "Every month upon payment",
+      "documents_needed": ["Bank transaction receipts / counterfoils", "Signed rent receipts"]
+    },
+    {
+      "order": 3,
+      "action_en": "If landlord unlawfully cuts off water or electricity supply, or attempts forcible eviction without notice, call Emergency 112 immediately to report criminal trespass, and file an urgent application before the Rent Controller under Schedule 3 for restoration of essential amenities.",
+      "action_hi": "यदि मकान मालिक बिजली-पानी काटे या जबरन बेदखल करने की धमकी दे, तो तुरंत 112 पर पुलिस को सूचना दें और रेंट कंट्रोलर के समक्ष आवश्यक सेवाएं बहाल करने हेतु आवेदन दें।",
+      "where": "Emergency 112 / Office of the Rent Controller (Tehsil / Collectorate)",
+      "deadline_or_limitation": "Immediate upon disconnection or threat",
+      "documents_needed": ["Application in Form under Rent Control Rules", "Copy of rent agreement and latest rent receipt", "Proof of disconnected electricity/water"]
+    },
+    {
+      "order": 4,
+      "action_en": "For eviction or deposit disputes, the aggrieved party must serve a statutory notice (e.g. 15 or 30 days notice as agreed or under s.106 TPA / CG Act), and if unheeded, file a petition before the Rent Controller (or civil court in non-rent control areas).",
+      "action_hi": "मकान खाली कराने या सिक्योरिटी राशि वापस न करने पर 15 या 30 दिन का विधिक नोटिस भेजें। समाधान न होने पर रेंट कंट्रोलर न्यायालय में याचिका दायर करें।",
+      "where": "Court of the Rent Controller / Rent Control Tribunal",
+      "deadline_or_limitation": "As per agreement terms; civil claims within 3 years under Limitation Act",
+      "documents_needed": [
+        "Petition under Chhattisgarh Rent Control Act / Civil Plaint",
+        "Registered statutory notice and proof of delivery",
+        "Original agreement and rent ledger"
+      ]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "National Emergency Police Helpline",
+      "number": "112",
+      "description": "To prevent immediate physical assault, illegal locking of house, or throwing of belongings"
+    },
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free legal aid assistance for low-income tenants facing unlawful eviction"
+    },
+    {
+      "name": "Chhattisgarh District Legal Services Authority",
+      "number": "DLSA Raipur / Bilaspur / Durg",
+      "description": "Legal aid clinics at District Courts across Chhattisgarh"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Tenants from economically weaker sections, women, senior citizens, and persons earning below the statutory state ceiling (Rs. 3,00,000 annual income) qualify for free legal counsel under Section 12 of the Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Visit the front office of the District Legal Services Authority (DLSA) in the District Court premises with income certificate and rent documents.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "When facing illegal eviction or locked premises without a valid court or Rent Controller decree",
+    "To draft statutory eviction petitions or responses under the state Rent Control Act schedules",
+    "When landlord refuses to refund significant security deposit upon vacation of premises"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/10041",
+    "https://www.indiacode.nic.in/handle/123456789/2338",
+    "https://www.indiacode.nic.in/handle/123456789/21921",
+    "https://cghighcourt.nic.in"
+  ],
+  "hi_reviewed": false
+}

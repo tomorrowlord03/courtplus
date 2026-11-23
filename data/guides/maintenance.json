@@ -1,0 +1,144 @@
+{
+  "id": "maintenance",
+  "title_en": "Maintenance for Wife, Children & Parents: Section 144 BNSS & Senior Citizens Act 2007",
+  "title_hi": "पत्नी, बच्चों और माता-पिता का भरण-पोषण: धारा 144 बीएनएसएस एवं वरिष्ठ नागरिक भरण-पोषण कानून 2007",
+  "keywords_en": [
+    "maintenance",
+    "Section 144 BNSS",
+    "Section 125 CrPC",
+    "maintenance for wife",
+    "maintenance for children",
+    "maintenance for parents",
+    "interim maintenance",
+    "Maintenance of Parents and Senior Citizens Act 2007",
+    "Senior Citizens Tribunal",
+    "alimony",
+    "Rajnesh v Neha",
+    "disclosure of assets",
+    "enforcement of maintenance",
+    "arrears of maintenance",
+    "warrant for non payment of maintenance",
+    "void property transfer Section 23"
+  ],
+  "keywords_hi": [
+    "भरण-पोषण",
+    "खर्चा",
+    "पत्नी का खर्चा",
+    "बच्चों का भरण-पोषण",
+    "माता-पिता का भरण-पोषण",
+    "धारा 144 बीएनएसएस",
+    "धारा 125 सीआरपीसी",
+    "अंतरिम भरण-पोषण",
+    "वरिष्ठ नागरिक अधिनियम 2007",
+    "एसडीओ कोर्ट",
+    "संपत्ति अंतरण रद्द",
+    "गुजारा भत्ता",
+    "बकाया भरण-पोषण वसूली",
+    "जायदाद से बेदखल"
+  ],
+  "laws": [
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 144 [old CrPC Section 125]",
+      "plain_meaning": "Order for maintenance of wives, children and parents: If any person having sufficient means neglects or refuses to maintain his wife (unable to maintain herself), legitimate/illegitimate minor child, or father/mother unable to maintain himself/herself, a Magistrate of the first class may order monthly allowance. Application for interim maintenance must be disposed of within 60 days of service of notice.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 144(3) [old CrPC Section 125(3)]",
+      "plain_meaning": "If any person fails without sufficient cause to comply with the maintenance order, Magistrate may issue a warrant for levying the amount due like a fine, and sentence the defaulter to imprisonment for up to one month for each month's allowance remaining unpaid.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Maintenance and Welfare of Parents and Senior Citizens Act, 2007",
+      "section": "Sections 4, 5, 9 & 23",
+      "plain_meaning": "Senior citizens/parents unable to maintain themselves can apply before the Maintenance Tribunal (headed by Sub-Divisional Officer / SDO) against children or legal heirs. Section 9 provides monthly allowance; Section 23 provides that transfer of property by senior citizen subject to condition of providing basic amenities can be declared void by Tribunal if children fail to maintain.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1516"
+    },
+    {
+      "act": "Supreme Court Precedent",
+      "section": "Rajnesh v. Neha (2021) 2 SCC 324",
+      "plain_meaning": "Uniform guidelines across all maintenance laws: mandatory filing of comprehensive Affidavit of Assets and Liabilities by both parties; maintenance orders to take effect from the date of filing of application; simultaneous orders under different laws can be adjusted.",
+      "source_url": "https://main.sci.gov.in/supremecourt/2018/43080/43080_2018_33_1501_24687_Judgement_04-Nov-2020.pdf"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Choose the appropriate legal forum: Wives and children apply under Section 144 BNSS in Family Court / JMFC court (or PWDVA s.20). Senior citizens/parents can choose either Section 144 BNSS or the speedier summary Maintenance Tribunal (SDO Office) under the Senior Citizens Act 2007.",
+      "action_hi": "उचित अदालत का चयन करें: पत्नी व बच्चे परिवार न्यायालय / सीजेएम कोर्ट में धारा 144 BNSS के तहत आवेदन करें। माता-पिता एसडीओ न्यायालय में वरिष्ठ नागरिक कानून के तहत त्वरित आवेदन दे सकते हैं।",
+      "where": "Family Court / JMFC Court (for wife/children) or Maintenance Tribunal / SDO Office (for senior citizens)",
+      "deadline_or_limitation": "Application can be filed at any time while neglect continues; recovery of arrears must be filed within 1 year of falling due",
+      "documents_needed": ["Proof of relationship (Marriage certificate / Ration card / Birth certificate / Photos)", "Proof of neglect and non-payment", "Proof of respondent's income and employment"]
+    },
+    {
+      "order": 2,
+      "action_en": "Draft the petition with a specific prayer for Interim Maintenance under the proviso to Section 144(1) BNSS. File the mandatory Affidavit of Assets and Liabilities in accordance with the Supreme Court format in Rajnesh v. Neha.",
+      "action_hi": "याचिका में अंतरिम भरण-पोषण की विशेष मांग करें। दोनों पक्षों को सुप्रीम कोर्ट के रजनेश बनाम नेहा प्रारूप में परिसंपत्ति व देनदारी का शपथपत्र दाखिल करना अनिवार्य है।",
+      "where": "Family Court / Court of JMFC",
+      "deadline_or_limitation": "Statute mandates disposal of interim application within 60 days of notice",
+      "documents_needed": [
+        "Petition under Section 144 BNSS",
+        "Comprehensive Affidavit of Assets and Liabilities (ITRs, salary slips, bank statements, expenses)",
+        "Interim maintenance application under s.144(1) proviso"
+      ]
+    },
+    {
+      "order": 3,
+      "action_en": "For elderly parents whose children took property and neglected them, file an application before the Sub-Divisional Officer (SDO) under Section 23 of the Senior Citizens Act to cancel the gift deed / transfer of property.",
+      "action_hi": "यदि बच्चों ने सेवा के नाम पर जमीन-जायदाद लिखवा ली और फिर छोड़ दिया, तो धारा 23 के तहत एसडीओ ट्रिब्यूनल में रजिस्ट्री रद्द करने का आवेदन लगाएं।",
+      "where": "Maintenance Tribunal (Sub-Divisional Magistrate / SDO Court)",
+      "deadline_or_limitation": "Within reasonable time of breach of condition",
+      "documents_needed": [
+        "Application in prescribed format under Senior Citizens Rules",
+        "Copy of registered Gift Deed or Settlement Deed",
+        "Senior Citizen ID proof (Age 60+)",
+        "Proof of lack of medical/food support"
+      ]
+    },
+    {
+      "order": 4,
+      "action_en": "If respondent fails to pay ordered maintenance, file an enforcement execution application under Section 144(3) BNSS. The court will issue salary attachment, distress warrant for property attachment, or non-bailable warrant committing defaulter to jail.",
+      "action_hi": "आदेश के बाद भी पति/पुत्र द्वारा खर्चा न देने पर धारा 144(3) BNSS के तहत वसूली अर्जी (एक्जीक्यूशन) लगाएं। अदालत वेतन अटैच करने या जेल भेजने का वारंट जारी करती है।",
+      "where": "Trial Court",
+      "deadline_or_limitation": "Application for warrant must be made within 1 year from the date on which amount became due",
+      "documents_needed": ["Certified copy of maintenance order", "Arrears calculation chart with dates and bank statement"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "Elderline (National Helpline for Senior Citizens)",
+      "number": "14567",
+      "description": "Toll-free national helpline for elderly abuse, maintenance guidance, and field intervention"
+    },
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free counsel for wives, children, and senior citizens in maintenance proceedings"
+    },
+    {
+      "name": "Women Helpline",
+      "number": "181",
+      "description": "For wives seeking emergency support and maintenance guidance"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "All women, minor children, senior citizens, and persons unable to maintain themselves qualify for free legal representation under Section 12 of the Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Approach the District Legal Services Authority (DLSA) in the District Court or SDO office. A legal aid lawyer will be appointed without any fee to draft the Section 144 BNSS or Senior Citizens Act petition.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "To accurately draft the Affidavit of Assets and Liabilities to unearth concealed business income or hidden properties of the spouse",
+    "To execute arrears recovery warrants under Section 144(3) BNSS within the 1-year limitation window",
+    "For drafting petitions under Section 23 of the Senior Citizens Act to revoke property gift deeds"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/21920",
+    "https://www.indiacode.nic.in/handle/123456789/1516",
+    "https://main.sci.gov.in/supremecourt/2018/43080/43080_2018_33_1501_24687_Judgement_04-Nov-2020.pdf",
+    "https://socialjustice.gov.in"
+  ],
+  "hi_reviewed": false
+}

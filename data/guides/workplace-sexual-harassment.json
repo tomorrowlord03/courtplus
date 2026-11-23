@@ -1,0 +1,157 @@
+{
+  "id": "workplace-sexual-harassment",
+  "title_en": "Sexual Harassment at Workplace: Internal Committee, POSH Act 2013 & SHe-Box",
+  "title_hi": "कार्यस्थल पर महिलाओं का यौन उत्पीड़न: आंतरिक समिति (IC), पॉश कानून 2013 और शी-बॉक्स",
+  "keywords_en": [
+    "sexual harassment at work",
+    "POSH Act 2013",
+    "Internal Committee",
+    "Internal Complaints Committee",
+    "ICC",
+    "Local Committee",
+    "Local Complaints Committee",
+    "LCC",
+    "SHe-Box",
+    "unwelcome physical contact",
+    "sexually coloured remarks",
+    "quid pro quo harassment",
+    "hostile work environment",
+    "Section 9 POSH Act",
+    "Section 75 BNS",
+    "Section 354A IPC",
+    "Section 78 BNS",
+    "Section 354D IPC stalking",
+    "workplace harassment woman",
+    "3 months limitation"
+  ],
+  "keywords_hi": [
+    "कार्यस्थल पर यौन उत्पीड़न",
+    "पॉश कानून 2013",
+    "आंतरिक शिकायत समिति",
+    "आईसीसी",
+    "स्थानीय समिति",
+    "शी-बॉक्स",
+    "ऑफिस में छेड़छाड़",
+    "अवांछित शारीरिक स्पर्श",
+    "अश्लील टिप्पणी",
+    "धारा 75 बीएनएस",
+    "धारा 354ए आईपीसी",
+    "पीछा करना",
+    "स्टॉकिंग",
+    "3 महीने की समय सीमा"
+  ],
+  "laws": [
+    {
+      "act": "Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013",
+      "section": "Section 2(n) & Section 3",
+      "plain_meaning": "Defines sexual harassment: includes unwelcome physical contact and advances, demand or request for sexual favours, making sexually coloured remarks, showing pornography, or any other unwelcome physical, verbal or non-verbal conduct of sexual nature. Section 3 prohibits sexual harassment and creation of hostile work environment.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2104"
+    },
+    {
+      "act": "Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013",
+      "section": "Section 4 & Section 6",
+      "plain_meaning": "Every employer of a workplace having 10 or more employees must constitute an Internal Committee (IC) headed by a senior woman employee. For workplaces with fewer than 10 workers or where complaint is against the employer himself, District Officer constitutes a Local Committee (LC).",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2104"
+    },
+    {
+      "act": "Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013",
+      "section": "Sections 9, 11, 12 & 16",
+      "plain_meaning": "Section 9: Written complaint to IC/LC within 3 months of incident (extendable by 3 months for recorded reasons). Section 11: Inquiry to be completed within 90 days following principles of natural justice. Section 12: Interim relief (transfer or leave up to 3 months). Section 16: Strict confidentiality: identity of complainant/respondent and proceedings cannot be published.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2104"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 75 & Section 78 [old IPC Section 354A & 354D]",
+      "plain_meaning": "Section 75: Sexual harassment criminal offence punishable with rigorous imprisonment up to 3 years or fine. Section 78: Stalking (following a woman or monitoring electronic communication) punishable with imprisonment up to 3 years for first offence and 5 years for repeat conviction.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Document every incident: Note down exact dates, times, locations, emails, messages, WhatsApp chats, and names of colleagues who witnessed or were told about the conduct.",
+      "action_hi": "सभी घटनाओं का लिखित रिकॉर्ड रखें: तारीख, समय, स्थान, ईमेल, चैट और घटना के गवाह सहकर्मियों के नाम नोट करें।",
+      "where": "Personal confidential diary / personal email (not office email)",
+      "deadline_or_limitation": "Immediate record keeping",
+      "documents_needed": ["Screenshots of chat / email messages", "Audio/call recordings (if any)", "Colleague testimonies / notes"]
+    },
+    {
+      "order": 2,
+      "action_en": "Submit a signed written complaint (6 copies with supporting documents) to the Presiding Officer of the Internal Committee (IC). If establishment has under 10 workers or complaint is against the employer/boss, submit to the Local Committee (LC) at District Magistrate / Collector office.",
+      "action_hi": "आंतरिक समिति (IC) की पीठासीन अधिकारी को लिखित में 6 प्रतियों में शिकायत सौंपें। यदि संस्थान में 10 से कम कर्मचारी हैं या शिकायत मालिक के खिलाफ है, तो जिला कलेक्टर कार्यालय स्थित स्थानीय समिति (LC) को दें।",
+      "where": "Internal Committee (IC) in office or Local Committee (LC) at District Officer / Collectorate",
+      "deadline_or_limitation": "Within 3 months from the date of incident (or last incident in a series); IC/LC may extend by 3 months if satisfied that circumstances prevented timely filing",
+      "documents_needed": [
+        "Signed formal complaint letter detailing timeline and incidents",
+        "List of witnesses with designations",
+        "Supporting digital and physical documentary evidence"
+      ]
+    },
+    {
+      "order": 3,
+      "action_en": "Alternatively or in addition, file an online complaint on the central government SHe-Box portal (shebox.wcd.gov.in). The portal routes the complaint directly to the concerned IC / LC and monitors inquiry timelines.",
+      "action_hi": "महिला एवं बाल विकास मंत्रालय के शी-बॉक्स पोर्टल (shebox.wcd.gov.in) पर भी ऑनलाइन शिकायत दर्ज कर सकती हैं।",
+      "where": "shebox.wcd.gov.in",
+      "deadline_or_limitation": "Within 3 months of incident",
+      "documents_needed": ["Online complaint form upload", "Employee ID and employer details"]
+    },
+    {
+      "order": 4,
+      "action_en": "Request interim relief in writing under Section 12 POSH Act during pendency of inquiry: transfer of complainant or respondent to another department/branch, or grant of paid leave up to 3 months (in addition to normal leave).",
+      "action_hi": "जांच चलने तक धारा 12 के तहत अंतरिम राहत की मांग करें: स्वयं का या आरोपी का ट्रांसफर अथवा 3 माह का अतिरिक्त सवैतनिक अवकाश।",
+      "where": "Internal Committee / Employer",
+      "deadline_or_limitation": "During the pendency of IC inquiry",
+      "documents_needed": ["Application for interim relief under Section 12"]
+    },
+    {
+      "order": 5,
+      "action_en": "In cases involving criminal assault, stalking, or sexual extortion, simultaneously register a regular police FIR under Section 75/78 BNS [old IPC s.354A/354D]. POSH Act inquiry and criminal trial can proceed simultaneously.",
+      "action_hi": "गंभीर मामले या पीछा करने (स्टॉकिंग) की स्थिति में थाने में धारा 75/78 BNS के तहत समानांतर पुलिस एफआईआर भी दर्ज कराई जा सकती है।",
+      "where": "Local Police Station / Women Police Station",
+      "deadline_or_limitation": "Promptly upon refusal or criminal act",
+      "documents_needed": ["FIR written complaint", "Identity proof", "Evidence copies"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "Women Helpline (All India)",
+      "number": "181",
+      "description": "24x7 toll-free emergency guidance and support for women"
+    },
+    {
+      "name": "National Commission for Women (NCW)",
+      "number": "7827170170",
+      "description": "NCW 24x7 helpline for reporting workplace sexual harassment"
+    },
+    {
+      "name": "SHe-Box Portal (Ministry of WCD)",
+      "number": "shebox.wcd.gov.in",
+      "description": "Centralized online monitoring portal for workplace sexual harassment complaints"
+    },
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free legal aid counsel for working women"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "All women are unconditionally entitled to free legal aid under Section 12(c) of the Legal Services Authorities Act, 1987, irrespective of income or status.",
+    "how_to_apply": "Contact DLSA at the District Court complex or call 15100. Legal aid advocates can assist in drafting the IC complaint, representing before the Local Committee, or filing appeals against perverse IC reports under Section 18 POSH Act.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "When employer fails to constitute an Internal Committee or IC members demonstrate bias or victim-blaming",
+    "To file an appeal under Section 18 POSH Act before the appellate authority / Industrial Tribunal against flawed inquiry recommendations within 90 days",
+    "When facing illegal termination, retaliation, or demotion after reporting sexual harassment"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/2104",
+    "https://www.indiacode.nic.in/handle/123456789/21921",
+    "https://shebox.wcd.gov.in",
+    "https://wcd.nic.in/act/handbook-sexual-harassment-women-workplace",
+    "https://nalsa.gov.in"
+  ],
+  "hi_reviewed": false
+}

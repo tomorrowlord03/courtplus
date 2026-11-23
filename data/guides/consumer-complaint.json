@@ -1,0 +1,139 @@
+{
+  "id": "consumer-complaint",
+  "title_en": "Consumer Complaint: Defective Goods, Deficient Service, e-Daakhil & Compensation",
+  "title_hi": "उपभोक्ता शिकायत: खराब सामान, सेवा में कमी, ई-दाखिल और उपभोक्ता फोरम में मुआवजा",
+  "keywords_en": [
+    "consumer complaint",
+    "consumer court",
+    "defective product",
+    "deficiency in service",
+    "unfair trade practice",
+    "e-Daakhil",
+    "Consumer Protection Act 2019",
+    "National Consumer Helpline",
+    "NCH",
+    "district consumer commission",
+    "e-commerce refund",
+    "airline cancellation",
+    "builder delay possession",
+    "warranty refused",
+    "overcharging"
+  ],
+  "keywords_hi": [
+    "उपभोक्ता शिकायत",
+    "उपभोक्ता फोरम",
+    "खराब सामान",
+    "सेवा में कमी",
+    "वारंटी देने से मना",
+    "पैसे वापस नहीं किए",
+    "ई-दाखिल",
+    "उपभोक्ता संरक्षण अधिनियम",
+    "राष्ट्रीय उपभोक्ता हेल्पलाइन 1915",
+    "जिला उपभोक्ता आयोग",
+    "ऑनलाइन शॉपिंग फ्रॉड",
+    "अनुचित व्यापार व्यवहार"
+  ],
+  "laws": [
+    {
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 2(7), 2(11) & 2(47)",
+      "plain_meaning": "Defines 'consumer' (buys any goods or hires any service for consideration, including online/offline), 'deficiency' (fault, imperfection, shortcoming in quality or manner of performance), and 'unfair trade practice' (misleading representations, refusing return/refund).",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/15256"
+    },
+    {
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 34, 47 & 58 (Pecuniary Jurisdiction)",
+      "plain_meaning": "District Consumer Disputes Redressal Commission entertains complaints where consideration does not exceed Rs. 50 lakh; State Commission from Rs. 50 lakh up to Rs. 2 crore; National Commission (NCDRC) above Rs. 2 crore.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/15256"
+    },
+    {
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 35 (Manner of Making Complaint / e-Daakhil)",
+      "plain_meaning": "Complaint may be filed by a consumer either physically or electronically through the e-Daakhil portal (edaakhil.nic.in) in the District Commission where the complainant resides or personally works for gain.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/15256"
+    },
+    {
+      "act": "Consumer Protection Act, 2019",
+      "section": "Section 69 (Limitation Period)",
+      "plain_meaning": "The District Commission, State Commission or National Commission shall not admit a complaint unless it is filed within two years from the date on which the cause of action has arisen (delay condonable for sufficient cause).",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/15256"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Send a formal written complaint or legal notice by registered email/post to customer support and the grievance officer of the company/seller, specifying the defect/deficiency, evidence, and giving 15 days for refund/replacement.",
+      "action_hi": "कंपनी / विक्रेता के कस्टमर केयर और ग्रीवेंस ऑफिसर को लिखित में शिकायत या कानूनी नोटिस भेजें और 15 दिनों में समाधान या पैसे वापसी की मांग करें।",
+      "where": "Company email / Grievance Officer / Registered Post",
+      "deadline_or_limitation": "Promptly after discovering defect",
+      "documents_needed": ["Tax invoice / Cash memo / Order confirmation", "Photos / Videos of defective goods", "Written emails / ticket numbers"]
+    },
+    {
+      "order": 2,
+      "action_en": "Lodge an online grievance on the National Consumer Helpline portal (consumerhelpline.gov.in) or call 1915 / WhatsApp 8800001915 for pre-litigation departmental conciliation.",
+      "action_hi": "राष्ट्रीय उपभोक्ता हेल्पलाइन (NCH) पोर्टल पर शिकायत दर्ज करें या टोल-फ्री नंबर 1915 पर कॉल करें।",
+      "where": "consumerhelpline.gov.in / UMANG app / NCH 1915",
+      "deadline_or_limitation": "Anytime before filing formal court case",
+      "documents_needed": ["Docket registration details", "Purchase bill", "Transaction receipt"]
+    },
+    {
+      "order": 3,
+      "action_en": "If unresolved, file a formal complaint online via the e-Daakhil portal (edaakhil.nic.in) or submit 3 copies of petition physically before the District Consumer Disputes Redressal Commission.",
+      "action_hi": "यदि समाधान न हो, तो ई-दाखिल पोर्टल (edaakhil.nic.in) पर ऑनलाइन या जिला उपभोक्ता आयोग में सीधे 3 प्रतियों में शिकायत दर्ज करें।",
+      "where": "District Consumer Disputes Redressal Commission (or edaakhil.nic.in)",
+      "deadline_or_limitation": "Strictly within 2 years from the date of cause of action (s.69)",
+      "documents_needed": [
+        "Complaint petition stating facts, deficiency, and specific compensation claimed",
+        "Verification affidavit sworn by complainant",
+        "Original or true copy of invoice/bill and payment proof",
+        "Warranty card or agreement terms",
+        "Correspondence with seller showing refusal or non-response",
+        "Prescribed nominal court fee (Nil for claims up to Rs. 5 lakh; nominal fees for higher slabs)"
+      ]
+    },
+    {
+      "order": 4,
+      "action_en": "Track hearing on e-Daakhil / Confonet portal. Consumer can argue in person without hiring a lawyer.",
+      "action_hi": "कॉन्फोनेट / ई-दाखिल पर पेशी की तारीख देखें। उपभोक्ता स्वयं भी बिना वकील के अपना पक्ष रख सकते हैं।",
+      "where": "confonet.nic.in / edaakhil.nic.in",
+      "deadline_or_limitation": "Opposite party must reply within 30 days of notice (s.38(2))",
+      "documents_needed": ["Case reference number", "Hearing notice"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "National Consumer Helpline (NCH)",
+      "number": "1915",
+      "description": "Toll-free helpline (08:00 AM to 08:00 PM) in 17 languages for consumer grievance resolution"
+    },
+    {
+      "name": "NCH WhatsApp Support",
+      "number": "8800001915",
+      "description": "Official WhatsApp bot for registering consumer complaints"
+    },
+    {
+      "name": "e-Daakhil Portal Support",
+      "number": "edaakhil.nic.in",
+      "description": "Official online portal for filing and tracking consumer cases"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Low-income consumers, women, senior citizens, and disadvantaged categories are entitled to free legal assistance through DLSA under Section 12 of Legal Services Authorities Act, 1987. Furthermore, consumer law does not mandate an advocate; consumers can represent themselves.",
+    "how_to_apply": "Contact DLSA at the District Court complex or file directly on e-Daakhil self-help mode.",
+    "authority": "District Legal Services Authority (DLSA) / Consumer Guidance Cell",
+    "helpline": "15100 / 1915"
+  },
+  "when_to_see_a_lawyer": [
+    "When claiming substantial financial compensation against major builders, hospitals for medical negligence, or insurance companies",
+    "When complex technical or expert evidence (e.g., forensic test of goods or forensic accounting) is required",
+    "When responding to appeals before the State Commission or National Commission"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/15256",
+    "https://consumerhelpline.gov.in",
+    "https://edaakhil.nic.in",
+    "https://ncdrc.nic.in"
+  ],
+  "hi_reviewed": false
+}

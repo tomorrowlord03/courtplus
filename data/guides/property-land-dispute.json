@@ -1,0 +1,142 @@
+{
+  "id": "property-land-dispute",
+  "title_en": "Property & Land Disputes: Civil Suits, Injunctions, Revenue Courts & Limitation",
+  "title_hi": "जमीन और संपत्ति विवाद: दीवानी मुकदमा, स्थगन आदेश (इंजंक्शन), राजस्व न्यायालय और मियाद",
+  "keywords_en": [
+    "property dispute",
+    "land dispute",
+    "civil suit",
+    "stay order",
+    "temporary injunction",
+    "Order 39 Rule 1 and 2",
+    "Specific Relief Act",
+    "declaration of title",
+    "illegal possession",
+    "encroachment",
+    "mutation",
+    "revenue court",
+    "Tahsildar",
+    "demarcation",
+    "Section 6 Specific Relief",
+    "Limitation Act 12 years",
+    "adverse possession"
+  ],
+  "keywords_hi": [
+    "जमीन विवाद",
+    "संपत्ति विवाद",
+    "कब्जा कर लिया",
+    "अवैध कब्जा",
+    "स्टे ऑर्डर",
+    "स्थगन आदेश",
+    "दीवानी दावा",
+    "टाइटिल सूट",
+    "सीमांकन",
+    "नामान्तरण",
+    "तहसीलदार कोर्ट",
+    "राजस्व न्यायालय",
+    "विशिष्ट अनुतोष अधिनियम",
+    "12 वर्ष की मियाद",
+    "खसरा खतौनी"
+  ],
+  "laws": [
+    {
+      "act": "Code of Civil Procedure, 1908",
+      "section": "Section 9 & Order XXXIX Rules 1 & 2",
+      "plain_meaning": "Section 9 gives civil courts jurisdiction to try all suits of a civil nature unless expressly or impliedly barred. Order 39 Rules 1 & 2 empower the court to grant temporary injunction to restrain dispossession, damage, alienation, or wastage of property during pendency of suit.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2191"
+    },
+    {
+      "act": "Specific Relief Act, 1963",
+      "section": "Sections 5, 6, 34 & 38",
+      "plain_meaning": "Section 5 enables recovery of possession based on title; Section 6 allows a person dispossessed without consent and without due process to recover possession by filing suit within 6 months irrespective of title; Section 34 provides declaration of ownership/title; Section 38 provides perpetual injunction.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1583"
+    },
+    {
+      "act": "Limitation Act, 1963",
+      "section": "Articles 64 & 65, Schedule I",
+      "plain_meaning": "Suit for possession of immovable property based on previous possession (Art. 64) or based on title (Art. 65) must be brought within 12 years from the date when possession of defendant becomes adverse to the plaintiff. For summary dispossession under Section 6 Specific Relief Act, limitation is strictly 6 months.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1566"
+    },
+    {
+      "act": "State Land Revenue Code (e.g. CG Land Revenue Code 1959 / UP Revenue Code)",
+      "section": "Demarcation (Simankan), Mutation (Namantaran) & Partition Provisions",
+      "plain_meaning": "Revenue Courts (Tahsildar / Sub-Divisional Officer / Collector) hold exclusive jurisdiction over correction of land revenue records, entry of names upon succession/sale (namantaran), physical boundary demarcation (simankan), and eviction of encroachments on government/panchayat land.",
+      "source_url": "https://www.indiacode.nic.in"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Obtain certified certified copies of revenue records (Khasra, Khatauni / B-1, P-II Kishtabandi, Jamabandi, Naksha/map) from the Tehsil or official land portal (e.g. Bhuiyan in CG / Bhulekh in UP) and check registration deed history.",
+      "action_hi": "तहसील या आधिकारिक भू-अभिलेख पोर्टल (जैसे छत्तीसगढ़ में भुइयां, यूपी में भूलेख) से खसरा, खतौनी (बी-1/पी-2) और प्रमाणित नक्शा प्राप्त करें।",
+      "where": "Tehsil Office / Land Records Department / State Bhulekh Portal",
+      "deadline_or_limitation": "Immediate step before taking legal action",
+      "documents_needed": ["Registered Sale Deed / Gift Deed / Will", "Certified Khasra / Khatauni", "Certified Field Map (Naksha)"]
+    },
+    {
+      "order": 2,
+      "action_en": "If there is a boundary confusion or encroaching neighbor, apply for statutory field demarcation (Simankan) before the Tahsildar under the state Land Revenue Code. Revenue Inspector (RI) will measure boundaries using total station / chain.",
+      "action_hi": "सीमा विवाद या मेड़ काटने की स्थिति में तहसीलदार के समक्ष धारा 129 के तहत सीमांकन (नाप-जोख) का विधिवत आवेदन प्रस्तुत करें।",
+      "where": "Office of the Tahsildar / Nayab Tahsildar",
+      "deadline_or_limitation": "Promptly upon noticing boundary encroachment",
+      "documents_needed": ["Application for Demarcation with prescribed fee challan", "Copy of title deed and current year Khasra"]
+    },
+    {
+      "order": 3,
+      "action_en": "If someone forcibly dispossesses you without due process, immediately file a summary suit under Section 6 of the Specific Relief Act within 6 months. In this suit, only previous peaceful possession and illegal dispossession need to be proved; title is not in issue.",
+      "action_hi": "यदि किसी ने आपकी जमीन/मकान से जबरन बेदखल कर दिया है, तो 6 महीने के भीतर विशिष्ट अनुतोष अधिनियम की धारा 6 के तहत त्वरित दीवानी दावा पेश करें।",
+      "where": "Civil Court (Civil Judge Senior / Junior Division)",
+      "deadline_or_limitation": "Strictly within 6 months of dispossession (no extension possible)",
+      "documents_needed": [
+        "Plaint under Section 6 Specific Relief Act",
+        "Proof of prior peaceful possession (electricity bills, tax receipts, tenant agreements, photos)",
+        "Proof of illegal dispossession and date of occurrence"
+      ]
+    },
+    {
+      "order": 4,
+      "action_en": "If title or ownership is disputed, file a comprehensive regular Civil Suit for Declaration of Title, Recovery of Possession, and Permanent Injunction, along with an application under Order 39 Rules 1 & 2 CPC for immediate Temporary Injunction (Stay Order) to maintain status quo.",
+      "action_hi": "मालिकाना हक पर विवाद होने पर स्वामित्व घोषणा (डिक्लरेशन), कब्जा वापसी और स्थायी निषेधाज्ञा का दावा लगाएं तथा धारा 39 नियम 1 व 2 सीपीसी में अंतरिम स्टे लें।",
+      "where": "Court of Civil Judge / District Judge having territorial and pecuniary jurisdiction",
+      "deadline_or_limitation": "12 years from adverse possession under Article 65 Limitation Act; 3 years for declaration under Article 58",
+      "documents_needed": [
+        "Plaint with detailed chain of title deeds and boundary description (Schedule of Property)",
+        "Application for Temporary Injunction under Order 39 Rules 1 & 2 CPC with supporting affidavit",
+        "Requisite ad-valorem Court Fee stamps",
+        "Original or certified title documents and mutation entries"
+      ]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free legal aid assistance for low-income citizens, small farmers, and women in civil property disputes"
+    },
+    {
+      "name": "State Land Records Citizen Grievance Portal",
+      "number": "State Revenue Helpline",
+      "description": "For complaints regarding delay in mutation or demarcation"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Small farmers, agricultural labourers, women, and citizens with annual income below state eligibility ceiling (typically Rs. 3,00,000) under Section 12 of Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Apply in person at the District Legal Services Authority (DLSA) in District Court complex or Taluk Legal Services Committee (TLSC) at Tehsil level. DLSA can provide legal counsel and cover court expenses.",
+    "authority": "District Legal Services Authority (DLSA) / Taluk Legal Services Committee (TLSC)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "To draft the plaint, schedule of property, and obtain an urgent ex-parte stay order before the opposite party changes nature of land or creates third-party rights",
+    "When facing summary dispossession under Section 6 Specific Relief Act where the 6-month deadline is non-extendable",
+    "To navigate jurisdictional boundaries between civil court (title/possession) and revenue court (mutation/demarcation)"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/2191",
+    "https://www.indiacode.nic.in/handle/123456789/1583",
+    "https://www.indiacode.nic.in/handle/123456789/1566",
+    "https://doj.gov.in",
+    "https://nalsa.gov.in"
+  ],
+  "hi_reviewed": false
+}

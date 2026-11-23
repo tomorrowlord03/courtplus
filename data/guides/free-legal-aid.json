@@ -1,0 +1,134 @@
+{
+  "id": "free-legal-aid",
+  "title_en": "Free Legal Aid: Section 12 LSAA Eligibility, DLSA Services & NALSA 15100",
+  "title_hi": "निःशुल्क कानूनी सहायता: धारा 12 पात्रता, जिला विधिक सेवा प्राधिकरण (DLSA) और नालसा 15100",
+  "keywords_en": [
+    "free legal aid",
+    "free lawyer",
+    "legal services",
+    "NALSA",
+    "DLSA",
+    "TLSC",
+    "Section 12 Legal Services Authorities Act",
+    "LSAA 1987",
+    "15100 helpline",
+    "Lok Adalat",
+    "legal aid counsel",
+    "court fee waiver",
+    "indigent person",
+    "Order 33 CPC",
+    "Legal Aid Defense Counsel System",
+    "LADCS",
+    "Article 39A"
+  ],
+  "keywords_hi": [
+    "मुफ्त कानूनी सहायता",
+    "मुफ्त सरकारी वकील",
+    "विधिक सेवा प्राधिकरण",
+    "नालसा",
+    "डीएलएसए",
+    "15100 राष्ट्रीय हेल्पलाइन",
+    "लोक अदालत",
+    "धारा 12 विधिक सेवा",
+    "कोर्ट फीस छूट",
+    "गरीबों के लिए वकील",
+    "समान न्याय",
+    "अनुच्छेद 39क"
+  ],
+  "laws": [
+    {
+      "act": "Legal Services Authorities Act, 1987",
+      "section": "Section 12 (Criteria for Giving Legal Services)",
+      "plain_meaning": "Every person is entitled to free legal services if they are: (a) member of SC or ST; (b) victim of trafficking in human beings or begar; (c) a woman or a child; (d) person with disability or mental illness; (e) victim of mass disaster, ethnic violence, caste atrocity, flood, earthquake; (f) an industrial workman; (g) in custody in a protective home/juvenile home/psychiatric hospital/jail; or (h) having annual income less than the amount prescribed by State Government (typically Rs. 3,00,000; Supreme Court Legal Services Committee limit is Rs. 5,00,000).",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1932"
+    },
+    {
+      "act": "Legal Services Authorities Act, 1987",
+      "section": "Section 13 (Entitlement to Legal Services)",
+      "plain_meaning": "Persons satisfying Section 12 criteria are entitled to legal services provided the Authority is satisfied that such person has a prima facie case to prosecute or defend.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1932"
+    },
+    {
+      "act": "Legal Services Authorities Act, 1987",
+      "section": "Sections 19, 20 & 21 (Lok Adalats)",
+      "plain_meaning": "Statutory alternative dispute resolution mechanism. Lok Adalat awards are deemed decrees of a civil court, final and binding with no appeal, and court fees paid in court are fully refunded when settled in Lok Adalat.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1932"
+    },
+    {
+      "act": "Constitution of India",
+      "section": "Article 39A (Equal Justice and Free Legal Aid)",
+      "plain_meaning": "The State shall secure that the operation of the legal system promotes justice on a basis of equal opportunity, and shall in particular provide free legal aid to ensure that opportunities for securing justice are not denied to any citizen by reason of economic or other disabilities.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1540"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Check eligibility under Section 12 of the Legal Services Authorities Act. All women, children, SC/ST citizens, persons in custody, and persons with annual income under state threshold (e.g. Rs. 3,00,000 in CG) automatically qualify without fee.",
+      "action_hi": "धारा 12 के तहत अपनी पात्रता जांचें। सभी महिलाएं, बच्चे, एससी/एसटी वर्ग, हिरासत में बंद व्यक्ति और निर्धारित आय सीमा से कम वाले नागरिक स्वतः पात्र हैं।",
+      "where": "Self check / NALSA Portal / DLSA Helpdesk",
+      "deadline_or_limitation": "Available at any stage (pre-litigation, trial, appeal)",
+      "documents_needed": ["Income Certificate or self-declaration affidavit", "Caste certificate (for SC/ST)", "Identity card (Aadhaar / Voter ID)"]
+    },
+    {
+      "order": 2,
+      "action_en": "Contact NALSA on national toll-free helpline 15100 or visit the Front Office of the District Legal Services Authority (DLSA) in the District Court premises or Taluk Legal Services Committee (TLSC) at Tehsil court.",
+      "action_hi": "राष्ट्रीय हेल्पलाइन 15100 पर कॉल करें या अपने जिला न्यायालय परिसर में स्थित 'जिला विधिक सेवा प्राधिकरण' (DLSA) के फ्रंट ऑफिस में जाएं।",
+      "where": "District Court DLSA Front Office / Tehsil TLSC / 15100 Helpline",
+      "deadline_or_limitation": "Working hours (or 24x7 for helpline 15100)",
+      "documents_needed": ["Filled Legal Aid Application Form", "Case papers / summons / notice received"]
+    },
+    {
+      "order": 3,
+      "action_en": "Submit the legal aid application detailing the dispute. The Front Office Secretary (Civil Judge cadre) scrutinizes the application and immediately passes an order assigning an empaneled legal aid advocate or Legal Aid Defense Counsel (LADC).",
+      "action_hi": "मामले का विवरण देकर आवेदन जमा करें। सचिव द्वारा तत्काल पैनल के योग्य वकील की नियुक्ति की जाती है।",
+      "where": "Office of Secretary, DLSA",
+      "deadline_or_limitation": "Usually assigned within 2 to 4 working days (same day for custody/remand matters)",
+      "documents_needed": ["Application form", "Supporting evidence", "Income affidavit"]
+    },
+    {
+      "order": 4,
+      "action_en": "Meet your assigned advocate at the DLSA office. The assigned advocate handles drafting, filing, court appearances, process fees, and certified copy costs at zero expense to the citizen.",
+      "action_hi": "प्राधिकरण कार्यालय में नियुक्त वकील से मिलकर केस पर चर्चा करें। ड्राफ्टिंग, फाइलिंग, पेशी और सर्टिफाइड कॉपी का पूरा खर्च सरकार वहन करती है।",
+      "where": "DLSA Consult Room / Court",
+      "deadline_or_limitation": "Throughout the pendency of the case",
+      "documents_needed": ["All original case documents", "Appointment letter issued by DLSA"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "NALSA National Legal Helpline",
+      "number": "15100",
+      "description": "24x7 pan-India toll-free helpline for legal counseling, lawyer assignment, and case status"
+    },
+    {
+      "name": "NALSA Online Portal",
+      "number": "nalsa.gov.in / legal services mobile app",
+      "description": "Online application tracking and complaint filing"
+    },
+    {
+      "name": "Tele-Law Service (Department of Justice)",
+      "number": "tele-law.in / CSC Centres",
+      "description": "Connects rural citizens to panel lawyers via video conference at Common Service Centres"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "All persons covered under Section 12 LSAA (women, children, custody detainees, SC/ST, disabled persons, disaster victims, workers, and citizens earning below state income limit).",
+    "how_to_apply": "Directly through DLSA front office in district court, calling 15100, or through the NALSA portal / Tele-Law at the nearest Gram Panchayat CSC.",
+    "authority": "National Legal Services Authority (NALSA) / State Legal Services Authority (SLSA) / DLSA",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "Whenever you receive a police notice, court summons, or warrant and cannot afford a private advocate",
+    "To appeal against adverse trial court convictions before the High Court or Supreme Court (via SCLSC)",
+    "To resolve ongoing disputes amicably in pre-litigation Lok Adalat without spending on court fees"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/1932",
+    "https://nalsa.gov.in",
+    "https://doj.gov.in/tele-law",
+    "https://main.sci.gov.in/jonew/judis/8078.pdf"
+  ],
+  "hi_reviewed": false
+}

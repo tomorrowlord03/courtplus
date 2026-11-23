@@ -1,0 +1,145 @@
+{
+  "id": "dowry-cruelty",
+  "title_en": "Dowry Demands, Harassment & Cruelty: Police Complaint, FIR & Legal Remedies",
+  "title_hi": "दहेज प्रताड़ना, क्रूरता और मारपीट: कानूनी अधिकार, एफआईआर और सुरक्षा",
+  "keywords_en": [
+    "dowry demand",
+    "dowry harassment",
+    "cruelty by husband",
+    "Section 85 BNS",
+    "Section 86 BNS",
+    "Section 498A IPC",
+    "dowry death",
+    "Section 80 BNS",
+    "Section 304B IPC",
+    "Dowry Prohibition Act",
+    "in laws harassment",
+    "stridhan",
+    "unlawful demand",
+    "marital cruelty",
+    "domestic abuse for dowry",
+    "cash car jewelry demand"
+  ],
+  "keywords_hi": [
+    "दहेज प्रताड़ना",
+    "दहेज की मांग",
+    "ससुराल में क्रूरता",
+    "पति और ससुरालियों द्वारा प्रताड़ना",
+    "धारा 85 बीएनएस",
+    "धारा 86 बीएनएस",
+    "धारा 498ए आईपीसी",
+    "दहेज हत्या",
+    "धारा 80 बीएनएस",
+    "दहेज प्रतिषेध अधिनियम",
+    "स्त्रीधन",
+    "गाड़ी या नकदी मांगना",
+    "मारपीट और उत्पीड़न"
+  ],
+  "laws": [
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 85 & Section 86 [old IPC Section 498A]",
+      "plain_meaning": "Husband or relative of husband of a woman subjecting her to cruelty (willful conduct driving woman to suicide or causing grave injury to limb/health, or harassment to coerce unlawful property/dowry demand) is punishable with imprisonment up to 3 years and fine.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 80 [old IPC Section 304B]",
+      "plain_meaning": "Where death of a woman is caused by burns or bodily injury or occurs under abnormal circumstances within 7 years of marriage, and it is shown that soon before death she was subjected to cruelty or harassment by husband or his relatives for dowry, it is dowry death punishable with minimum 7 years imprisonment up to life imprisonment.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    },
+    {
+      "act": "Dowry Prohibition Act, 1961",
+      "section": "Sections 3, 4 & 6",
+      "plain_meaning": "Giving or taking dowry is punishable with minimum 5 years imprisonment and fine (s.3); demanding dowry directly or indirectly is punishable with imprisonment up to 2 years (s.4); dowry received must be transferred to the woman within 3 months, failing which it is punishable (s.6).",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1517"
+    },
+    {
+      "act": "Bharatiya Sakshya Adhiniyam, 2023",
+      "section": "Section 118 [old Indian Evidence Act Section 113B]",
+      "plain_meaning": "Presumption as to dowry death: When a woman dies within 7 years of marriage and cruelty for dowry soon before death is proven, the Court shall presume that the person caused the dowry death.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21922"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Prioritize physical safety. Call Women Helpline 181 or 112 if in imminent danger. If injured, visit a government hospital for treatment and obtain an MLC documenting bruises or injuries.",
+      "action_hi": "सबसे पहले अपनी जान व सुरक्षा सुनिश्चित करें। आपात स्थिति में 181 या 112 डायल करें। चोट लगने पर सरकारी अस्पताल में मेडिकल (MLC) करवाएं।",
+      "where": "Emergency 112 / Women Helpline 181 / Nearest Government Hospital",
+      "deadline_or_limitation": "Immediate emergency response",
+      "documents_needed": ["Medico-Legal Certificate (MLC)", "Photographs of injuries", "Call recordings / text / WhatsApp messages of dowry demands"]
+    },
+    {
+      "order": 2,
+      "action_en": "Submit a detailed written complaint to the Women Police Station (Mahila Thana) or local police station specifying dates, specific demands (cash, vehicle, gold), and specific acts by each accused relative.",
+      "action_hi": "महिला थाने या स्थानीय थाने में लिखित शिकायत दें जिसमें दहेज की मांग (रुपये, गाड़ी, गहने) और प्रताड़ना की विशिष्ट तारीखों का स्पष्ट उल्लेख हो।",
+      "where": "Women Police Station (Mahila Thana) / Crime Against Women (CAW) Cell",
+      "deadline_or_limitation": "Without unreasonable delay; for unnatural death, within 7 years of marriage",
+      "documents_needed": [
+        "Detailed written complaint signed by complainant",
+        "Marriage invitation card and marriage certificate / photos",
+        "List of Stridhan items given at marriage with receipts/bills",
+        "Bank statements showing money transfers or withdrawals demanded"
+      ]
+    },
+    {
+      "order": 3,
+      "action_en": "Attend preliminary counseling / mediation session at the CAW cell / Parivar Paramarsh Kendra if referred per guidelines, while insisting on FIR if violence or immediate threat continues.",
+      "action_hi": "परिवार परामर्श केंद्र या महिला सेल में यदि काउंसिलिंग की तारीख मिले तो उपस्थित हों। यदि समझौता संभव न हो तो एफआईआर दर्ज करने का अनुरोध करें।",
+      "where": "Crime Against Women Cell / Police Station",
+      "deadline_or_limitation": "Usually scheduled within 7 to 15 days of complaint",
+      "documents_needed": ["Identity card", "Complaint copy", "Proof of past incidents"]
+    },
+    {
+      "order": 4,
+      "action_en": "If police delays or refuses FIR, send the complaint to the Superintendent of Police under Section 173(4) BNSS and subsequently approach the Magistrate under Section 175(3) BNSS or file under PWDVA 2005 for immediate protection.",
+      "action_hi": "यदि पुलिस एफआईआर दर्ज न करे, तो धारा 173(4) BNSS के तहत एसपी को भेजें और मजिस्ट्रेट के समक्ष धारा 175(3) BNSS के तहत अर्जी लगाएं।",
+      "where": "Office of SP / Court of Judicial Magistrate First Class",
+      "deadline_or_limitation": "After reasonable notice to SP",
+      "documents_needed": ["Complaint copy with postal receipt to SP", "Sworn affidavit of complainant", "Medical proof"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "Women Helpline (All India)",
+      "number": "181",
+      "description": "24x7 toll-free helpline for women facing domestic and dowry harassment"
+    },
+    {
+      "name": "National Emergency Service",
+      "number": "112",
+      "description": "Police and emergency dispatch"
+    },
+    {
+      "name": "National Commission for Women (NCW)",
+      "number": "7827170170",
+      "description": "Complaints portal and helpline for violence against women"
+    },
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free legal aid for filing cases and magistrate applications"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "All women are entitled to free legal aid without any income limit under Section 12(c) of the Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Visit the District Legal Services Authority (DLSA) office in the District Court or contact 15100. DLSA provides a free lawyer for criminal complaints, protection orders, and maintenance.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "When drafting the criminal complaint to ensure specific allegations against individual family members to withstand quashing challenges",
+    "To initiate simultaneous recovery of Stridhan and maintenance under BNSS s.144 / PWDVA s.20",
+    "If accused threatens bail jumping, physical harm, or files false counter-cases"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/21921",
+    "https://www.indiacode.nic.in/handle/123456789/1517",
+    "https://www.indiacode.nic.in/handle/123456789/21920",
+    "https://www.indiacode.nic.in/handle/123456789/21922",
+    "https://nalsa.gov.in"
+  ],
+  "hi_reviewed": false
+}

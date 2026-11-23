@@ -1,0 +1,139 @@
+{
+  "id": "unpaid-wages",
+  "title_en": "Unpaid Wages, Delayed Salary & Final Settlement Dues: Labour Authority Claims",
+  "title_hi": "बकाया वेतन, वेतन में देरी और गैरकानूनी कटौती: श्रम अधिकारी के समक्ष दावा",
+  "keywords_en": [
+    "unpaid wages",
+    "salary not paid",
+    "delayed wages",
+    "unauthorized salary deduction",
+    "Payment of Wages Act 1936",
+    "Section 15 Payment of Wages",
+    "Minimum Wages Act 1948",
+    "Labour Commissioner",
+    "final settlement dues",
+    "gratuity not paid",
+    "PF not deposited",
+    "SAMADHAN portal",
+    "industrial dispute",
+    "wage claim limitation",
+    "employer fraud salary"
+  ],
+  "keywords_hi": [
+    "वेतन नहीं मिला",
+    "सैलरी रोक ली",
+    "बकाया पगार",
+    "मजदूरी नहीं दी",
+    "वेतन भुगतान अधिनियम",
+    "श्रम न्यायालय",
+    "लेबर कमिश्नर",
+    "समाधान पोर्टल",
+    "अवैध वेतन कटौती",
+    "फुल एंड फाइनल सेटलमेंट",
+    "न्यूनतम मजदूरी",
+    "ग्रेच्युटी नहीं मिली"
+  ],
+  "laws": [
+    {
+      "act": "Payment of Wages Act, 1936",
+      "section": "Section 3, 4 & 5",
+      "plain_meaning": "Every employer is responsible for payment of all wages required to be paid to employees. Wage period cannot exceed 1 month, and wages must be paid before expiry of 7th day (if under 1000 workers) or 10th day after the wage period.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2386"
+    },
+    {
+      "act": "Payment of Wages Act, 1936",
+      "section": "Section 15 (Claims Arising out of Deductions or Delay)",
+      "plain_meaning": "Application can be filed before the Authority appointed under Section 15 (Labour Commissioner / Assistant Labour Commissioner) for recovery of unpaid/delayed wages along with compensation up to 10 times the amount deducted, or up to Rs. 3,000 for delayed wages.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2386"
+    },
+    {
+      "act": "Minimum Wages Act, 1948",
+      "section": "Sections 12 & 20",
+      "plain_meaning": "Employer must pay every employee wages at a rate not less than the statutory minimum rate of wages fixed by state/central notification without unauthorized deductions. Section 20 provides claims authority for recovery with compensation up to 10 times the shortfall.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2385"
+    },
+    {
+      "act": "Payment of Gratuity Act, 1972",
+      "section": "Sections 4 & 7",
+      "plain_meaning": "Gratuity is payable on termination of employment after continuous service of not less than 5 years. Employer must determine and pay gratuity within 30 days of it becoming payable, with simple interest if delayed.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/1501"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Issue a formal written demand email and letter to the employer / HR department specifying exact unpaid wage period, salary slip figures, and statutory interest, granting 7 to 15 days to clear dues.",
+      "action_hi": "नियोक्ता या कंपनी के एचआर को ईमेल और डाक से स्पष्ट मांग पत्र (डिमांड लेटर) भेजें जिसमें बकाया महीनों का विवरण और भुगतान हेतु 7 से 15 दिन का समय दें।",
+      "where": "Employer Registered Office / HR Email",
+      "deadline_or_limitation": "Promptly after wage due date",
+      "documents_needed": ["Appointment letter / Employment contract", "Salary slips", "Bank statements showing salary credit history", "Attendance logs / ID card"]
+    },
+    {
+      "order": 2,
+      "action_en": "File an online grievance on the Ministry of Labour's SAMADHAN portal (samadhan.labour.gov.in) or state labour department portal for industrial conciliation.",
+      "action_hi": "श्रम मंत्रालय के समाधान पोर्टल (samadhan.labour.gov.in) या राज्य श्रम विभाग के पोर्टल पर ऑनलाइन विवाद दर्ज करें।",
+      "where": "samadhan.labour.gov.in / State Labour Portal",
+      "deadline_or_limitation": "Anytime during or after dispute arises",
+      "documents_needed": ["Employment proof", "Unpaid salary calculation sheet", "Employer communication"]
+    },
+    {
+      "order": 3,
+      "action_en": "File a statutory claim application in Form A under Section 15(2) of the Payment of Wages Act or Section 20 of Minimum Wages Act before the designated Authority (Labour Officer / Assistant Labour Commissioner).",
+      "action_hi": "सक्षम श्रम अधिकारी (Authority under Payment of Wages Act) के समक्ष धारा 15(2) के तहत फॉर्म 'ए' में आवेदन प्रस्तुत करें।",
+      "where": "Office of the Assistant Labour Commissioner / Labour Court",
+      "deadline_or_limitation": "Must be presented within 12 months from the date on which deduction was made or wages fell due (delay can be condoned by Authority for sufficient cause)",
+      "documents_needed": [
+        "Application in prescribed Form A (in duplicate)",
+        "Proof of employment, designation, and wage rate",
+        "Record of work performed / timesheets",
+        "Copy of demand notice served upon employer",
+        "Delay condonation application (if after 12 months)"
+      ]
+    },
+    {
+      "order": 4,
+      "action_en": "Participate in conciliation and inquiry proceedings before the Labour Authority. If the employer fails to appear or comply with order, the Authority issues a recovery certificate executed through the District Collector as arrears of land revenue.",
+      "action_hi": "श्रम अधिकारी के समक्ष सुनवाई में उपस्थित हों। आदेश का पालन न होने पर भू-राजस्व बकाया की भांति वसूली प्रमाण पत्र (रिकवरी सर्टिफिकेट) जारी किया जाता है।",
+      "where": "Labour Court / Office of District Collector",
+      "deadline_or_limitation": "Enforceable under revenue recovery laws",
+      "documents_needed": ["Authority's recovery order copy"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "Shram Suvidha Portal Helpline",
+      "number": "011-23354722",
+      "description": "Ministry of Labour and Employment centralized grievance support"
+    },
+    {
+      "name": "Chief Labour Commissioner Central",
+      "number": "clc.gov.in / samadhan.labour.gov.in",
+      "description": "Industrial dispute resolution portal for workers"
+    },
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Free legal aid for industrial workmen and labourers"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Every industrial workman is expressly eligible for free legal aid under Section 12(e) of the Legal Services Authorities Act, 1987, without needing to prove low income.",
+    "how_to_apply": "Approach the District Legal Services Authority (DLSA) or Labour Court Legal Services Clinic to obtain an appointed advocate for labour authority and court filings.",
+    "authority": "DLSA / Labour Court Legal Services Committee",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "If the employer disputes the existence of employee-employer relationship (claiming contract labour or freelance vendor)",
+    "When calculating complex retrenchment compensation, statutory bonus, or gratuity arrears under industrial dispute laws",
+    "If 12-month limitation under Section 15(2) has expired and strong grounds for condonation must be drafted"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/2386",
+    "https://www.indiacode.nic.in/handle/123456789/2385",
+    "https://www.indiacode.nic.in/handle/123456789/1501",
+    "https://labour.gov.in",
+    "https://samadhan.labour.gov.in"
+  ],
+  "hi_reviewed": false
+}

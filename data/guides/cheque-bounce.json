@@ -1,0 +1,145 @@
+{
+  "id": "cheque-bounce",
+  "title_en": "Cheque Bounce: Section 138 NI Act Legal Notice, Deadlines & Court Complaint",
+  "title_hi": "चेक बाउंस: धारा 138 एनआई एक्ट कानूनी नोटिस, समय-सीमा और अदालत में परिवाद",
+  "keywords_en": [
+    "cheque bounce",
+    "dishonour of cheque",
+    "Section 138",
+    "Negotiable Instruments Act",
+    "NI Act",
+    "insufficient funds",
+    "return memo",
+    "statutory legal notice",
+    "15 days notice",
+    "30 days limitation",
+    "bounced check",
+    "cheque fraud",
+    "interim compensation",
+    "Section 143A NI Act",
+    "Section 142 NI Act",
+    "stop payment"
+  ],
+  "keywords_hi": [
+    "चेक बाउंस",
+    "चेक अनादर",
+    "धारा 138 एनआई एक्ट",
+    "खाते में पैसे नहीं",
+    "बैंक रिटर्न मेमो",
+    "कानूनी नोटिस",
+    "15 दिन का समय",
+    "30 दिन की मियाद",
+    "चेक का अनादरण",
+    "मजिस्ट्रेट कोर्ट में केस",
+    "20% अंतरिम मुआवजा"
+  ],
+  "laws": [
+    {
+      "act": "Negotiable Instruments Act, 1881",
+      "section": "Section 138",
+      "plain_meaning": "Where a cheque drawn for discharge of any debt or other liability is returned by the bank unpaid (due to insufficient funds or exceeding arrangement), it is a criminal offence punishable with imprisonment up to 2 years, or fine up to twice the cheque amount, or both.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2202"
+    },
+    {
+      "act": "Negotiable Instruments Act, 1881",
+      "section": "Section 142",
+      "plain_meaning": "Cognizance of offence: strict procedural timelines must be met. (a) Cheque presented within validity (3 months); (b) Legal demand notice sent within 30 days of receiving return memo; (c) Drawer gets 15 days to pay from receipt; (d) If unpaid, complaint must be filed in court within 1 month from the expiry of the 15-day period.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2202"
+    },
+    {
+      "act": "Negotiable Instruments Act, 1881",
+      "section": "Section 141",
+      "plain_meaning": "Offences by companies: if the person committing offence under s.138 is a company/firm, every person in charge of and responsible to the company for the conduct of its business, as well as the company itself, shall be deemed guilty.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2202"
+    },
+    {
+      "act": "Negotiable Instruments Act, 1881",
+      "section": "Section 143A",
+      "plain_meaning": "Trial court may order the drawer of the cheque to pay interim compensation to the complainant not exceeding 20% of the cheque amount during trial.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2202"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Present the cheque to the bank within its validity period (3 months from the date written on the cheque). Obtain the official Cheque Return Memo showing reason for dishonour (e.g. 'Funds Insufficient', 'Account Closed', 'Stop Payment').",
+      "action_hi": "चेक जारी होने की तारीख से 3 महीने के भीतर बैंक में प्रस्तुत करें। बैंक से अनादरण की आधिकारिक पर्ची (रिटर्न मेमो) प्राप्त करें।",
+      "where": "Your Bank Branch (Payee Bank)",
+      "deadline_or_limitation": "Within 3 months from date of cheque",
+      "documents_needed": ["Original Cheque", "Bank Deposit Slip", "Bank Return Memo with seal/date"]
+    },
+    {
+      "order": 2,
+      "action_en": "Send a formal Demand Notice in writing to the drawer demanding payment of the cheque amount, dispatched by Registered Post with Acknowledgment Due (RPAD) or Speed Post within 30 days of receiving the bank memo.",
+      "action_hi": "बैंक रिटर्न मेमो मिलने के 30 दिनों के भीतर देनदार को रजिस्टर्ड डाक / स्पीड पोस्ट से 15 दिनों का कानूनी नोटिस भेजें।",
+      "where": "Dispatched via India Post (Registered Post AD / Speed Post) to debtor's verified address",
+      "deadline_or_limitation": "Strictly within 30 calendar days from the date of receiving return memo from bank",
+      "documents_needed": [
+        "Copy of Statutory Legal Demand Notice",
+        "Original Postal Booking Receipt",
+        "India Post tracking consignment delivery report / signed AD card"
+      ]
+    },
+    {
+      "order": 3,
+      "action_en": "Wait 15 days from the date the drawer receives the notice (or deemed service). The law gives the drawer 15 clear days to make payment.",
+      "action_hi": "नोटिस प्राप्त होने की तारीख से 15 दिन तक भुगतान की प्रतीक्षा करें। कानून देनदार को भुगतान के लिए 15 दिन देता है।",
+      "where": "Calendar tracking",
+      "deadline_or_limitation": "15 days from date of delivery of notice",
+      "documents_needed": ["Delivery confirmation report from India Post website"]
+    },
+    {
+      "order": 4,
+      "action_en": "If no payment is received within the 15-day window, file a formal Criminal Complaint under Section 138 read with Section 142 of the NI Act before the Judicial Magistrate First Class / Metropolitan Magistrate within 30 days (1 month) of the cause of action arising.",
+      "action_hi": "15 दिन पूरे होने के बाद भी भुगतान न होने पर, अगले 1 महीने (30 दिन) के भीतर सक्षम मजिस्ट्रेट अदालत में धारा 138 के तहत परिवाद पेश करें।",
+      "where": "Court of Judicial Magistrate First Class (JMFC) / Metropolitan Magistrate (where payee bank branch is situated under s.142(2))",
+      "deadline_or_limitation": "Within 1 month (30 days) from the 16th day after notice delivery",
+      "documents_needed": [
+        "Formal Complaint petition under s.138 NI Act with verification affidavit",
+        "Original dishonoured Cheque",
+        "Original Bank Return Memo",
+        "Office copy of the Statutory Legal Notice",
+        "Original Postal Receipts and Delivery Tracking Report",
+        "Proof of underlying legally enforceable debt (invoice, agreement, ledger statement, promissory note)"
+      ]
+    },
+    {
+      "order": 5,
+      "action_en": "File an application under Section 143A NI Act along with or post-cognizance seeking 20% interim compensation from the accused.",
+      "action_hi": "अदालत में धारा 143A के तहत आवेदन देकर कुल चेक राशि का 20% अंतरिम मुआवजा दिलाने का अनुरोध करें।",
+      "where": "Trial Court",
+      "deadline_or_limitation": "At the stage of framing of notice/charge or plea of not guilty",
+      "documents_needed": ["Application under Section 143A NI Act", "Affidavit"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "NALSA Legal Aid Helpline",
+      "number": "15100",
+      "description": "Assistance for citizens eligible for free legal counsel to draft notice and file complaint"
+    },
+    {
+      "name": "District Court Legal Services Clinic",
+      "number": "Contact local DLSA",
+      "description": "Pre-litigation mediation and legal assistance"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Any individual whose annual income is within the state ceiling (generally Rs. 3,00,000 in most states), women, senior citizens, and disadvantaged groups under Section 12 of Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Apply at the District Legal Services Authority (DLSA) at the local court complex. A legal aid lawyer will be assigned to draft the statutory notice and conduct the trial.",
+    "authority": "District Legal Services Authority (DLSA)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "Immediately upon receiving the cheque bounce memo — the 30-day statutory notice clock starts ticking right away",
+    "When calculating jurisdictional bank branch under Section 142(2) NI Act to avoid filing in wrong court",
+    "If drawer is a company, to correctly implead active directors under Section 141 NI Act"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/2202",
+    "https://main.sci.gov.in/supremecourt/2020/2202/2202_2020_31_1501_27318_Judgement_16-Apr-2021.pdf",
+    "https://nalsa.gov.in"
+  ],
+  "hi_reviewed": false
+}

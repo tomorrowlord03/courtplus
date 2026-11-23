@@ -1,0 +1,141 @@
+{
+  "id": "police-refuses-fir",
+  "title_en": "Police Refuses to Register FIR: Zero FIR, SP Remedy & Magistrate Application",
+  "title_hi": "पुलिस द्वारा प्राथमिकी (FIR) दर्ज न करने पर कानूनी अधिकार और उपाय",
+  "keywords_en": [
+    "refused FIR",
+    "police refusal",
+    "register FIR",
+    "zero FIR",
+    "e-FIR",
+    "Section 173 BNSS",
+    "Section 154 CrPC",
+    "cognizable offence",
+    "superintendent of police",
+    "SP complaint",
+    "magistrate application",
+    "Section 175(3) BNSS",
+    "Section 156(3) CrPC",
+    "police station complaint",
+    "refusal to investigate",
+    "police inaction",
+    "Lalita Kumari"
+  ],
+  "keywords_hi": [
+    "एफआईआर दर्ज नहीं की",
+    "पुलिस ने मना किया",
+    "थाने में सुनवाई नहीं",
+    "जीरो एफआईआर",
+    "ई-एफआईआर",
+    "पुलिस अधीक्षक",
+    "एसपी को आवेदन",
+    "मजिस्ट्रेट को परिवाद",
+    "धारा 173 बीएनएसएस",
+    "धारा 175 बीएनएसएस",
+    "संज्ञेय अपराध",
+    "प्राथमिकी",
+    "पुलिस शिकायत"
+  ],
+  "laws": [
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 173(1) & (2) [old CrPC Section 154]",
+      "plain_meaning": "Information relating to commission of a cognizable offence must be recorded by the officer in charge of a police station. Can be given orally or electronically (e-FIR), and can be registered irrespective of jurisdiction (Zero FIR) to be transferred to the concerned police station.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 173(4) [old CrPC Section 154(3)]",
+      "plain_meaning": "If the station house officer refuses to record the information, the aggrieved person may send the substance of such information, in writing and by post/electronic communication, to the Superintendent of Police (SP). If satisfied that a cognizable offence is disclosed, the SP shall investigate or direct an investigation.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "section": "Section 175(3) & (4) [old CrPC Section 156(3)]",
+      "plain_meaning": "Any person aggrieved by refusal of police under Section 173(4) may apply to the Judicial Magistrate having jurisdiction, supported by an affidavit and proof of prior representation to the SP. The Magistrate may order registration of FIR and investigation.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21920"
+    },
+    {
+      "act": "Bharatiya Nyaya Sanhita, 2023",
+      "section": "Section 199 [old IPC Section 166A]",
+      "plain_meaning": "A public servant (including a police officer) who knowingly disobeys law requiring him to record any information relating to cognizable offences (especially offences against women and children) shall be punished with rigorous imprisonment up to 2 years and fine.",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/21921"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "action_en": "Submit a signed written complaint to the Officer-in-Charge (SHO) of the local police station. Request an acknowledged copy (receiving stamp with date and Diary/GD number). Under Lalita Kumari (SC 2014), registration of FIR is mandatory if cognizable offence is disclosed.",
+      "action_hi": "थाना प्रभारी (SHO) को लिखित शिकायत सौंपें और उस पर तारीख व मुहर सहित पावती (रिसीविंग) मांगें। संज्ञेय अपराध में एफआईआर दर्ज करना अनिवार्य है।",
+      "where": "Local Police Station (or any police station for Zero FIR)",
+      "deadline_or_limitation": "Immediately upon refusal",
+      "documents_needed": ["Written complaint signed with date", "Proof of incident (medical, photos, call records)", "Identity proof"]
+    },
+    {
+      "order": 2,
+      "action_en": "If SHO refuses or ignores the complaint, send the complete complaint with proof of refusal to the Superintendent of Police (SP / DCP) by Registered Post with Acknowledgment Due (RPAD) or official email under Section 173(4) BNSS.",
+      "action_hi": "यदि थाना प्रभारी इनकार करे, तो धारा 173(4) BNSS के तहत डाक (रजिस्टर्ड एडी) या ईमेल से पुलिस अधीक्षक (एसपी / डीसीपी) को पूरी शिकायत भेजें।",
+      "where": "Office of Superintendent of Police (SP) / Senior Superintendent of Police (SSP)",
+      "deadline_or_limitation": "Promptly after refusal (keep post receipt and tracking)",
+      "documents_needed": ["Copy of initial complaint", "Postal booking receipt and tracking delivery report", "Application under s.173(4) BNSS"]
+    },
+    {
+      "order": 3,
+      "action_en": "If no action is taken by SP within reasonable time (15-30 days), file an application under Section 175(3) BNSS before the competent Judicial Magistrate / Metropolitan Magistrate praying for direction to police to register FIR and investigate.",
+      "action_hi": "यदि एसपी के स्तर पर भी कार्रवाई न हो, तो धारा 175(3) BNSS के तहत न्यायिक मजिस्ट्रेट की अदालत में शपथपत्र सहित आवेदन दाखिल करें।",
+      "where": "Court of Judicial Magistrate First Class (JMFC) / Metropolitan Magistrate",
+      "deadline_or_limitation": "After exhausting Section 173(4) remedy with SP",
+      "documents_needed": [
+        "Petition under Section 175(3) BNSS prepared by advocate / legal aid",
+        "Sworn affidavit of complainant affirming truth of facts and compliance with s.173(4)",
+        "Copy of initial complaint to police station",
+        "Postal receipt and tracking delivery proof of representation sent to SP",
+        "Available supporting evidence"
+      ]
+    },
+    {
+      "order": 4,
+      "action_en": "Alternatively or simultaneously, file a private criminal complaint under Section 223 BNSS [old CrPC s.200] before the Magistrate, who will examine the complainant and witnesses upon oath.",
+      "action_hi": "मजिस्ट्रेट के समक्ष धारा 223 BNSS (पुराना CrPC 200) के तहत परिवाद (प्राइवेट कम्पलेंट) भी दर्ज कराया जा सकता है।",
+      "where": "Judicial Magistrate Court",
+      "deadline_or_limitation": "Subject to general limitation under BNSS s.514",
+      "documents_needed": ["Private complaint draft", "Affidavits of complainant and witnesses", "Documentary evidence"]
+    }
+  ],
+  "helplines": [
+    {
+      "name": "National Emergency Number",
+      "number": "112",
+      "description": "24x7 control room to report immediate police denial or emergency"
+    },
+    {
+      "name": "National Legal Services Authority (NALSA)",
+      "number": "15100",
+      "description": "Free legal aid assistance for filing Section 175(3) application before Magistrate"
+    },
+    {
+      "name": "National Commission for Women (NCW) Helpline",
+      "number": "7827170170",
+      "description": "Assistance when police refuses FIR in crimes against women"
+    }
+  ],
+  "free_legal_aid": {
+    "eligible": "Any citizen unable to afford counsel, all women, children, and persons belonging to SC/ST or low income groups are entitled to free legal aid under Section 12 of Legal Services Authorities Act, 1987.",
+    "how_to_apply": "Approach the District Legal Services Authority (DLSA) at the district court or Taluk Legal Services Committee (TLSC) at tehsil level. They will assign an empaneled advocate to draft and argue the Section 175(3) BNSS application.",
+    "authority": "District Legal Services Authority (DLSA) / Taluk Legal Services Committee (TLSC)",
+    "helpline": "15100"
+  },
+  "when_to_see_a_lawyer": [
+    "When drafting the Section 175(3) BNSS application and mandatory compliance affidavit for the Magistrate court",
+    "If the accused is an influential person or police officer itself",
+    "If police threatens or intimidates the complainant to withdraw the complaint"
+  ],
+  "last_checked": "2026-11-23",
+  "sources": [
+    "https://www.indiacode.nic.in/handle/123456789/21920",
+    "https://www.indiacode.nic.in/handle/123456789/21921",
+    "https://main.sci.gov.in/jonew/judis/41046.pdf",
+    "https://nalsa.gov.in"
+  ],
+  "hi_reviewed": false
+}
