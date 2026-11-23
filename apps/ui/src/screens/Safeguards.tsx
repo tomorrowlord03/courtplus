@@ -1,9 +1,9 @@
 import { ui } from '../lib/i18n';
-import { Page } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 export function Safeguards() {
   return (
-    <Page title={ui("Safeguards")}>
+    <ScreenPage screenId="safeguards">
       <div className="grid max-w-3xl gap-4">
         <section className="rounded border bg-white p-3">
           <h2 className="font-semibold">{ui("What this tool does")}</h2>
@@ -40,6 +40,6 @@ export function Safeguards() {
           </p>
         </section>
       </div>
-    </Page>
+    </ScreenPage>
   );
 }

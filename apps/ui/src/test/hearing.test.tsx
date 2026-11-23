@@ -91,7 +91,7 @@ describe('hearing recorder screens', () => {
     localStorage.setItem('courtplus.uiLanguage', 'hi');
     window.courtplusHearing = bridge();
     renderAt('/hearings/r1');
-    expect(screen.getByRole('heading', { name: 'सुनवाई का प्रतिलेख' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'सुनवाई का लिखा रिकॉर्ड देखें और सुधारें' })).toBeInTheDocument();
     expect(await screen.findByRole('textbox', { name: 'खंड का पाठ 1' })).toHaveValue(machine.segments[0].text);
   });
 

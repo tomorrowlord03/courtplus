@@ -1,10 +1,12 @@
+import { ui } from '../lib/i18n';
 import { useState, type FormEvent } from 'react';
 import type { MactInput, MactResult } from '@courtplus/contracts';
 import { calculateMact } from '../../../../packages/engine/src/mact';
-import { ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
+import { ErrorNote, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
-const notice = 'Estimate based on Supreme Court formulas and past awards - not a prediction; talk to free legal aid (NALSA 15100)';
+const notice = "This estimate uses Supreme Court rules and past awards. Call 15100 for free help from the National Legal Services Authority.";
 
 export function CitizenSettlement() {
   const [kind, setKind] = useState<MactInput['kind']>('fatal');
@@ -30,57 +32,57 @@ export function CitizenSettlement() {
     catch (cause) { setResult(undefined); setError(errMsg(cause)); }
   }
 
-  const field = (label: string, name: string, required = false, max?: number) => <label key={name}>{label}
+  const field = (label: string, name: string, required = false, max?: number) => <label key={name}>{ui(label)}
     <input className="field-control" name={name} type="number" min="0" max={max} step="any" required={required} defaultValue={required ? undefined : 0} />
   </label>;
 
-  return <Page title="Settlement and compensation guide" note={notice}>
-    <section className="panel grid gap-3" aria-label="Motor accident estimate">
-      <h2 className="text-lg font-semibold">Motor accident compensation estimate</h2>
-      <p>Use the age at the accident and income supported by records. A lawyer can help check the other amounts the court may consider.</p>
+  return <ScreenPage screenId="settlement-guide" note={ui(notice)}>
+    <section className="panel grid gap-3" aria-label={ui("Accident compensation estimate")}>
+      <h2 className="text-lg font-semibold">{ui("Estimate compensation for a road accident")}</h2>
+      <p>{ui("Use the person’s age at the accident and income shown in records. Ask a lawyer to help check other amounts.")}</p>
       <form className="grid gap-3" onSubmit={calculate} onChange={() => { setResult(undefined); setError(null); }}>
-        <label>What happened?<select className="field-control" value={kind} onChange={event => setKind(event.target.value === 'injury' ? 'injury' : 'fatal')}>
-          <option value="fatal">Death in a motor accident</option><option value="injury">Injury in a motor accident</option>
+        <label>{ui("What happened?")}<select className="field-control" value={kind} onChange={event => setKind(event.target.value === 'injury' ? 'injury' : 'fatal')}>
+          <option value="fatal">{ui("Death in a road accident")}</option><option value="injury">{ui("Injury in a road accident")}</option>
         </select></label>
         <div className="grid gap-3 sm:grid-cols-2">
-          {field('Age at the accident', 'age', true, 120)}
-          {field('Monthly income in rupees', 'income', true)}
-          {field('Annual income tax in rupees', 'tax')}
+          {field("Age at the accident", 'age', true, 120)}
+          {field("Monthly income in rupees", 'income', true)}
+          {field("Annual income tax in rupees", 'tax')}
           {kind === 'fatal' ? <>
-            <label>Work type<select className="field-control" name="employment"><option value="permanent">Permanent job</option><option value="fixed">Fixed pay or self-employed</option></select></label>
-            <label>Family situation<select className="field-control" name="family"><option value="married">Married</option><option value="unmarried">Unmarried</option></select></label>
-            {field('Dependent family members', 'dependants', true, 100)}
-            {field('Eligible family members claiming consortium', 'claimants', false, 100)}
+            <label>{ui("Type of work")}<select className="field-control" name="employment"><option value="permanent">{ui("Permanent job")}</option><option value="fixed">{ui("Fixed pay or self-employed")}</option></select></label>
+            <label>{ui("Marital status")}<select className="field-control" name="family"><option value="married">{ui("Married")}</option><option value="unmarried">{ui("Unmarried")}</option></select></label>
+            {field("Family members who depend on this income", 'dependants', true, 100)}
+            {field("Family members claiming for loss of companionship", 'claimants', false, 100)}
           </> : <>
-            {field('Loss of ability to earn (%)', 'loss', true, 100)}
-            {field('Months unable to work', 'months')}
-            {field('Treatment and related costs in rupees', 'treatment')}
-            {field('Expected future medical costs in rupees', 'futureMedical')}
+            {field("Loss of ability to earn (%)", 'loss', true, 100)}
+            {field("Months unable to work", 'months')}
+            {field("Treatment and related costs in rupees", 'treatment')}
+            {field("Expected future medical costs in rupees", 'futureMedical')}
           </>}
         </div>
-        <div><button className={btnPrimary}>Show estimate and working</button></div>
+        <div><button data-guide="start" className={btnPrimary}>{ui("Show estimate and working")}</button></div>
       </form>
       <ErrorNote error={error} />
-      {result && <div aria-label="Compensation working">
-        <p className="font-semibold">Estimated total: {money.format(result.total)}</p>
+      {result && <div aria-label={ui("How the estimate was calculated")}>
+        <p className="font-semibold">{ui("Estimated total:") + " "}{money.format(result.total)}</p>
         <ol className="ml-5 list-decimal space-y-2">{result.steps.map(step => <li key={step.label}>
           <strong>{step.label}:</strong> {step.working}{step.amount !== undefined && ` = ${money.format(step.amount)}`}
           {step.source && <p><a href={step.source.url} target="_blank" rel="noreferrer">Source: {step.source.act}, {step.source.section}</a></p>}
         </li>)}</ol>
-        <p>{notice}</p>
+        <p>{ui(notice)}</p>
       </div>}
     </section>
     <section className="panel mt-4">
-      <h2 className="text-lg font-semibold">Maintenance guidance</h2>
-      <p>The court considers both people’s income and assets, the needs of children, housing, education and healthcare costs, the standard of living during the marriage, and each person’s ability to work. Health, caregiving and other dependants also matter. There is no amount that applies to every family.</p>
+      <h2 className="text-lg font-semibold">{ui("Help with family support payments")}</h2>
+      <p>{ui("The court looks at income, assets, and each person’s ability to work. It considers children’s needs and the family’s living, education, and healthcare costs. Health, caregiving, and other dependants also matter. The court sets the amount for each family.")}</p>
       <a href="https://indiankanoon.org/doc/117541087/?type=print" target="_blank" rel="noreferrer">Rajnesh v. Neha (2020)</a>
-      <p>{notice}</p>
+      <p>{ui(notice)}</p>
     </section>
     <section className="panel mt-4">
-      <h2 className="text-lg font-semibold">Consider Lok Adalat or mediation</h2>
-      <p>Lok Adalat can help both sides settle suitable disputes, including some motor accident and family matters. Mediation is a guided discussion where both sides can seek an agreed solution. Ask a legal aid lawyer whether your matter can use either route before agreeing to terms.</p>
-      <a href="https://nalsa.gov.in/" target="_blank" rel="noreferrer">National Legal Services Authority</a>
-      <p>{notice}</p>
+      <h2 className="text-lg font-semibold">{ui("Ways to reach an agreement")}</h2>
+      <p>{ui("Lok Adalat can help settle some disputes, including certain road accident and family cases. In mediation, someone helps both sides talk and look for an agreement. Ask a legal aid lawyer which option could work for you before agreeing to terms.")}</p>
+      <a href="https://nalsa.gov.in/" target="_blank" rel="noreferrer">{ui("National Legal Services Authority")}</a>
+      <p>{ui(notice)}</p>
     </section>
-  </Page>;
+  </ScreenPage>;
 }

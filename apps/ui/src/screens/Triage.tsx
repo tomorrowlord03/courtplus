@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { Circle, Clock, ShieldAlert } from 'lucide-react';
 import type { Authority, CaseMeta, CaseTier, CourtAction, CourtSettings, CourtWorkspace, CourtWorkspaceApi, Hearing,
   PriorityOverride } from '@courtplus/contracts';
-import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
+import { btn, btnPrimary, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { addDays, todayIST, useApp } from '../lib/context';
 
 declare global {
@@ -106,10 +107,10 @@ export function Triage() {
     return result;
   }
 
-  return <Page title={ui("Smart triage")} note={ui("Rule-based priority - not AI, not a judgement about any person. The judge decides.")}>
+  return <ScreenPage screenId="triage" note={ui("Case triage uses court rules to suggest the hearing order.") + " " + ui("Release checks use Bharatiya Nagarik Suraksha Sanhita (BNSS), section 479.")} judgeHint>
     <ErrorNote error={error} />
     {message && <p role="status">{message}</p>}
-    {!window.courtplusJudge && <p>{ui("Open Smart triage in the desktop workspace.")}</p>}
+    {!window.courtplusJudge && <p>{ui("Open the Court+ desktop app to plan which cases to hear first.")}</p>}
     {window.courtplusJudge && profile !== undefined && profile?.role !== 'judge' &&
       <p>Choose the Judge role in your <Link to="/profile">{ui("desktop profile")}</Link>.</p>}
     {!data && busy && <p role="status">{ui("Loading docket…")}</p>}
@@ -129,11 +130,11 @@ export function Triage() {
               {item.adjournedBy && ` · ${item.adjournedBy}`}{item.grantedDays !== undefined && ` · ${item.grantedDays} day(s) granted`}
               {item.reasonText && ` · ${item.reasonText}`}</li>)}</ul>
           {!data.hearings.some(item => item.caseId === selectedCase.id) && <p>{ui("No hearings recorded.")}</p>}
-          <Link to={`/triage/adjournment?case=${encodeURIComponent(selectedCase.id)}`}>{ui("Analyze an adjournment request")}</Link>
+          <Link to={`/triage/adjournment?case=${encodeURIComponent(selectedCase.id)}`}>{ui("Review a request to move a hearing")}</Link>
         </>}
       </section>
       <section className="panel">
-        <h2>{ui("Ranked pending cases")}</h2>
+        <h2>{ui("Pending cases in suggested order")}</h2>
         <p>{ui("Factor chips show points earned and maximum points. The weights are local scheduling rules.")}</p>
         <div className="flex flex-wrap gap-3">
           <label>{ui("Find case")}<input className={fieldStyle} value={query} onChange={e => setQuery(e.target.value)} /></label>
@@ -151,7 +152,7 @@ export function Triage() {
             aria-pressed={filterTier === level} onClick={() => setFilterTier(level)}>
             {ui("Tier {level} ({count})", { level, count: tierCounts[level] })}
           </button>)}
-          <button type="button" className={filterTier === undefined ? btnPrimary : btn}
+          <button data-guide="start" type="button" className={filterTier === undefined ? btnPrimary : btn}
             aria-pressed={filterTier === undefined} onClick={() => setFilterTier(undefined)}>{ui("All")}</button>
         </div>
         {!visible.length && <p>{data.ranked.length ? ui("No pending cases match these filters.") : ui("No pending cases with confirmed filing details.")}</p>}
@@ -171,7 +172,7 @@ export function Triage() {
                   { status: ui(urgent[1]), date: urgent[2] })
                   : due ? ui('BNSS s.479 due in {days} days', { days: due[1] }) : ui(rule);
                 return <li key={rule}>{wording}{' '}<SourceLink authority={source} />
-                  {(urgent || due) && <> · <Link to={`/case/${encodeURIComponent(meta.caseId)}`}>{ui('View s.479 proof trace')}</Link></>}
+                  {(urgent || due) && <> · <Link to={`/case/${encodeURIComponent(meta.caseId)}`}>{ui('See how we checked for release')}</Link></>}
                 </li>;
               })}</ul>
                 : <p>{ui("No priority trigger recorded")}</p>}
@@ -184,7 +185,7 @@ export function Triage() {
               <span key={item.label} className="rounded-full border px-2 py-1 text-sm">{item.label} {item.points}/{item.weight}</span>)}</div>
             <details className="my-2">
               <summary>{ui("Factor reasons and sources")}</summary>
-              <p>{ui("Ordering aid (not a tier)")}: {score}/100</p>
+              <p>{ui("Score used to order cases")}: {score}/100</p>
               <ul>{factors.map(item => <li key={item.label}>{item.label}. {item.reason}{' '}
                 {item.sources.map(source => <span key={source.section}><SourceLink authority={source} />{' '}</span>)}</li>)}</ul>
             </details>
@@ -204,7 +205,7 @@ export function Triage() {
         </ol>
       </section>
       <section className="panel">
-        <h2>{ui("Cause list")}</h2>
+        <h2>{ui("List of cases to hear")}</h2>
         <SettingsForm key={JSON.stringify(data.settings)} settings={data.settings} submit={submit} />
         <label>{ui("Listing date")}<input className={fieldStyle} type="date" required value={date} onChange={e => {
           if (e.target.value) setDate(e.target.value);
@@ -220,12 +221,12 @@ export function Triage() {
               : <button className={btnPrimary} type="button" disabled={date < todayIST()} onClick={() => void submit({
                 kind: 'confirmCauseList', entries: data.causeList.entries, capacity: data.causeList.capacity,
               })}>{ui("Confirm cause list")}</button>}
-            <Link className={btn} to="/triage/adjournment">{ui("Adjournment analyzer")}</Link>
+            <Link className={btn} to="/triage/adjournment">{ui("Pick a realistic next date")}</Link>
           </div>
         </>}
       </section>
     </fieldset>}
-  </Page>;
+  </ScreenPage>;
 }
 
 function MetaForm({ caseId, meta, submit }: { caseId: string; meta?: CaseMeta; submit: Submit }) {

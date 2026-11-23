@@ -4,14 +4,15 @@ import { Link, useParams } from 'react-router-dom';
 import type {
   AudioIntegrity, HearingPublishApi, HearingRecording, HearingSummary, SpeakerRole, TranscriptLanguage, TranscriptSegment, TranscriptVersion,
 } from '@courtplus/contracts';
-import { Empty, ErrorNote, Page, btn, btnPrimary, errMsg } from '../components/ui';
+import { Empty, ErrorNote, btn, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { useApp } from '../lib/context';
 import { clock, hearingBridge, speakerOptions, wordDiff, type HearingBridge } from './hearing-tools';
 
 export function HearingTranscript() {
   const hearing = hearingBridge();
   const { id = '' } = useParams();
-  if (!hearing) return <Page title={ui('Hearing transcript')}><Empty title={ui('Hearing transcripts open in the Court+ desktop app.')} /></Page>;
+  if (!hearing) return <ScreenPage screenId="hearing-transcript" judgeHint><Empty title={ui('Hearing transcripts open in the Court+ desktop app.')} /></ScreenPage>;
   return <Transcript hearing={hearing as HearingBridge & HearingPublishApi} id={id} />;
 }
 
@@ -110,9 +111,9 @@ function Transcript({ hearing, id }: { hearing: HearingBridge & HearingPublishAp
     setDraft(current => current.map((segment, position) => position === index ? { ...segment, ...patch } : segment));
   }
 
-  if (!recording) return <Page title={ui("Hearing transcript")}><ErrorNote error={error} /><p role="status" className="muted">{ui("Loading…")}</p></Page>;
+  if (!recording) return <ScreenPage screenId="hearing-transcript" judgeHint><ErrorNote error={error} /><p role="status" className="muted">{ui("Loading…")}</p></ScreenPage>;
   return (
-    <Page title={ui("Hearing transcript")} note={ui("Speaker names come from the clerk's markers during the hearing. They are not identified from voices.")}>
+    <ScreenPage screenId="hearing-transcript" judgeHint note={ui("Hearing transcript. Speaker names come from the court clerk.")}>
       <p><Link to="/hearings">{ui("← All recorded hearings")}</Link></p>
       <ErrorNote error={error} />
       {notice && <p role="status" className="my-2 rounded bg-emerald-50 p-3 text-emerald-900">{notice}</p>}
@@ -135,7 +136,7 @@ function Transcript({ hearing, id }: { hearing: HearingBridge & HearingPublishAp
             <option value="en">{ui("English")}</option><option value="hi">{ui("Hindi")}</option><option value="auto">{ui("Detect automatically")}</option>
           </select>
         </label>
-        <button className={btnPrimary + ' mt-3'} disabled={!model?.available || !integrity?.unchanged || !recording.receipt || Boolean(busy)} onClick={() => void transcribe()}>{ui('Transcribe on this computer')}</button>
+        <button data-guide="start" className={btnPrimary + ' mt-3'} disabled={!model?.available || !integrity?.unchanged || !recording.receipt || Boolean(busy)} onClick={() => void transcribe()}>{ui('Make a written record')}</button>
         {model && !model.available && <p className="muted">{ui('The speech model is not installed in this build.')}</p>}
       </section> : <>
         <section className="panel mt-4" aria-label={ui("Transcript editor")}>
@@ -191,6 +192,6 @@ function Transcript({ hearing, id }: { hearing: HearingBridge & HearingPublishAp
           {published && <p role="status" className="text-emerald-800">{ui('Published by the court.')}</p>}
         </section>}
       </>}
-    </Page>
+    </ScreenPage>
   );
 }

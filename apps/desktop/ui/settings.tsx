@@ -1,7 +1,9 @@
 import { ui } from '../../ui/src/lib/i18n';
 import { useEffect, useState, type FormEvent } from 'react';
-import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../../ui/src/components/ui';
+import { btn, btnPrimary, ErrorNote, errMsg } from '../../ui/src/components/ui';
+import { ScreenPage } from '../../ui/src/components/ScreenIntro';
 import { RoleSwitch } from '../../ui/src/components/RoleSwitch';
+import { CompanionSetting } from '../../ui/src/components/companion';
 import { useApp } from '../../ui/src/lib/context';
 import { shell, type CloudStatus, type DesktopSettings, type SignerStatus } from './bridge';
 
@@ -63,9 +65,10 @@ export function Settings() {
     });
   }
 
-  return <Page title={ui("Settings")}>
+  return <ScreenPage screenId="settings" title={ui("Settings")}>
     <ErrorNote error={error} />
     {message && <p role="status" className="mb-2">{message}</p>}
+    <div className="mb-6 max-w-2xl"><CompanionSetting /></div>
     {settings && <div className="grid max-w-2xl gap-6">
       <RoleSwitch />
       <form className="grid gap-3 rounded border bg-white p-4" onSubmit={event => {
@@ -120,7 +123,7 @@ export function Settings() {
       <SigningKey busy={busy} run={run} setMessage={setMessage} />
       <AuditAnchor busy={busy} run={run} setMessage={setMessage} />
     </div>}
-  </Page>;
+  </ScreenPage>;
 }
 
 type SectionProps = {

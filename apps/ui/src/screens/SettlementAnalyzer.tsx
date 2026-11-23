@@ -3,7 +3,8 @@ import { createElement, useEffect, useState, type FormEvent, type ReactNode } fr
 import { Link, useSearchParams } from 'react-router-dom';
 import { LAWYER_HINT, PRECEDENT_LOADING, type LawyerPdf, type LawyerToolsApi, type MactInput, type MactResult, type PastAward, type ResearchResult, type SettlementProposal } from '@courtplus/contracts';
 import { calculateMact } from '../../../../packages/engine/src/mact';
-import { ErrorNote, Page, btn, btnPrimary, errMsg } from '../components/ui';
+import { ErrorNote, btn, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 declare global {
   interface Window {
@@ -17,8 +18,8 @@ const indianDate = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolk
 
 export function LawyerNav() {
   return <nav className="mb-4 flex flex-wrap gap-2" aria-label={ui("Lawyer tools")}>
-    <Link className={btn} to="/lawyer">{ui("Settlement & compensation")}</Link>
-    <Link className={btn} to="/lawyer/case">{ui("Case analyzer")}</Link>
+    <Link className={btn} to="/lawyer">{ui("What courts awarded before")}</Link>
+    <Link className={btn} to="/lawyer/case">{ui("Review a case file")}</Link>
   </nav>;
 }
 
@@ -30,7 +31,7 @@ export function SignedPdfResult({ out }: { out: LawyerPdf }) {
       <dt>{ui("Receipt")}</dt><dd>{out.receiptPath}</dd>
       <dt>{ui("Verification manifest")}</dt><dd>{out.manifestPath}</dd>
     </dl>
-    <Link className="mt-2 inline-block" to="/verify">{ui("Open verifier")}</Link>
+    <Link className="mt-2 inline-block" to="/verify">{ui("Check the signed file")}</Link>
   </section>;
 }
 
@@ -154,7 +155,7 @@ function Awards() {
     <form className="grid gap-3" onSubmit={run}>
       <label>{ui("Case description")}<textarea className="field-control" rows={3} required minLength={3} maxLength={10000} value={description}
         disabled={!api || busy} onChange={event => { setDescription(event.target.value); setResult(undefined); }} /></label>
-      <div><button className={btnPrimary} disabled={!api || busy || description.trim().length < 3}>{busy ? ui("Searching…") : ui("Find past awards")}</button></div>
+      <div><button data-guide="start" className={btnPrimary} disabled={!api || busy || description.trim().length < 3}>{busy ? ui("Searching…") : ui("Find past awards")}</button></div>
     </form>
     <ErrorNote error={error} />
     {(!api || result?.available === false) && <p role="status">{PRECEDENT_LOADING}</p>}
@@ -176,7 +177,7 @@ function Awards() {
 }
 
 export function SettlementAnalyzer() {
-  return <Page title={ui("Settlement & compensation analyzer")}>
+  return <ScreenPage screenId="settlement" judgeHint>
     <LawyerNav />
     <div className="grid gap-4">
       <MactCalculator />
@@ -209,7 +210,7 @@ export function SettlementAnalyzer() {
         <div><Link className={btnPrimary} to="/drafts/settlement">{ui("Draft settlement proposal")}</Link></div>
       </section>
     </div>
-  </Page>;
+  </ScreenPage>;
 }
 
 const previewTags = new Set(['p', 'h1', 'h2', 'div']);
@@ -258,7 +259,7 @@ export function SettlementDraft() {
     finally { setBusy(false); }
   }
 
-  return <Page title={ui("Drafting studio")} note={ui("Review the terms with the parties before sending the proposal.")}>
+  return <ScreenPage screenId="settlement-draft" note={ui("Review the terms with the parties before sending the proposal.")}>
     <div className="mb-4 flex gap-2"><Link className={btn} to="/drafts">{ui("All drafts")}</Link><Link className={btn} to="/lawyer">{ui("Settlement routes")}</Link></div>
     <ErrorNote error={error} />
     {!api && <p role="status">{ui("Open the CourtPlus desktop app to preview and export a settlement proposal.")}</p>}
@@ -274,7 +275,7 @@ export function SettlementDraft() {
             <label>{ui("Parties")}<textarea className="field-control" value={proposal.parties} maxLength={2000} required onChange={event => change('parties', event.target.value)} /></label>
             <label>{ui("Proposed terms")}<textarea className="field-control" rows={5} value={proposal.terms} maxLength={12000} required onChange={event => change('terms', event.target.value)} /></label>
             <label>{ui("Deadlines and performance (optional)")}<textarea className="field-control" value={proposal.deadlines} maxLength={3000} onChange={event => change('deadlines', event.target.value)} /></label>
-            <div><button className={btnPrimary} disabled={!proposal.parties.trim() || !proposal.terms.trim()}>{busy ? ui("Preparing…") : ui("Export signed PDF")}</button></div>
+            <div><button data-guide="start" className={btnPrimary} disabled={!proposal.parties.trim() || !proposal.terms.trim()}>{busy ? ui("Preparing…") : ui("Export signed PDF")}</button></div>
           </fieldset>
         </form>
       </section>
@@ -284,5 +285,5 @@ export function SettlementDraft() {
       </section>
     </div>
     {out && <SignedPdfResult out={out} />}
-  </Page>;
+  </ScreenPage>;
 }

@@ -12,11 +12,13 @@ files:
   - "!**/onnxruntime-node/bin/napi-v*/{darwin,linux}/**"
   - "!**/onnxruntime-node/bin/napi-v*/win32/!(x64)/**"
   - "!**/onnxruntime-web/dist/!(ort.node.min.js|ort.node.min.mjs|ort-wasm-simd-threaded.mjs|ort-wasm-simd-threaded.wasm|ort-wasm-simd-threaded.jsep.mjs|ort-wasm-simd-threaded.jsep.wasm)"
+  - "!**/@node-llama-cpp/win-x64-*/**"
 asarUnpack:
   - "**/*.node"
   - "**/onnxruntime-node/bin/napi-v*/win32/x64/**/*"
   - "**/onnxruntime-web/dist/*.wasm"
   - "**/onnxruntime-web/dist/*.mjs"
+  - "**/@node-llama-cpp/win-x64/bins/**/*"
   - "**/tesseract.js/src/**/*"
   - "**/tesseract.js-core/**/*"
   - "**/@courtplus/intake/assets/tessdata/**/*"
@@ -29,9 +31,14 @@ extraResources:
       - "model/**/*"
       - "asr/**/*"
       - "models/**/*"
+      - "!models/guide/**/*"
       - "data/**/*"
       - "assets/**/*"
       - "templates/**/*"
+  - from: resources/models/guide
+    to: models/guide
+    filter:
+      - "*.gguf"
 # Stops a same-user process from running CourtPlus.exe as plain Node or attaching an inspector to
 # the main process, either of which could call safeStorage and unwrap the database key.
 # Asar integrity validation is left off: it needs the exe resources edited, which

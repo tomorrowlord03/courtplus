@@ -2,7 +2,8 @@ import { ui } from '../../ui/src/lib/i18n';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CaseRecord, Charge, CourtPlusApi, Person, Tri } from '@courtplus/contracts';
-import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../../ui/src/components/ui';
+import { btn, btnPrimary, ErrorNote, errMsg } from '../../ui/src/components/ui';
+import { ScreenPage } from '../../ui/src/components/ScreenIntro';
 import { useApp } from '../../ui/src/lib/context';
 import { api } from './bridge';
 import {
@@ -81,14 +82,14 @@ export function ImportCase() {
   const suggestions = doc?.suggestions.map((suggestion, i) => ({ suggestion, i, field: suggestionTarget(suggestion) }))
     .filter(item => item.field) ?? [];
 
-  return <Page title={ui("Import order")} note={ui("Review the extracted order and save confirmed facts. Exclude sealed, in-camera and other protected orders.")}>
+  return <ScreenPage screenId="import" title={ui("Import order")} note={ui("Review the extracted order and save confirmed facts. Exclude sealed, in-camera and other protected orders.")}>
     <ErrorNote error={error} />
     {!doc ? <label className="panel import-picker">
       {busy ? ui("Reading order…") : ui("Choose PDF or image")}
-      <input className="ml-3" type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy}
+      <input data-guide="start" className="ml-3" type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy}
         onChange={event => void read(event.target.files?.[0])} />
     </label> : <>
-      <button className={btn + ' mb-4'} onClick={() => setDoc(undefined)}>{ui("Import another")}</button>
+      <button data-guide="start" className={btn + ' mb-4'} onClick={() => setDoc(undefined)}>{ui("Import another")}</button>
       {doc.aiUnavailable && <p role="status" className="mb-4 rounded bg-amber-50 p-2 text-sm text-amber-800">{ui("▲ Automated reading is unavailable. Names are masked by rules only and the suggestions below come from text patterns. Check the masking and enter every fact from the order by hand.")}</p>}
       <div className="grid gap-4 lg:grid-cols-2">
         <section aria-label={ui("Anonymised order and suggestions")} className="min-w-0 space-y-3">
@@ -150,7 +151,7 @@ export function ImportCase() {
           </select></label>
           <label>{ui("Other court event date")}<input name="otherEventOn" type="date" className={fieldStyle} /></label>
           <label>{ui("Charge stage")}<select name="stage" className={fieldStyle}>
-            <option value="FIR">FIR</option><option value="FRAMED">{ui("Framed and verified")}</option>
+            <option value="FIR">FIR</option><option value="FRAMED">{ui("Charge framed (as recorded)")}</option>
           </select></label>
           <label>{ui("Pending stage")}<select name="pendingStatus" className={fieldStyle}>
             {['investigation', 'inquiry', 'trial', 'appeal', 'disposed'].map(stage => <option key={stage}>{stage}</option>)}
@@ -161,5 +162,5 @@ export function ImportCase() {
         </form>
       </div>
     </>}
-  </Page>;
+  </ScreenPage>;
 }

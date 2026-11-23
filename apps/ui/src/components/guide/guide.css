@@ -1,0 +1,34 @@
+.guide-root {
+  --guide-offset: 18px;
+  --guide-gap: 12px;
+  --guide-button-height: 44px;
+  --guide-clearance: calc(var(--guide-offset) + var(--guide-gap) + var(--guide-button-height));
+  position: fixed;
+  z-index: 1000;
+  right: var(--guide-offset);
+  bottom: var(--guide-offset);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--guide-gap);
+  max-height: calc(100dvh - 2 * var(--guide-offset));
+  pointer-events: none;
+}
+.guide-root > * { pointer-events: auto; }
+.guide-launch { order: 1; flex: none; height: var(--guide-button-height); border: 0; border-radius: 999px; padding: 0 18px; background: var(--ink, #20212a); color: white; box-shadow: 0 4px 18px #0003; cursor: pointer; }
+.guide-panel { width: min(390px, calc(100vw - 36px)); min-height: 0; max-height: 700px; overflow: auto; padding: 18px; border: 1px solid var(--border, #ccc); border-radius: 16px; background: var(--surface, white); color: var(--ink, #20212a); box-shadow: 0 12px 38px #0003; }
+.guide-head, .guide-actions, .guide-tabs { display: flex; gap: 6px; align-items: center; }
+.guide-head { justify-content: space-between; }
+.guide-head button { font-size: 24px; background: none; border: 0; cursor: pointer; }
+.guide-disclaimer { font-size: 12px; margin: 9px 0; }
+.guide-tabs { flex-wrap: wrap; border-bottom: 1px solid var(--border, #ccc); }
+.guide-tabs button { flex: 1; min-width: 90px; padding: 8px 4px; background: none; border: 0; cursor: pointer; }
+.guide-tabs button[aria-selected="true"] { border-bottom: 3px solid currentColor; font-weight: 700; }
+.guide-body { padding-top: 12px; }
+.guide-body h2 { font-size: 18px; }
+.guide-body h3 { font-size: 15px; margin-bottom: 3px; }
+.guide-body p { margin-top: 4px; line-height: 1.5; }
+.guide-body textarea { display: block; width: 100%; min-height: 75px; margin: 8px 0; }
+.guide-body article { border-top: 1px solid var(--border, #ccc); padding-top: 8px; }
+.guide-actions { justify-content: space-between; margin-top: 14px; }
+.guide-highlight { outline: 3px solid #e6a800 !important; outline-offset: 3px; position: relative; z-index: 1001; }

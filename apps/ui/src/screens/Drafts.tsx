@@ -5,7 +5,8 @@ import type { CaseRecord, CourtDraftKind, JudgeDraftKind, LawyerDraftKind, Relea
 import { DRAFT_LANGS, RIGHTS_CARD_LANGS, isReviewedLanguage, ui } from '../lib/i18n';
 import { todayIST, useApp } from '../lib/context';
 import { useRole } from '../lib/roles';
-import { Empty, ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
+import { Empty, ErrorNote, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 const statusLabels: Record<Status, string> = {
   APPLY_NOW: 'APPLY NOW',
@@ -18,7 +19,7 @@ type Kind = CourtDraftKind;
 const RELEASE_DRAFTS: [ReleaseDraftKind, string][] = [
   ['S479_3_APPLICATION', 'Application under s.479(3)'],
   ['DLSA_7_DAY', 'DLSA 7-day note'],
-  ['AI_ASSISTANCE_NOTE', 'AI assistance note'],
+  ['AI_ASSISTANCE_NOTE', 'Note on how the app helped'],
   ['RIGHTS_CARD', 'Rights card'],
 ];
 const JUDGE_DRAFTS: [JudgeDraftKind, string][] = [
@@ -128,7 +129,7 @@ export function Drafts() {
   };
 
   return (
-    <Page title={ui("Drafting studio")} note={view === 'legal_aid' ? ui("Prepare and check. The jail superintendent attests and files the s.479(3) application; a lawyer reviews flagged cases. The court decides.") : ui("Drafts are prepared by legal-aid staff.")}>
+    <ScreenPage screenId="drafts" note={view === 'legal_aid' ? ui("The jail superintendent signs and files the release application under section 479(3). A lawyer checks flagged cases. The court decides.") : ui("Drafts are prepared by legal-aid staff.")}>
       <ErrorNote error={error} />
       <div className="draft-studio">
       <section className="panel grid content-start gap-4" aria-label={ui("Draft parameters")}>
@@ -160,7 +161,7 @@ export function Drafts() {
         {isCourtDraft && exportLang === 'hi' && (
           <p className="text-sm text-amber-800">{ui('Hindi draft needs review by a fluent legal reader.')}</p>
         )}
-        <button className={btnPrimary} disabled={!caseId || busy} onClick={() => void run()}>
+        <button data-guide="start" className={btnPrimary} disabled={!caseId || busy} onClick={() => void run()}>
           {busy ? ui("Preparing…") : ui("Export signed PDF")}
         </button>
       </section>
@@ -189,6 +190,6 @@ export function Drafts() {
       )}
       </section>
       </div>
-    </Page>
+    </ScreenPage>
   );
 }

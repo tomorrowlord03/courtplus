@@ -3,7 +3,8 @@ import { useState } from 'react';
 import jsQR from 'jsqr';
 import type { CourtPlusApi } from '@courtplus/contracts';
 import { useApp } from '../lib/context';
-import { ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
+import { ErrorNote, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 type Verification = Awaited<ReturnType<CourtPlusApi['verify']>>;
 type Result = Verification & {
@@ -18,7 +19,7 @@ const TONES = {
 };
 
 const BADGES: { key: keyof Verification; title: string; good: string; text: Record<string, string> }[] = [
-  { key: 'signature', title: 'Signature', good: 'valid', text: { valid: '✓ Valid', invalid: '✗ Invalid', unknown_signer: '? Unknown signer' } },
+  { key: 'signature', title: 'Signature', good: 'valid', text: { valid: '✓ Signature matches', invalid: '✗ Signature does not match', unknown_signer: '? Unknown signer' } },
   { key: 'pdf', title: 'PDF', good: 'unchanged', text: { unchanged: '✓ Unchanged', changed: '✗ Changed' } },
   { key: 'chain', title: 'Audit chain', good: 'intact', text: { intact: '✓ Intact', mismatch: '✗ Mismatch', not_checked: '– Not checked' } },
 ];
@@ -91,7 +92,7 @@ export function Verifier() {
   );
 
   return (
-    <Page title={ui('Verifier')} note={ui('Check a signed PDF or an original evidence file. Include the manifest for draft, hearing and lawyer PDFs.')}>
+    <ScreenPage screenId="verify" note={ui('Add the file and its receipt. For drafts or hearing records, include the file list (manifest).')}>
       <ErrorNote error={error} />
       <div className="grid max-w-xl gap-3">
         {pick('Signed PDF or original evidence file', '', setPdf, pdf)}
@@ -101,7 +102,7 @@ export function Verifier() {
           if (f) void decodeQr(f).then((v) => setQrText(v ?? ui('No QR code found in this image')), () => setQrText(ui('Could not read this image')));
         }, null)}
         {qrText && <p role="status" className="text-sm">{ui('QR says:')} <code>{qrText}</code></p>}
-        <button className={btnPrimary} disabled={!pdf || !receipt} onClick={() => void run()}>{ui('Verify')}</button>
+        <button data-guide="start" className={btnPrimary} disabled={!pdf || !receipt} onClick={() => void run()}>{ui('Check file')}</button>
       </div>
       <div aria-live="polite">
         {result && summary && (
@@ -114,12 +115,12 @@ export function Verifier() {
               <dt>SHA-256</dt><dd>{result.details.hash ?? ui('Unavailable')}</dd>
               {result.details.sha3_256 && <><dt>SHA3-256</dt><dd>{result.details.sha3_256}</dd></>}
             </dl>}
-            {result.legacy && <p className="text-sm">{ui('Ed25519 only (older receipt, not quantum-safe)')}</p>}
+            {result.legacy && <p className="text-sm">{ui('Ed25519 only (older receipt)')}</p>}
             {result.signature === 'unknown_signer' && result.signatures?.ed25519 &&
               <p className="text-sm">{ui("Import the issuer's updated key file")}</p>}
             {result.signatures && <div className="text-sm">
-              <p>Ed25519: {ui(result.signatures.ed25519 ? 'valid' : 'invalid')}</p>
-              {!result.legacy && <p>ML-DSA-65 (FIPS 204, quantum-safe): {ui(result.signatures.mldsa65 ? 'valid' : 'invalid')}</p>}
+              <p>Ed25519: {ui(result.signatures.ed25519 ? '✓ Signature matches' : '✗ Signature does not match')}</p>
+              {!result.legacy && <p>ML-DSA-65 (FIPS 204): {ui(result.signatures.mldsa65 ? '✓ Signature matches' : '✗ Signature does not match')}</p>}
             </div>}
             <div className="grid gap-3 md:grid-cols-3">
               {BADGES.map((b) => {
@@ -137,6 +138,6 @@ export function Verifier() {
           </section>
         )}
       </div>
-    </Page>
+    </ScreenPage>
   );
 }

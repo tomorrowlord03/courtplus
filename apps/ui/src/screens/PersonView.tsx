@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { CaseRecord, Person } from '@courtplus/contracts';
 import { useApp } from '../lib/context';
-import { Empty, ErrorNote, Page, errMsg } from '../components/ui';
+import { Empty, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 function useData() {
   const { api } = useApp();
@@ -18,13 +19,13 @@ function useData() {
 export function PersonList() {
   const { data, error } = useData();
   return (
-    <Page title={ui("People")}>
+    <ScreenPage screenId="persons">
       <ErrorNote error={error} />
-      {data && data.persons.length === 0 && <Empty title={ui("No people yet")} hint={ui("Import a court order to begin.")} to="/import" cta={ui("Import order")} />}
+      {data && data.persons.length === 0 && <Empty title={ui("No people yet")} hint={ui("Import a court order to begin.")} to="/import" cta={ui("Add a court order")} />}
       <ul className="space-y-1">
-        {data?.persons.map((p) => <li key={p.id}><Link className="text-blue-800 underline" to={`/person/${p.id}`}>{p.alias}</Link></li>)}
+        {data?.persons.map((p, index) => <li key={p.id}><Link data-guide={index === 0 ? "start" : undefined} className="text-blue-800 underline" to={`/person/${p.id}`}>{p.alias}</Link></li>)}
       </ul>
-    </Page>
+    </ScreenPage>
   );
 }
 
@@ -34,13 +35,13 @@ export function PersonView() {
   const person = data?.persons.find((p) => p.id === personId);
   const cases = data?.cases.filter((c) => c.personId === personId) ?? [];
   return (
-    <Page title={person ? person.alias : ui("Person")}>
+    <ScreenPage screenId="person" note={person?.alias}>
       <ErrorNote error={error} />
       {data && !person && <Empty title={ui("Person not found")} to="/persons" cta={ui("All people")} />}
       {person && (
         <>
           <section className="mb-4 rounded border bg-white p-3" aria-label={ui("Section 479(2)")}>
-            <h2 className="font-semibold">{ui("Why more than one case matters (s.479(2) BNSS)")}</h2>
+            <h2 className="font-semibold">{ui("Why having more than one case matters")}</h2>
             <p className="text-sm">
               {cases.length > 1
                 ? `${cases.length} cases are recorded for this person. `
@@ -54,15 +55,15 @@ export function PersonView() {
           <h2 className="font-semibold">{ui("Cases")}</h2>
           {cases.length === 0 && <p className="text-sm text-slate-600">{ui("No cases linked.")}</p>}
           <ul className="space-y-1">
-            {cases.map((c) => (
+            {cases.map((c, index) => (
               <li key={c.id}>
-                <Link className="text-blue-800 underline" to={`/case/${c.id}`}>{c.caseNo ?? c.cnr ?? c.id}</Link>
+                <Link data-guide={index === 0 ? "start" : undefined} className="text-blue-800 underline" to={`/case/${c.id}`}>{c.caseNo ?? c.cnr ?? c.id}</Link>
                 {` · ${c.pendingStatus}`}
               </li>
             ))}
           </ul>
         </>
       )}
-    </Page>
+    </ScreenPage>
   );
 }

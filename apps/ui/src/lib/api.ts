@@ -1,10 +1,17 @@
-import type { CourtPlusApi, DesktopWorkspaceApi } from '@courtplus/contracts';
+import type { CourtPlusApi, DesktopPreloadApi, GuideAskInput } from '@courtplus/contracts';
 
-export type WorkspaceApi = CourtPlusApi & Partial<DesktopWorkspaceApi> & { profileAvailable?: false };
+export type WorkspaceApi = CourtPlusApi & Partial<DesktopPreloadApi> & { profileAvailable?: false };
+
+// A standalone guide bridge has no workspace methods and may handle only a known screen.
+interface GuideOnlyBridge {
+  listPersons?: never;
+  guideAsk?(input: GuideAskInput & { screenId: string }): ReturnType<DesktopPreloadApi['guideAsk']>;
+  guideCancel?: DesktopPreloadApi['guideCancel'];
+}
 
 declare global {
   interface Window {
-    courtplus?: WorkspaceApi;
+    courtplus?: WorkspaceApi | GuideOnlyBridge;
   }
 }
 
@@ -118,7 +125,8 @@ export function createDevStub(): CourtPlusApi {
 }
 
 export function getApi(): WorkspaceApi {
-  if (typeof window !== 'undefined' && window.courtplus) return window.courtplus;
+  const preload = typeof window === 'undefined' ? undefined : window.courtplus;
+  if (preload?.listPersons) return preload;
   if (import.meta.env.DEV && !new URLSearchParams(window.location.search).has('http')) return createDevStub();
   return createHttpApi();
 }

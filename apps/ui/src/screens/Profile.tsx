@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { Profile as ProfileDetails } from '@courtplus/contracts';
-import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
+import { btn, btnPrimary, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { useApp } from '../lib/context';
 import { RIGHTS_CARD_LANGS, ui } from '../lib/i18n';
 import { UI_LANGUAGES } from '../lib/preferences';
@@ -10,7 +11,7 @@ import { RoleSwitch } from '../components/RoleSwitch';
 export function ProfileScreen() {
   const { profileAvailable, profile, profileError, language, setLanguage } = useApp();
   const [message, setMessage] = useState('');
-  return <Page title={ui("My profile")} note={profileAvailable ? ui("Stored only on this computer") : undefined}>
+  return <ScreenPage screenId="profile" note={profileAvailable ? ui("Stored only on this computer") : undefined}>
     {profileAvailable ? <>
       <ErrorNote error={profileError} />
       {profile !== undefined
@@ -18,14 +19,14 @@ export function ProfileScreen() {
         : !profileError && <p role="status">{ui("Loading profile…")}</p>}
     </> : <div className="panel profile-panel">
       <p className="mb-4">{ui("Personal profiles are available in the desktop app.")}</p>
-      <label>{ui("Language")}<select className="field-control" value={language} onChange={event => setLanguage(event.target.value)}>
+      <label>{ui("Language")}<select data-guide="start" className="field-control" value={language} onChange={event => setLanguage(event.target.value)}>
           <LanguageOptions />
         </select>
       </label>
       <div className="mt-4"><RoleSwitch /></div>
     </div>}
     <p className="muted" role="status">{message}</p>
-  </Page>;
+  </ScreenPage>;
 }
 
 function LanguageOptions() {
@@ -89,7 +90,7 @@ function ProfileForm({ initial, onMessage }: { initial: ProfileDetails | null; o
       <label>{ui("Email") + " "}<small>{ui("Optional")}</small><input className="field-control" name="email" type="email" autoComplete="email" maxLength={254} defaultValue={initial?.email} /></label>
     </fieldset>
     <div className="profile-actions">
-      <button className={btnPrimary} disabled={busy}>{ui("Save profile")}</button>
+      <button data-guide="start" className={btnPrimary} disabled={busy}>{ui("Save profile")}</button>
       {initial && !clearing && <button className={btn} type="button" disabled={busy} onClick={() => setClearing(true)}>{ui("Clear my details")}</button>}
     </div>
     {clearing && <div className="clear-profile" aria-label={ui("Confirm clearing profile")}>

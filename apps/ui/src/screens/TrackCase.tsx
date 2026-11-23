@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { CaseRecord, CourtEvent, PublicCaseTrack } from '@courtplus/contracts';
-import { btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
+import { btnPrimary, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { t, ui } from '../lib/i18n';
 import { CitizenSettlementEstimator } from './CitizenSettlementEstimator';
 import { HearingBreakdowns } from './HearingBreakdowns';
@@ -80,12 +81,12 @@ export function TrackCase() {
     finally { setBusy(false); }
   }
 
-  return <Page title={t('track.title', 'Track my case')} note={t('track.note', 'See what this court office has recorded. The eCourts website has the official status.')}>
+  return <ScreenPage screenId="track" note={t('track.note', 'See what this court office has recorded. The eCourts website has the official status.')}>
     <form className="panel" onSubmit={event => void look(event)}>
-      <label>{t('track.reference', 'Case number or CNR')}
+      <label>{t('track.reference', 'Case number or Case Number Record (CNR)')}
         <input className="field-control" name="reference" required maxLength={100} autoComplete="off" placeholder={ui('e.g. CGRP010012342024')} />
       </label>
-      <button className={btnPrimary + ' mt-2'} disabled={busy}>{busy ? ui("Looking…") : t('track.find', 'Find my case')}</button>
+      <button data-guide="start" className={btnPrimary + ' mt-2'} disabled={busy}>{busy ? ui("Looking…") : t('track.find', 'Find my case')}</button>
     </form>
     <ErrorNote error={error && ui(error)} />
     <p className="mt-3"><a href={ECOURTS_CASE_STATUS} target="_blank" rel="noreferrer">{t('track.ecourts', 'Official case status on eCourts services')}</a></p>
@@ -109,5 +110,5 @@ export function TrackCase() {
         <dt className="font-medium capitalize">{ui(stage)}</dt><dd>{ui(meaning)}</dd>
       </div>)}</dl>
     </details>
-  </Page>;
+  </ScreenPage>;
 }

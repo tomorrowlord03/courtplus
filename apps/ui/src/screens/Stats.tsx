@@ -2,7 +2,8 @@ import { ui } from '../lib/i18n';
 import { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useApp } from '../lib/context';
-import { Empty, ErrorNote, Page, errMsg } from '../components/ui';
+import { Empty, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 // api.stats() is typed unknown in the contract; we accept this shape and ignore anything else.
 export interface Figure { label: string; value: number; source: string; date: string }
@@ -21,7 +22,7 @@ export function Stats() {
   useEffect(() => { api.stats().then((r) => setFigs(parseFigures(r)), (e) => setError(errMsg(e))); }, [api]);
 
   return (
-    <Page title={ui("Statistics")}>
+    <ScreenPage screenId="stats">
       <ErrorNote error={error} />
       {figs && figs.length === 0 && <Empty title={ui("No statistics yet")} hint={ui("Figures appear once cases are imported and official sources are loaded.")} />}
       {figs && figs.length > 0 && (
@@ -43,6 +44,6 @@ export function Stats() {
           </table>
         </>
       )}
-    </Page>
+    </ScreenPage>
   );
 }

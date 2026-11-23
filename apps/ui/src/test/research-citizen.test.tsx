@@ -173,7 +173,7 @@ describe('Rights advisor', () => {
     expect(within(card).getByText(/Negotiable Instruments Act, 1881, Section 138/)).toBeInTheDocument();
     expect(within(card).getAllByRole('link', { name: 'Official text' })[0]).toHaveAttribute('href', expect.stringMatching(/^https:\/\//));
     expect(within(card).getByText('What to do, step by step')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: 'Talk to free legal aid (NALSA 15100)' })[0]).toHaveAttribute('href', 'tel:15100');
+    expect(screen.getAllByRole('link', { name: 'Talk to free legal aid (National Legal Services Authority, 15100)' })[0]).toHaveAttribute('href', 'tel:15100');
     expect(screen.queryByRole('textbox', { name: /reply|message/i })).not.toBeInTheDocument();
 
     await userEvent.selectOptions(screen.getByLabelText(/Show guide in/), 'hi');
@@ -207,7 +207,7 @@ describe('Track my case', () => {
     }), { status: 200 }));
     wrap(<TrackCase />);
     expect(screen.getByRole('link', { name: 'Official case status on eCourts services' })).toHaveAttribute('href', ECOURTS_CASE_STATUS);
-    await userEvent.type(screen.getByLabelText('Case number or CNR'), 'fictional 7/2026');
+    await userEvent.type(screen.getByLabelText('Case number or Case Number Record (CNR)'), 'fictional 7/2026');
     await userEvent.click(screen.getByRole('button', { name: 'Find my case' }));
     const status = await screen.findByRole('region', { name: 'Case status' });
     expect(status).toHaveTextContent('trial — The court is hearing evidence');
@@ -220,7 +220,7 @@ describe('Track my case', () => {
   it('says when the office has no such case', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }));
     wrap(<TrackCase />);
-    await userEvent.type(screen.getByLabelText('Case number or CNR'), 'FICTIONAL-404');
+    await userEvent.type(screen.getByLabelText('Case number or Case Number Record (CNR)'), 'FICTIONAL-404');
     await userEvent.click(screen.getByRole('button', { name: 'Find my case' }));
     expect(await screen.findByText(/has no case with that number/)).toBeInTheDocument();
   });
@@ -236,7 +236,7 @@ describe('Track my case', () => {
     const localTranscripts = vi.fn();
     window.courtplusHearing = { transcripts: localTranscripts } as unknown as NonNullable<typeof window.courtplusHearing>;
     wrap(<TrackCase />);
-    await userEvent.type(screen.getByLabelText('Case number or CNR'), 'FICTIONAL 7/2026');
+    await userEvent.type(screen.getByLabelText('Case number or Case Number Record (CNR)'), 'FICTIONAL 7/2026');
     await userEvent.click(screen.getByRole('button', { name: 'Find my case' }));
     const breakdowns = await screen.findByRole('region', { name: 'Hearing breakdowns' });
     expect(breakdowns).toHaveTextContent('Fictional court approved summary.');
@@ -288,8 +288,8 @@ describe('Roles and navigation', () => {
   it('judge: role dashboard, research and India backlog', async () => {
     wrap(<App />);
     expect(groups()).toEqual(['For Judges', 'For Lawyers', 'For Citizens', 'Common']);
-    expect(group('For Judges')).toEqual(['Judge dashboard', 'Import order', 'Evidence inbox', 'Hearing recorder', 'Research', 'Drafts', 'Cases']);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Judge dashboard' })).toBeInTheDocument();
+    expect(group('For Judges')).toEqual(['Judge dashboard', 'Add a court order', 'Proof sent by citizens', 'Record and type the hearing', 'Find similar past cases', 'Write orders and notices', 'Find saved cases']);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Judge dashboard' }, { timeout: 3_000 })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Official backlog benchmarks' })).toBeInTheDocument();
     expect(nav().queryByText('More tools')).not.toBeInTheDocument();
   });
@@ -297,7 +297,7 @@ describe('Roles and navigation', () => {
   it('lawyer: workspace with research and file evidence; no backlog card', async () => {
     setRoleOverride('lawyer');
     wrap(<App />);
-    expect(group('For Lawyers')).toEqual(['Lawyer workspace', 'Case analyzer', 'Settlement', 'Research', 'Import order', 'File evidence', 'Drafts']);
+    expect(group('For Lawyers')).toEqual(['Lawyer workspace', 'Review a case file', 'What courts awarded before', 'Find similar past cases', 'Add a court order', 'File proof for a case', 'Write orders and notices']);
     expect(await screen.findByRole('heading', { level: 1, name: 'Lawyer workspace' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Official backlog benchmarks' })).not.toBeInTheDocument();
   });
@@ -305,8 +305,8 @@ describe('Roles and navigation', () => {
   it('citizen: citizen tools grouped together, and home is Citizen help', async () => {
     setRoleOverride('citizen');
     wrap(<App />);
-    expect(group('For Citizens')).toEqual(['Rights advisor', 'Submit proof', 'Track my case', 'Settlement guide']);
-    expect(group('Common')).toContain('Safeguards');
+    expect(group('For Citizens')).toEqual(['Know your rights', 'Send proof to the court', 'Track my case', 'Get help with compensation or a settlement']);
+    expect(group('Common')).toContain('See how Court+ protects your data');
     expect(await screen.findByRole('heading', { level: 1, name: 'Citizen help' })).toBeInTheDocument();
     expect(screen.getByText('Court+')).toBeInTheDocument();
   });

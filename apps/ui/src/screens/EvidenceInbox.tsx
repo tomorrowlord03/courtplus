@@ -2,7 +2,8 @@ import { ui } from '../lib/i18n';
 import { evidenceBridge } from '../lib/api';
 import { useEffect, useState } from 'react';
 import type { EvidenceItem, EvidenceMode, EvidenceStatus, EvidenceVerification } from '@courtplus/contracts';
-import { Page, ErrorNote, btn, btnPrimary, errMsg, Empty } from '../components/ui';
+import { ErrorNote, btn, btnPrimary, errMsg, Empty } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 export function EvidenceInbox() {
   const [items, setItems] = useState<EvidenceItem[]>([]);
@@ -157,7 +158,7 @@ export function EvidenceInbox() {
   }
 
   return (
-    <Page title={ui("Evidence Vault & Judicial Inbox")} note={ui("Tamper-evident vault under Bharatiya Sakshya Adhiniyam, 2023. Encrypted at rest (AES-256-GCM) with signed receipts and hash-chained audit logging.")}>
+    <ScreenPage screenId="evidence" note={ui("Court evidence inbox under the Bharatiya Sakshya Adhiniyam, 2023. Files are encrypted and have signed receipts.")}>
       <ErrorNote error={error} />
 
       {/* TABS & FILTERS */}
@@ -167,17 +168,18 @@ export function EvidenceInbox() {
             type="button"
             className={`rounded px-3 py-1.5 text-sm font-semibold ${activeTab === 'identified' ? 'bg-blue-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
             onClick={() => setActiveTab('identified')}
-          >{ui("Case Evidence (Identified)")}</button>
+          >{ui("Proof sent with a name")}</button>
           <button
             type="button"
             className={`rounded px-3 py-1.5 text-sm font-semibold ${activeTab === 'anonymous' ? 'bg-amber-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
             onClick={() => setActiveTab('anonymous')}
-          >{ui("Anonymous Tips")}</button>
+          >{ui("Tips sent without a name")}</button>
           <button
+            data-guide="start"
             type="button"
             className={`rounded px-3 py-1.5 text-sm font-semibold ${activeTab === 'all' ? 'bg-blue-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
             onClick={() => setActiveTab('all')}
-          >{ui("All Submissions")}</button>
+          >{ui("All submissions")}</button>
         </div>
 
         <form
@@ -186,7 +188,7 @@ export function EvidenceInbox() {
         >
           <input
             type="text"
-            placeholder={ui("Search Case Ref (CNR)...")}
+            placeholder={ui("Search by case number")}
             value={caseFilter}
             onChange={(e) => setCaseFilter(e.target.value)}
             className="rounded border border-slate-300 px-3 py-1.5 text-sm"
@@ -305,9 +307,9 @@ export function EvidenceInbox() {
 
                   {verification && (
                     <div className="mt-2 border-t border-emerald-200 pt-2 text-xs text-emerald-900">
-                      <div>{ui("File Bytes Intact:") + " "}{verification.hashMatch ? ui("✓ Verified") : ui("✗ Mismatch")}</div>
-                      <div>{ui("Ed25519 Signature:") + " "}{(verification.signatures?.ed25519 ?? verification.signatureValid) ? ui("✓ Valid") : ui("✗ Invalid")}</div>
-                      {verification.signatures && <div>ML-DSA-65 (FIPS 204, quantum-safe): {verification.signatures.mldsa65 ? ui("✓ Valid") : ui("✗ Invalid")}</div>}
+                      <div>{ui("File Unchanged:") + " "}{verification.hashMatch ? ui("✓ Same as receipt") : ui("✗ Does not match receipt")}</div>
+                      <div>{ui("Ed25519 Signature:") + " "}{(verification.signatures?.ed25519 ?? verification.signatureValid) ? ui("✓ Signature matches") : ui("✗ Signature does not match")}</div>
+                      {verification.signatures && <div>ML-DSA-65 (FIPS 204): {verification.signatures.mldsa65 ? ui("✓ Signature matches") : ui("✗ Signature does not match")}</div>}
                       <div>{ui("Evidence Hash Chain:") + " "}{verification.chainValid ? ui("✓ Intact") : ui("✗ Broken")}</div>
                     </div>
                   )}
@@ -329,7 +331,7 @@ export function EvidenceInbox() {
 
                 {/* MEDIA PREVIEW */}
                 <div className="mb-4 rounded border bg-slate-50 p-3">
-                  <h3 className="mb-2 text-xs font-semibold text-slate-700">{ui("Media Preview / साक्ष्य पूर्वावलोकन")}</h3>
+                  <h3 className="mb-2 text-xs font-semibold text-slate-700">{ui("Preview the file")}</h3>
                   {previewLoading ? (
                     <p className="text-xs text-slate-500">{ui("Loading preview...")}</p>
                   ) : !previewUrl ? (
@@ -352,7 +354,7 @@ export function EvidenceInbox() {
 
                 {/* JUDICIAL ACTIONS */}
                 <div className="mb-4 rounded border border-slate-200 bg-slate-50/70 p-3">
-                  <h3 className="mb-2 text-xs font-bold uppercase text-slate-700">{ui("Judicial Actions / अदालती कार्रवाई")}</h3>
+                  <h3 className="mb-2 text-xs font-bold uppercase text-slate-700">{ui("Record what the court does")}</h3>
                   <div className="mb-2">
                     <input
                       type="text"
@@ -415,6 +417,6 @@ export function EvidenceInbox() {
           </div>
         </div>
       )}
-    </Page>
+    </ScreenPage>
   );
 }

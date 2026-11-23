@@ -1,15 +1,17 @@
-import type { CourtWorkspaceApi, DesktopWorkspaceApi } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+import type { CourtWorkspaceApi, DesktopPreloadApi } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import { contextBridge, ipcRenderer } from 'electron';
 import type { LawyerToolsApi } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 
-function invoke<K extends keyof DesktopWorkspaceApi>(
+function invoke<K extends keyof DesktopPreloadApi>(
   name: K,
-  ...args: Parameters<DesktopWorkspaceApi[K]>
-): ReturnType<DesktopWorkspaceApi[K]> {
-  return ipcRenderer.invoke(`courtplus:${name}`, ...args) as ReturnType<DesktopWorkspaceApi[K]>;
+  ...args: Parameters<DesktopPreloadApi[K]>
+): ReturnType<DesktopPreloadApi[K]> {
+  return ipcRenderer.invoke(`courtplus:${name}`, ...args) as ReturnType<DesktopPreloadApi[K]>;
 }
 
-const courtplus: DesktopWorkspaceApi = {
+const courtplus: DesktopPreloadApi = {
+  guideAsk: input => invoke('guideAsk', input),
+  guideCancel: () => invoke('guideCancel'),
   listPersons: () => invoke('listPersons'),
   listCases: () => invoke('listCases'),
   getProfile: () => invoke('getProfile'),
@@ -30,8 +32,8 @@ const courtplus: DesktopWorkspaceApi = {
   judgeDashboard: (asOf, judgeName) => invoke('judgeDashboard', asOf, judgeName),
 };
 
-contextBridge.exposeInMainWorld('courtplus', courtplus);
 if (!process.argv.includes('--courtplus-verifier-window')) {
+  contextBridge.exposeInMainWorld('courtplus', courtplus);
   contextBridge.exposeInMainWorld('courtplusLawyer', {
     pastAwards: description => ipcRenderer.invoke('desktop:lawyer:pastAwards', description),
     analyzeCase: file => ipcRenderer.invoke('desktop:lawyer:analyzeCase', file),
@@ -39,6 +41,9 @@ if (!process.argv.includes('--courtplus-verifier-window')) {
     previewSettlement: proposal => ipcRenderer.invoke('desktop:lawyer:previewSettlement', proposal),
     exportSettlement: proposal => ipcRenderer.invoke('desktop:lawyer:exportSettlement', proposal),
   } satisfies LawyerToolsApi);
+} else {
+  const { guideAsk, guideCancel, ...verifierApi } = courtplus;
+  contextBridge.exposeInMainWorld('courtplus', verifierApi);
 }
 contextBridge.exposeInMainWorld('courtplusJudge', {
   courtWorkspace: (date, action) => ipcRenderer.invoke('desktop:courtWorkspace', date, action),

@@ -101,14 +101,50 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
     await step('judge dashboard renders', 60_000, async () => {
       if (previewDirectory) await page.setViewportSize({ width: 1366, height: 768 });
       await find(page, 'Judge dashboard').waitFor({ timeout: 60_000 });
-      await page.getByRole('button', { name: 'Skip for now' }).click();
+      await page.getByRole('complementary', { name: 'Set up your profile' }).getByRole('button', { name: 'Skip for now' }).click();
       await page.getByText('No cases saved yet', { exact: true }).waitFor();
+    });
+
+    await step('help and companion layout', 45_000, async () => {
+      const help = page.getByRole('button', { name: 'Need help?', exact: true });
+      const companion = page.locator('.companion-root');
+      const panel = page.getByRole('complementary', { name: 'Help guide' });
+      const originalViewport = page.viewportSize() ?? await page.evaluate(() => ({
+        width: innerWidth, height: innerHeight,
+      }));
+      assert.equal(await panel.count(), 0, 'the companion offers the first-run tour');
+      for (const { width, height } of [{ width: 1280, height: 720 }, { width: 1920, height: 1080 }]) {
+        await page.setViewportSize({ width, height });
+        const assertAbove = async (upper, lower) => {
+          const [a, b] = await Promise.all([upper.boundingBox(), lower.boundingBox()]);
+          assert.ok(a && b && a.y + a.height < b.y, `expected vertical clearance at ${width}x${height}`);
+        };
+        await assertAbove(companion, help);
+        await help.click();
+        await assertAbove(panel, companion);
+        await assertAbove(companion, help);
+        await page.getByRole('button', { name: 'Close help' }).click();
+      }
+      await page.setViewportSize(originalViewport);
+    });
+
+    await step('settings intro and companion switch', 30_000, async () => {
+      await page.getByRole('link', { name: 'Settings', exact: true }).click();
+      await page.locator('header[data-guide-screen="settings"]').waitFor();
+      const toggle = state => page.getByRole('switch', { name: 'Guide companion: ' + state });
+      await page.getByText('Help answers use a small model that runs on this computer. Nothing is sent online.', { exact: true }).waitFor();
+      assert.equal(await toggle('On').getAttribute('data-guide'), 'start');
+      await toggle('On').click();
+      await toggle('Off').waitFor();
+      await page.locator('.companion-root').waitFor({ state: 'detached' });
+      await toggle('Off').click();
+      await toggle('On').waitFor();
     });
 
     await step('save and reopen local profile', 60_000, async () => {
       const avatar = page.getByRole('link', { name: 'My profile' });
       await avatar.click();
-      await find(page, 'My profile').waitFor();
+      await find(page, 'Set your name, role, and language').waitFor();
       await page.getByLabel('Full name').waitFor();
       await capture('profile');
       await page.getByLabel('Full name').fill('Smoke Tester');
@@ -125,7 +161,9 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
     });
 
     await step('open import', 30_000, async () => {
-      await navTo(page, 'Import order');
+      await navTo(page, 'Add a court order');
+      await page.locator('header[data-guide-screen="import"]').waitFor();
+      assert.equal(await page.getByLabel('Choose PDF or image').getAttribute('data-guide'), 'start');
       await page.getByLabel('Choose PDF or image').setInputFiles({
         name: 'fictional-order.pdf', mimeType: 'application/pdf', buffer: fictionalOrder(),
       });
@@ -153,17 +191,17 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
       await navTo(page, 'Lawyer workspace');
       await page.getByRole('region', { name: 'Needs attention' }).getByRole('link', { name: /Accused-901/ }).first().waitFor();
       await capture('dashboard');
-      await navTo(page, 'Deadline Calendar');
+      await navTo(page, 'See important dates');
       await page.getByRole('region', { name: 'Month view' }).waitFor();
       await capture('calendar');
-      await navTo(page, 'Action board');
+      await navTo(page, 'See cases that need action');
       await page.getByRole('link', { name: /Accused-901.*Lawyer review/ }).click();
       await page.getByRole('heading', { name: /^Case / }).waitFor();
       await page.getByText(/Custody counted:/).waitFor();
       await capture('case-view');
     });
     await step('export signed PDF', 120_000, async () => {
-      await navTo(page, 'Drafts');
+      await navTo(page, 'Write orders and notices');
       if (previewDirectory) {
         await page.getByRole('region', { name: 'Draft preview' }).getByText(/Smoke Tester/).first().waitFor();
         await capture('drafts');
@@ -183,12 +221,12 @@ test('Electron imports a fictional PDF, saves a board card, exports and verifies
 
     page = await step('open verifier', launchBudget, () => app.openVerifier());
     await step('verify signed PDF', 60_000, async () => {
-      await find(page, 'Verifier').waitFor();
-      await page.getByLabel('Signed PDF').setInputFiles(join(exportDirectory, pdf));
+      await find(page, 'Check a document is unchanged').waitFor();
+      await page.getByLabel('Signed PDF or original evidence file').setInputFiles(join(exportDirectory, pdf));
       await page.getByLabel('Receipt file').setInputFiles(join(exportDirectory, receipt));
       await page.getByLabel('Manifest file').setInputFiles(join(exportDirectory, manifest));
-      await page.getByRole('button', { name: 'Verify', exact: true }).click();
-      await page.getByText('✓ Valid', { exact: true }).waitFor();
+      await page.getByRole('button', { name: 'Check file', exact: true }).click();
+      await page.getByText('✓ Signature matches', { exact: true }).waitFor();
       await page.getByText('✓ Unchanged', { exact: true }).waitFor();
     });
   } catch (error) {

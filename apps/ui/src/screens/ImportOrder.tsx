@@ -2,7 +2,8 @@ import { ui } from '../lib/i18n';
 import { useMemo, useRef, useState } from 'react';
 import type { CourtPlusApi, Entity, FieldSuggestion } from '@courtplus/contracts';
 import { useApp } from '../lib/context';
-import { ErrorNote, Page, btn, btnPrimary, errMsg } from '../components/ui';
+import { ErrorNote, btn, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 type Imported = Awaited<ReturnType<CourtPlusApi['importOrder']>>;
 type Decision = { status: 'pending' | 'confirmed' | 'rejected'; value: string };
@@ -86,7 +87,7 @@ export function ImportOrder() {
   };
 
   return (
-    <Page title={ui("Import order")} note={ui("Text is read on this computer. Suggestions need a person to confirm.")}>
+    <ScreenPage screenId="import" judgeHint note={ui("The order is read on this computer. Check suggestions against the order.")}>
       <ErrorNote error={error} />
       {!doc && (
         <div
@@ -99,6 +100,7 @@ export function ImportOrder() {
           <label className={`${btnPrimary} cursor-pointer`}>
             {busy ? ui("Reading…") : ui("Choose PDF or image")}
             <input
+              data-guide="start"
               type="file" accept="application/pdf,image/*" className="sr-only"
               onChange={(e) => void handleFile(e.target.files?.[0])}
             />
@@ -113,7 +115,7 @@ export function ImportOrder() {
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={anonymise} onChange={(e) => setAnonymise(e.target.checked)} />{ui("Anonymised view (names masked)")}</label>
               {doc.ocr && <span className="rounded bg-slate-200 px-2 py-0.5 text-xs">{ui("Scanned: read by OCR, check carefully")}</span>}
-              <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium">{ui("✦ AI helped read this order")}</span>
+              <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium">{ui("✦ The app suggested details from this order")}</span>
               <button className={btn} onClick={() => setDoc(null)}>{ui("Import another")}</button>
             </div>
             <div
@@ -181,6 +183,6 @@ export function ImportOrder() {
           </aside>
         </div>
       )}
-    </Page>
+    </ScreenPage>
   );
 }

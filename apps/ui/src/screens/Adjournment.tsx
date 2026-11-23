@@ -2,7 +2,8 @@ import { ui } from '../lib/i18n';
 import { useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { AdjournmentAdvice, AdjournmentRequest, AdjournmentSummary } from '@courtplus/contracts';
-import { btn, btnPrimary, ErrorNote, Page } from '../components/ui';
+import { btn, btnPrimary, ErrorNote } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { todayIST } from '../lib/context';
 import { fieldStyle, SourceLink, tomorrowIST, useCourt } from './Triage';
 
@@ -42,11 +43,11 @@ export function Adjournment() {
 
   const advice = reviewed?.advice;
   const history = advice?.history ?? selected?.adjournments;
-  return <Page title={ui("Adjournment analyzer")} note={ui("Priority hint - the judge decides")}>
-    <Link to="/triage">{ui("Back to Smart triage")}</Link>
+  return <ScreenPage screenId="adjournment" note={ui("Moving a hearing to a later date (adjournment).")} judgeHint>
+    <Link to="/triage">{ui("Back to hearing priorities")}</Link>
     <ErrorNote error={error} />
     {message && <p role="status">{message}</p>}
-    {!window.courtplusJudge && <p>{ui("Open the adjournment analyzer in the desktop workspace.")}</p>}
+    {!window.courtplusJudge && <p>{ui("Open the Court+ desktop app to check a request to move a hearing.")}</p>}
     {window.courtplusJudge && profile !== undefined && profile?.role !== 'judge' &&
       <p>Choose the Judge role in your <Link to="/profile">{ui("desktop profile")}</Link>.</p>}
     {!data && busy && <p role="status">{ui("Loading docket…")}</p>}
@@ -69,7 +70,7 @@ export function Adjournment() {
               <option value="">{ui("Choose procedure")}</option>
               <option value="cpc">{ui("Civil suit under CPC")}</option><option value="bnss">{ui("Inquiry or trial under BNSS")}</option>
               <option value="other">{ui("Other or uncertain")}</option></select></label>
-            <button className={btnPrimary}>{ui("Review request")}</button>
+            <button data-guide="start" className={btnPrimary}>{ui("Review request")}</button>
           </fieldset>
         </form>
       </section>
@@ -98,7 +99,7 @@ export function Adjournment() {
         </form>
       </section>}
     </fieldset>}
-  </Page>;
+  </ScreenPage>;
 }
 
 function History({ history }: { history: AdjournmentSummary[] }) {

@@ -60,7 +60,7 @@ describe('triage priority tiers', () => {
       source: { act: 'Bharatiya Nagarik Suraksha Sanhita, 2023', section: '479', text: 'Detention limit', url: niaUrl },
     }] })]);
     await userEvent.setup().click(await screen.findByText('Why this tier'));
-    const proof = screen.getByRole('link', { name: 'View s.479 proof trace' });
+    const proof = screen.getByRole('link', { name: 'See how we checked for release' });
     expect(proof.closest('li')).toHaveTextContent('BNSS s.479: Apply now (checked 2026-11-23)');
     expect(proof).toHaveAttribute('href', '/case/fictional-479');
   });
@@ -71,7 +71,7 @@ describe('triage priority tiers', () => {
     expect(chips.getByRole('button', { name: 'Tier 2 (0)' })).toBeVisible();
     expect(chips.getByRole('button', { name: 'Tier 3 (2)' })).toBeVisible();
     expect(chips.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('Rule-based priority - not AI, not a judgement about any person. The judge decides.')).toBeVisible();
+    expect(screen.getByText('Hint - the judge decides')).toBeVisible();
 
     await user.click(chips.getByRole('button', { name: 'Tier 1 (1)' }));
     const badge = screen.getByText('Tier 1 — Liberty / custody');
@@ -83,7 +83,7 @@ describe('triage priority tiers', () => {
     expect(screen.getByText('Tiers order the list from recorded case facts. They do not decide any legal right.')).toBeVisible();
     expect(screen.queryByRole('heading', { name: /\/100/ })).not.toBeInTheDocument();
     await user.click(screen.getByText('Factor reasons and sources'));
-    expect(screen.getByText('Ordering aid (not a tier): 0/100')).toBeVisible();
+    expect(screen.getByText('Score used to order cases: 0/100')).toBeVisible();
     expect(screen.getByRole('link', { name: 'National Investigation Agency Act, 2008 19' })).toHaveAttribute('href', niaUrl);
 
     await user.click(screen.getByRole('button', { name: 'Judge override' }));

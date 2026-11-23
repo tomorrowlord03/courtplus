@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Card, Lane } from '@courtplus/contracts';
 import { useApp, todayIST } from '../lib/context';
-import { Empty, ErrorNote, Page, errMsg } from '../components/ui';
+import { Empty, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 
 export const LANES: { lane: Lane; title: string; hint: string }[] = [
   { lane: 'APPLY_NOW', title: 'Apply now', hint: 'Threshold reached: superintendent to apply; court decides' },
@@ -60,14 +61,15 @@ export function Board() {
 
   if (cards && cards.length === 0) {
     return (
-      <Page title={ui("Action board")}>
-        <Empty title={ui("Nothing to act on yet")} hint={ui("Import a court order to begin.")} to="/import" cta={ui("Import order")} />
-      </Page>
+      <ScreenPage screenId="board">
+        <Empty title={ui("Nothing to act on yet")} hint={ui("Import a court order to begin.")} to="/import" cta={ui("Add a court order")} />
+      </ScreenPage>
     );
   }
 
+  const firstCase = LANES.map(({ lane }) => cards?.find(card => card.lane === lane)).find(Boolean);
   return (
-    <Page title={ui("Action board")} note={ui("Each card is a suggestion for a person to check. Nothing here is a decision.")}>
+    <ScreenPage screenId="board" note={ui("Check each suggested action before taking it.")}>
       <ErrorNote error={error} />
       {!cards && !error && <p>{ui("Loading…")}</p>}
       {cards && (
@@ -95,7 +97,7 @@ export function Board() {
                 <ul className="mt-2 space-y-2">
                   {inLane.map((c) => (
                     <li key={c.id} className="rounded border p-2 text-sm">
-                      <Link to={`/case/${c.caseId}`} className="font-medium text-blue-800 underline">{c.title}</Link>
+                      <Link data-guide={c.id === firstCase?.id ? "start" : undefined} to={`/case/${c.caseId}`} className="font-medium text-blue-800 underline">{c.title}</Link>
                       <p className="text-slate-700">{ui("Owner:") + " "}{c.owner ?? 'unassigned'}{c.dueOn ? ` · Due ${c.dueOn}` : ''}
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1">
@@ -119,6 +121,6 @@ export function Board() {
           })}
         </div>
       )}
-    </Page>
+    </ScreenPage>
   );
 }

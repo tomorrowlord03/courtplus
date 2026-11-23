@@ -9,6 +9,7 @@ ml/**/runs/
 ml/**/artifacts/
 *.onnx
 *.safetensors
+*.gguf
 *.bin
 .venv/
 scripts/cohort/out/

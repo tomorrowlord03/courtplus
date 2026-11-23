@@ -4,7 +4,8 @@ import type { Card, Lane } from '@courtplus/contracts';
 import { Link } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, LabelList, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Icon } from '../components/icons';
-import { btn, ErrorNote, errMsg, Page } from '../components/ui';
+import { btn, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { todayIST, useApp } from '../lib/context';
 import { weeklyActivity } from '../lib/dashboard';
 import { useWorkData, type WorkData } from '../lib/deadlines';
@@ -17,7 +18,7 @@ const regionIndicators = [
   { id: 'cg-undertrial-share', label: 'Undertrial share', max: 100 },
   { id: 'cg-occupancy', label: 'Prison occupancy', max: 150 },
   { id: 'cg-utrc-identified', label: 'Identified for review' },
-  { id: 'cg-utrc-recommended', label: 'Release recommended' },
+  { id: 'cg-utrc-recommended', label: 'Release application suggested for review' },
   { id: 'cg-utrc-released', label: 'Released' },
 ];
 const axis = { fontSize: 11, fill: 'var(--muted)' };
@@ -25,21 +26,21 @@ const tooltip = { border: '1px solid var(--border)', borderRadius: 12 };
 
 export function Dashboard() {
   const role = useRole();
-  return role === 'citizen' ? <RightsAdvisor title={ui(dashboardTitle(role))} /> : <WorkDashboard role={role} />;
+  return role === 'citizen' ? <RightsAdvisor title={ui(dashboardTitle(role))} screenId="dashboard" /> : <WorkDashboard role={role} />;
 }
 
 function WorkDashboard({ role }: { role: RoleGroup }) {
   const { data, error } = useWorkData();
-  return <Page title={ui(dashboardTitle(role))}>
+  return <ScreenPage screenId="dashboard" title={ui(dashboardTitle(role))}>
     <ErrorNote error={error} />
     {!data?.boardIncluded && !error && <p role="status">{ui('Loading dashboard…')}</p>}
-    {data?.boardIncluded && <section aria-label={ui('Undertrial release check')}>
-      <h2 className="mb-2 text-lg font-semibold">{ui('Undertrial release check')}</h2>
+    {data?.boardIncluded && <section aria-label={ui('Who can apply for release')}>
+      <h2 className="mb-2 text-lg font-semibold">{ui('Who can apply for release')}</h2>
       <DashboardContent data={data} showActivityTrend={role === 'lawyer'} />
     </section>}
     {/* Judge view order: release check (with deadlines) first, then court backlog, official benchmarks last. */}
     {role === 'judge' && <CourtBacklogPanel caseCount={data?.cases.length} caseError={error} />}
-  </Page>;
+  </ScreenPage>;
 }
 
 function DashboardContent({ data, showActivityTrend }: { data: WorkData; showActivityTrend: boolean }) {
@@ -175,7 +176,7 @@ function MonthlyProgress({ open, applyNow, review, closed }: { open: number; app
 function Attention({ cards, empty, due, mismatch }: { cards: Card[]; empty: boolean; due: number; mismatch: number }) {
   const soonest = [...cards].sort((a, b) => (a.dueOn ?? '9999').localeCompare(b.dueOn ?? '9999') || a.title.localeCompare(b.title)).slice(0, 3);
   return <section className="panel attention-panel" aria-labelledby="attention-title">
-    <div className="panel-heading"><h2 id="attention-title">{ui("Needs attention")}</h2><Link className="panel-link" to="/board">{ui("View all") + " "}<Icon name="arrow" size={15} /></Link></div>
+    <div className="panel-heading"><h2 id="attention-title">{ui("Needs attention")}</h2><Link data-guide="start" className="panel-link" to="/board">{ui("View all") + " "}<Icon name="arrow" size={15} /></Link></div>
     <div className="attention-metrics"><BoardMetric label={ui("Due in 30 days")} count={due} /><BoardMetric label={ui("Court/jail mismatch")} count={mismatch} /></div>
     {!soonest.length && <p className="muted">{empty ? ui("No cases saved yet") : ui("No open cards")}</p>}
     <div className="attention-list">
@@ -183,7 +184,7 @@ function Attention({ cards, empty, due, mismatch }: { cards: Card[]; empty: bool
         <Icon name={card.dueOn ? 'calendar' : 'cases'} size={17} /><strong>{card.title}</strong>
         {card.dueOn ? <time dateTime={card.dueOn}>{ui("Due") + " "}{card.dueOn}</time> : <span>{ui("No due date")}</span>}
       </Link>)}
-      <Link className="attention-add" to="/import"><Icon name="plus" size={19} />{" " + ui("Import order")}</Link>
+      <Link className="attention-add" to="/import"><Icon name="plus" size={19} />{" " + ui("Add a court order")}</Link>
     </div>
   </section>;
 }
@@ -191,7 +192,7 @@ function Attention({ cards, empty, due, mismatch }: { cards: Card[]; empty: bool
 function RegionCard() {
   const identified = chhattisgarh.figures.find(figure => figure.id === 'cg-utrc-identified' && figure.verified)?.value;
   return <section className="panel region-panel" aria-labelledby="region-title">
-    <div className="panel-heading"><h2 id="region-title">{ui("Chhattisgarh at a glance")}</h2><Link className="panel-link" to="/stats">{ui("Statistics") + " "}<Icon name="arrow" size={15} /></Link></div>
+    <div className="panel-heading"><h2 id="region-title">{ui("Chhattisgarh at a glance")}</h2><Link className="panel-link" to="/stats">{ui("See court and prison numbers") + " "}<Icon name="arrow" size={15} /></Link></div>
     <div className="overview-list">{regionIndicators.map(({ id, label, max }) => {
       const figure = chhattisgarh.figures.find(item => item.id === id && item.verified);
       if (!figure) return null;

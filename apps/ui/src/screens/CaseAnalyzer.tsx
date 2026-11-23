@@ -1,7 +1,8 @@
 import { ui } from '../lib/i18n';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { CASE_ROLES, LAWYER_HINT, PRECEDENT_LOADING, type CaseAnalysis, type LawyerPdf, type ResearchResult, type ResearchSentence } from '@courtplus/contracts';
-import { Page, ErrorNote, btnPrimary, errMsg } from '../components/ui';
+import { ErrorNote, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { LawyerNav, SignedPdfResult } from './SettlementAnalyzer';
 
 const people = new Set(['PETITIONER', 'RESPONDENT', 'WITNESS', 'OTHER_PERSON', 'LAWYER']);
@@ -60,7 +61,7 @@ export function CaseAnalyzer() {
     finally { setBusy(undefined); }
   }
 
-  return <Page title={ui("Case analyzer")} note={ui("Read a case file locally and review the extracted material before using the analysis.")}>
+  return <ScreenPage screenId="case-analyzer" judgeHint note={ui("Case file analysis. Check each suggestion against the original.")}>
     <LawyerNav />
     <div className="grid gap-4">
       <section className="panel">
@@ -69,7 +70,7 @@ export function CaseAnalyzer() {
             required disabled={!api || !!busy} onChange={event => {
               setFile(event.target.files?.[0]); setAnalysis(undefined); setOut(undefined); setError(null);
             }} /></label>
-          <div><button className={btnPrimary} disabled={!file || !api || !!busy}>{busy === 'analyzing' ? ui("Analyzing…") : ui("Analyze case")}</button></div>
+          <div><button data-guide="start" className={btnPrimary} disabled={!file || !api || !!busy}>{busy === 'analyzing' ? ui("Analyzing…") : ui("Read case file")}</button></div>
         </form>
         {!api && <p role="status" className="mt-2">{ui("Open the CourtPlus desktop app to analyze a case file.")}</p>}
         {busy === 'analyzing' && <p role="status" className="mt-2">{ui("Reading and masking the case file. Scanned pages may take longer.")}</p>}
@@ -146,5 +147,5 @@ export function CaseAnalyzer() {
         {out && <SignedPdfResult out={out} />}
       </>}
     </div>
-  </Page>;
+  </ScreenPage>;
 }

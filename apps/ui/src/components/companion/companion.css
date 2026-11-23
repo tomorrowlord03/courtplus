@@ -1,0 +1,264 @@
+.companion-root {
+  flex: none;
+  display: flex;
+  max-width: calc(100vw - 36px);
+}
+
+.companion-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  max-height: 100%;
+  overflow: auto;
+  pointer-events: auto;
+}
+
+.companion-container > :first-child {
+  min-width: 0;
+}
+
+.companion-avatar-anchor {
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+}
+
+[data-companion-target="true"] {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 3px !important;
+  transition: outline 0.2s ease !important;
+}
+
+.companion-reduced-motion {
+  transition: opacity 0.2s ease !important;
+}
+
+.companion-reduced-motion * {
+  transition: opacity 0.2s ease !important;
+}
+
+.companion-bubble {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 12px 14px;
+  width: 320px;
+  max-width: 90vw;
+  font-family: inherit;
+  color: #1e293b;
+  position: relative;
+}
+
+.companion-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.companion-guide-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+  display: inline-block;
+  line-height: 1.3;
+}
+
+.companion-close-btn {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.companion-close-btn:hover {
+  color: #0f172a;
+}
+
+.companion-step-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.companion-narration-box {
+  min-height: 48px;
+  margin-bottom: 6px;
+}
+
+.companion-speech-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #334155;
+  margin: 0;
+}
+
+.companion-thinking-text {
+  font-size: 13px;
+  font-style: italic;
+  color: #0284c7;
+  margin: 0;
+}
+
+.companion-readonly-notice {
+  font-size: 11px;
+  color: #64748b;
+  margin: 4px 0 8px 0;
+  background: #f8fafc;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border-left: 2px solid #3b82f6;
+}
+
+.companion-progress-container {
+  margin-bottom: 8px;
+}
+
+.companion-progress-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.companion-progress-track {
+  width: 100%;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.companion-progress-fill {
+  height: 100%;
+  background: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.companion-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.companion-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.companion-offer-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.companion-prompt-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.courtplus-companion-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.cp-breathing-group {
+  animation: cp-breathe-anim 3s ease-in-out infinite;
+  transform-origin: 28px 28px;
+}
+
+.cp-eyes-blinking {
+  animation: cp-blink-anim 4.5s infinite;
+  transform-origin: 28px 25px;
+}
+
+.cp-eyes-thinking {
+  animation: cp-look-up-anim 2s ease-in-out infinite alternate;
+  transform-origin: 28px 25px;
+}
+
+.cp-mouth-talking {
+  animation: cp-mouth-anim 0.25s ease-in-out infinite alternate;
+  transform-origin: 28px 31px;
+}
+
+.cp-glow-thinking {
+  animation: cp-glow-anim 1.5s ease-in-out infinite alternate;
+}
+
+.cp-antenna-pulse {
+  animation: cp-antenna-anim 1s ease-in-out infinite alternate;
+}
+
+.cp-thinking-dots .cp-dot-1 {
+  animation: cp-pulse-dot 1.2s ease-in-out infinite;
+}
+.cp-thinking-dots .cp-dot-2 {
+  animation: cp-pulse-dot 1.2s ease-in-out 0.2s infinite;
+}
+.cp-thinking-dots .cp-dot-3 {
+  animation: cp-pulse-dot 1.2s ease-in-out 0.4s infinite;
+}
+
+@keyframes cp-breathe-anim {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes cp-blink-anim {
+  0%, 88%, 100% { transform: scaleY(1); }
+  93% { transform: scaleY(0.1); }
+}
+
+@keyframes cp-look-up-anim {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-2px) translateX(1px); }
+}
+
+@keyframes cp-mouth-anim {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.6); }
+}
+
+@keyframes cp-glow-anim {
+  0% { opacity: 0.4; }
+  100% { opacity: 0.9; }
+}
+
+@keyframes cp-antenna-anim {
+  0% { transform: scale(1); fill: #3b82f6; }
+  100% { transform: scale(1.3); fill: #38bdf8; }
+}
+
+@keyframes cp-pulse-dot {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-breathing-group,
+  .cp-eyes-blinking,
+  .cp-eyes-thinking,
+  .cp-mouth-talking,
+  .cp-glow-thinking,
+  .cp-antenna-pulse,
+  .cp-thinking-dots circle {
+    animation: none !important;
+  }
+}

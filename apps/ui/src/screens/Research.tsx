@@ -2,7 +2,8 @@ import { ui } from '../lib/i18n';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { HINT_LABEL, type PrecedentHit, type PrecedentQuery, type PrecedentText } from '@courtplus/contracts';
-import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
+import { btn, btnPrimary, ErrorNote, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import {
   addDraftCitation, copyText, formatCitation, highlight, removeDraftCitation, researchApi, unavailableText, useDraftCitations,
 } from '../lib/research';
@@ -55,7 +56,7 @@ export function Research() {
     setMessage(await copyText(formatCitation(hit)) ? 'Citation copied.' : 'Could not copy. Select the citation and copy it.');
   }
 
-  return <Page title={ui("Research")} note={ui("Search published judgments by plain words or a section. Results are hints with their source.")}>
+  return <ScreenPage screenId="research" judgeHint note={ui("Search published decisions by words or a law section. Each result links to its source.")}>
     <form className="panel research-form" role="search" onSubmit={event => void search(event)}>
       <label>{ui("Search judgments")}<input className="field-control" name="query" type="search" required maxLength={2000}
           placeholder="e.g. default bail chargesheet not filed, or IPC 379" />
@@ -68,7 +69,7 @@ export function Research() {
         </label>
         <label>{ui("From year")}<input className="field-control" name="yearFrom" type="number" min={1950} max={2100} inputMode="numeric" /></label>
         <label>{ui("To year")}<input className="field-control" name="yearTo" type="number" min={1950} max={2100} inputMode="numeric" /></label>
-        <button className={btnPrimary} disabled={busy}>{busy ? ui("Searching…") : ui("Search")}</button>
+        <button data-guide="start" className={btnPrimary} disabled={busy}>{busy ? ui("Searching…") : ui("Search")}</button>
       </div>
     </form>
     <ErrorNote error={error} />
@@ -95,7 +96,7 @@ export function Research() {
       <div className="research-text">{open.text}</div>
     </section>}
     <DraftCitations />
-  </Page>;
+  </ScreenPage>;
 }
 
 function DraftCitations() {

@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import type { SectionSuggestion } from '@courtplus/contracts';
 import { HINT_LABEL } from '@courtplus/contracts';
-import { btn, btnPrimary, Page } from '../components/ui';
+import { btn, btnPrimary } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { useApp } from '../lib/context';
 import { t, ui } from '../lib/i18n';
 import { researchApi } from '../lib/research';
@@ -17,7 +18,7 @@ export function adviseFor(description: string): MatchResult[] {
   return matchGuides(description, BUILTIN_GUIDES, { limit: 5 });
 }
 
-export function RightsAdvisor({ title = 'Rights advisor' }: { title?: string }) {
+export function RightsAdvisor({ title, screenId = 'rights' }: { title?: string; screenId?: 'rights' | 'dashboard' }) {
   const { language } = useApp();
   const [guideLanguage, setGuideLanguage] = useState<Lang>();
   const lang = guideLanguage ?? (language === 'hi' ? 'hi' : 'en');
@@ -41,13 +42,13 @@ export function RightsAdvisor({ title = 'Rights advisor' }: { title?: string }) 
   const others = matches?.filter(match => match.guide.id !== chosen?.id) ?? [];
   const fallback = getGuideById('free-legal-aid');
 
-  return <Page title={ui(title)} note={t('rights.note', 'Find your rights and the next steps. Not legal advice; free legal aid can help you.')}>
+  return <ScreenPage screenId={screenId} title={title} note={t('rights.note', 'Find your rights and the next steps. Not legal advice; free legal aid can help you.')}>
     <form className="panel rights-form" onSubmit={submit}>
       <label htmlFor="rights-description" className="font-medium">{t('rights.describe', 'Describe your problem in your own words')}</label>
       <textarea id="rights-description" name="description" className="field-control" rows={4} maxLength={4000} required
         placeholder={t('rights.placeholder', 'For example: my employer has not paid my salary for three months / मालिक ने तीन महीने से वेतन नहीं दिया')} />
       <div className="flex flex-wrap items-center gap-2">
-        <button className={btnPrimary}>{t('rights.find', 'Find my rights and next steps')}</button>
+        <button data-guide="start" className={btnPrimary}>{t('rights.find', 'Find my rights and next steps')}</button>
         <LegalAidButton />
         <label className="ml-auto text-sm">{t('rights.showIn', 'Show guide in')}{' '}
           <select className="field-control inline-block w-auto" value={lang} onChange={event => setGuideLanguage(event.target.value as Lang)}>
@@ -76,11 +77,11 @@ export function RightsAdvisor({ title = 'Rights advisor' }: { title?: string }) 
       </li>)}</ul>
       <p className="text-xs muted">{HINT_LABEL}: a lawyer or legal-aid clinic should confirm which law applies.</p>
     </section>}
-  </Page>;
+  </ScreenPage>;
 }
 
 function LegalAidButton() {
-  return <a className={btn} href={`tel:${NALSA_HELPLINE}`}>{t('rights.legalAid', `Talk to free legal aid (NALSA ${NALSA_HELPLINE})`)}</a>;
+  return <a className={btn} href={`tel:${NALSA_HELPLINE}`}>{t('rights.legalAid', `Talk to free legal aid (National Legal Services Authority, ${NALSA_HELPLINE})`)}</a>;
 }
 
 function TopicChips({ guides, lang, onPick, label }: { guides: Guide[]; lang: Lang; onPick: (guide: Guide) => void; label: string }) {

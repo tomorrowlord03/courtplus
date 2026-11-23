@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import type { CaseRecord, ScreeningResult } from '@courtplus/contracts';
 import { daysBetween, todayIST, useApp } from '../../lib/context';
 import { ui } from '../../lib/i18n';
-import { Empty, ErrorNote, Page, btn, btnPrimary, errMsg } from '../ui';
+import { ScreenPage } from '../ScreenIntro';
+import { Empty, ErrorNote, btn, btnPrimary, errMsg } from '../ui';
 import { CaseText, ResultChip, cardReason, caseReference, chargeText, fullDate, plainReason, resultKind, results, type CaseResult } from './casePresentation';
 
 interface CaseRow {
@@ -92,14 +93,14 @@ export function CaseCards() {
     return terms.every(term => searchable.includes(term));
   });
 
-  return <Page title={ui('Cases')}>
+  return <ScreenPage screenId="cases" title={ui('Cases')}>
     <ErrorNote error={error} />
     {!rows && !error && <p role="status">{ui('Loading cases…')}</p>}
     {rows?.length === 0 && <Empty title={ui('No cases yet')} hint={ui('Import an order to get started.')} to="/import" cta={ui('Import order')} />}
     {!!rows?.length && <div className="space-y-4">
       <label className="block max-w-lg font-medium">
         {ui('Search cases')}
-        <input type="search" className="field-control mt-1 w-full" placeholder={ui('Alias, section or court')} value={query}
+        <input data-guide="start" type="search" className="field-control mt-1 w-full" placeholder={ui('Alias, section or court')} value={query}
           onChange={event => setQuery(event.target.value)} />
       </label>
       <div role="group" aria-label={ui('Filter by result')} className="flex flex-wrap gap-2">
@@ -113,5 +114,5 @@ export function CaseCards() {
         {visible?.map(row => <li key={row.record.id}><CaseCard row={row} /></li>)}
       </ul>
     </div>}
-  </Page>;
+  </ScreenPage>;
 }

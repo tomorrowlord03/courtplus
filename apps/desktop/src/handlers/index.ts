@@ -10,6 +10,7 @@ import { clearProfile, readProfile, readSettings, writeProfile } from './setting
 import { createEvidenceHandlers } from './evidence';
 import { createCourtHandler } from './triage';
 import { createLawyerHandlers, registerLawyerHandlers } from './lawyer';
+import { createGuideHandler, registerGuideHandler } from './guide-llm';
 
 interface HandlerPorts {
   resourceDirectory: string;
@@ -61,6 +62,7 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
   const anchor = createAnchor(store, exports, { ...ports, localizationRoot: ports.resourceDirectory });
   const evidence = createEvidenceHandlers(store, ports, cloud);
   registerLawyerHandlers(createLawyerHandlers(store, engine, exports, signer, ports));
+  registerGuideHandler(createGuideHandler(ports.resourceDirectory, store.audit));
   const handlers: DesktopWorkspaceApi = {
     listPersons: async () => listPersons(),
     listCases: async () => listCases(),

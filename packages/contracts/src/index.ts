@@ -131,3 +131,4 @@ export * from './hearing-publication.js';
 export * from './lawyer.js';
 export * from './draft.js';
 export * from './research.js';
+export * from './guide.js';

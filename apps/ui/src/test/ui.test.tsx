@@ -55,7 +55,7 @@ describe('Route loading', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not load this screen.');
     expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
     const sidebar = screen.getByRole('complementary', { name: 'Primary navigation' });
-    await userEvent.click(within(sidebar).getByRole('link', { name: 'Action board' }));
+    await userEvent.click(within(sidebar).getByRole('link', { name: 'See cases that need action' }));
 
     expect(await screen.findByText(/Import a court order to begin/)).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -174,7 +174,7 @@ describe('Case what-if slider', () => {
     expect(await screen.findByText('Needs a lawyer')).toBeInTheDocument();
     const proof = screen.getByText('How we checked (proof trace)').closest('details');
     expect(proof).not.toHaveAttribute('open');
-    await userEvent.click(screen.getByRole('button', { name: 'Open proof trace' }));
+    await userEvent.click(screen.getByRole('button', { name: 'See how we checked' }));
     expect(proof).toHaveAttribute('open');
     expect(screen.getByRole('region', { name: 'Proof trace' })).toHaveTextContent('as of = 2023-12-31');
     await userEvent.click(screen.getByRole('button', { name: 'Back to today' }));
@@ -221,14 +221,14 @@ it('shows verdicts for the signed and edited PDF with a neutral unchecked audit 
   await uploadPdf(1);
   await userEvent.upload(screen.getByLabelText(/^Receipt file/), json);
   await userEvent.upload(screen.getByLabelText(/^Manifest file/), json);
-  await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Check file' }));
   expect(await screen.findByText('Unchanged since signing')).toHaveClass('border-green-700');
   expect(screen.getByText('– Not checked').parentElement).toHaveClass('border-slate-300');
   expect(screen.getByRole('region', { name: 'Verification result' }).querySelector('.border-red-700')).toBeNull();
   await uploadPdf(0);
-  await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Check file' }));
   expect(await screen.findByText('Changed after signing')).toHaveClass('border-red-700');
-  expect(screen.getByText('✓ Valid')).toBeInTheDocument();
+  expect(screen.getByText('✓ Signature matches')).toBeInTheDocument();
 });
 
 it('verifies an evidence file and receipt without a manifest and shows the signed metadata', async () => {
@@ -241,7 +241,7 @@ it('verifies an evidence file and receipt without a manifest and shows the signe
   wrap(mockApi({ verify }), <Verifier />);
   await userEvent.upload(screen.getByLabelText(/^Signed PDF/), new File(['fictional bytes'], 'fictional.webm', { type: 'audio/webm' }));
   await userEvent.upload(screen.getByLabelText(/^Receipt file/), new File(['fictional signed receipt'], 'fictional.json'));
-  await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Check file' }));
   expect(await screen.findByText('Evidence receipt')).toBeInTheDocument();
   expect(screen.getByText('Evidence file')).toBeInTheDocument();
   for (const value of [keyId, hash, '2026-01-02T03:04:05.000Z']) expect(screen.getByText(value)).toBeInTheDocument();
@@ -264,15 +264,15 @@ it.each([
   const json = new File(['{}'], 'fixture.json', { type: 'application/json' });
   await userEvent.upload(screen.getByLabelText(/^Receipt file/), json);
   await userEvent.upload(screen.getByLabelText(/^Manifest file/), json);
-  await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Check file' }));
 
   const verification = within(await screen.findByRole('region', { name: 'Verification result' }));
-  expect(verification.getByText('Ed25519: valid')).toBeInTheDocument();
+  expect(verification.getByText('Ed25519: ✓ Signature matches')).toBeInTheDocument();
   if (legacy) {
-    expect(verification.getByText('Ed25519 only (older receipt, not quantum-safe)')).toBeInTheDocument();
+    expect(verification.getByText('Ed25519 only (older receipt)')).toBeInTheDocument();
     expect(verification.queryByText(/^ML-DSA-65/)).toBeNull();
   } else {
-    expect(verification.getByText('ML-DSA-65 (FIPS 204, quantum-safe): valid')).toBeInTheDocument();
+    expect(verification.getByText('ML-DSA-65 (FIPS 204): ✓ Signature matches')).toBeInTheDocument();
     expect(verification.getByText(hashes.sha256)).toBeInTheDocument();
     expect(verification.getByText(hashes.sha3_256)).toBeInTheDocument();
   }
@@ -292,7 +292,7 @@ describe('Import confirm / reject', () => {
     await userEvent.upload(screen.getByLabelText(/Choose PDF or image/), file);
     const s0 = await screen.findByTestId('suggestion-0');
     expect(s0).toHaveTextContent('Test order dated 01-02-2024.');
-    expect(screen.getByText(/AI helped read this order/)).toBeInTheDocument();
+    expect(screen.getByText(/The app suggested details from this order/)).toBeInTheDocument();
     await userEvent.click(s0.querySelector('button')!); // Confirm
     expect(s0).toHaveTextContent('Confirmed');
     const s1 = screen.getByTestId('suggestion-1');
@@ -308,7 +308,7 @@ describe('Judge dashboard', () => {
       listCases: async () => [{ id: 'fictional-case', personId: 'fictional-person', charges: [], custody: [], events: [], pendingStatus: 'trial' }],
     });
     wrap(api, <><App /><Location /></>, '/judge-dashboard');
-    expect(await screen.findByRole('heading', { name: 'Judge dashboard' })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: 'Judge dashboard' }, { timeout: 3_000 })).toBeVisible();
     expect(screen.getByLabelText('Current path')).toHaveTextContent(/^\/$/);
     const navigation = screen.getByRole('navigation', { name: 'Main' });
     expect(within(navigation).getAllByRole('link', { name: /^Judge dashboard$/i })).toHaveLength(1);

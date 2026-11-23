@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import type { CaseRecord, Person, ScreeningResult } from '@courtplus/contracts';
 import { ChevronDown } from 'lucide-react';
 import { addDays, daysBetween, todayIST, useApp } from '../lib/context';
-import { Empty, ErrorNote, Page, btn, btnPrimary, errMsg } from '../components/ui';
+import { Empty, ErrorNote, btn, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { HintsPanel } from '../components/HintsPanel';
 import { useRole } from '../lib/roles';
 import { ui } from '../lib/i18n';
@@ -13,8 +14,8 @@ import { CaseText, ResultChip, cardReason, caseReference, chargeText, fullDate, 
 export { CaseCards as CaseList };
 
 const meanings = {
-  APPLY_NOW: 'The recorded time in custody has reached the point for an application to the court.',
-  DUE_IN_N_DAYS: 'The recorded time in custody is approaching the point for an application to the court.',
+  APPLY_NOW: 'The person has reached the time in custody after which a release application can be made. The court decides.',
+  DUE_IN_N_DAYS: 'The person will reach the time in custody for a release application soon.',
   NEEDS_LAWYER_REVIEW: 'A lawyer needs to check the recorded facts and the rules that apply.',
   OUTSIDE_SCREEN: 'The recorded facts put this case outside the scope of this custody check.',
   BAIL_NOT_RELEASED: 'The records show bail was granted and the person is still in custody.',
@@ -84,8 +85,8 @@ function CaseDetails({ caseId }: { caseId: string }) {
   }, [rec, today]);
   const maxDate = [addDays(today, 365), rec?.orderDate ?? today].sort()[1];
 
-  if (rec === undefined) return <Page title={ui("Case")}><ErrorNote error={error} />{!error && <p>{ui("Loading…")}</p>}</Page>;
-  if (rec === null) return <Page title={ui("Case")}><Empty title={ui("Case not found")} to="/cases" cta={ui("All cases")} /></Page>;
+  if (rec === undefined) return <ScreenPage screenId="case"><ErrorNote error={error} />{!error && <p>{ui("Loading…")}</p>}</ScreenPage>;
+  if (rec === null) return <ScreenPage screenId="case"><Empty title={ui("Case not found")} to="/cases" cta={ui("All cases")} /></ScreenPage>;
 
   const trace = (
     <CasePanel title="How we checked (proof trace)" panelRef={proofPanel}>
@@ -159,7 +160,7 @@ function CaseDetails({ caseId }: { caseId: string }) {
   );
 
   return (
-    <Page title={reference ? `${ui('Case')} ${reference}` : ui('Case')} note={[person?.alias, rec.court].filter(Boolean).join(' · ')}>
+    <ScreenPage screenId="case" judgeHint={role === 'judge'} note={[reference, person?.alias, rec.court, ui("Section 479 of the Bharatiya Nagarik Suraksha Sanhita (BNSS)")].filter(Boolean).join(' · ')}>
       <ErrorNote error={screenError} />
       <div className="space-y-4">
         <section aria-label={ui('Case summary')} aria-live="polite" className="surface-card space-y-3">
@@ -178,10 +179,10 @@ function CaseDetails({ caseId }: { caseId: string }) {
             <div>
               <h2 className="mb-2">{ui('What to do next')}</h2>
               {canPrepare
-                ? <Link className={btnPrimary} to={drafts}>{ui('Open s.479(3) application drafts')}</Link>
+                ? <Link data-guide="start" className={btnPrimary} to={drafts}>{ui('Open release application drafts')}</Link>
                 : kind === 'BAIL_NOT_RELEASED'
-                  ? <button className={btnPrimary} type="button" onClick={() => openPanel(alertsPanel.current)}>{ui('Open release follow-up')}</button>
-                  : <button className={btnPrimary} type="button" onClick={() => openPanel(proofPanel.current)}>{ui('Open proof trace')}</button>}
+                  ? <button data-guide="start" className={btnPrimary} type="button" onClick={() => openPanel(alertsPanel.current)}>{ui('Open release follow-up')}</button>
+                  : <button data-guide="start" className={btnPrimary} type="button" onClick={() => openPanel(proofPanel.current)}>{ui('See how we checked')}</button>}
             </div>
           </> : <p>{screenError ? ui('Screening is unavailable for this date.') : ui('Checking the recorded facts…')}</p>}
         </section>
@@ -208,16 +209,16 @@ function CaseDetails({ caseId }: { caseId: string }) {
             <h2 className="text-lg font-semibold">{ui('Charges')}</h2>
             {rec.charges.length === 0 && <p className="text-sm text-slate-600">{ui('No charges recorded.')}</p>}
             <table className="w-full text-sm">
-              <thead><tr className="text-left"><th>{ui('Charge')}</th><th>{ui('Stage')}</th><th>{ui('Verified')}</th></tr></thead>
+              <thead><tr className="text-left"><th>{ui('Charge')}</th><th>{ui('Stage')}</th><th>{ui('Checked against record')}</th></tr></thead>
               <tbody>
                 {rec.charges.map((c, i) => (
                   <tr key={i} className="border-t">
                     <td><CaseText>{chargeText(c)}</CaseText></td>
-                    <td>{c.stage === 'FIR' ? <CaseText>{ui('FIR (as registered)')}</CaseText> : ui('Framed by court')}</td>
+                    <td>{c.stage === 'FIR' ? <CaseText>{ui('FIR (as registered)')}</CaseText> : ui('Charge framed (as recorded)')}</td>
                     <td>
                       {c.verified
-                        ? `✓ ${c.source?.verifiedBy ?? ui('verified')}${c.source?.page ? `, ${ui('p.')} ${c.source.page}` : ''}`
-                        : c.stage === 'FRAMED' ? ui('✗ Not yet verified (not counted)') : '—'}
+                        ? `✓ ${c.source?.verifiedBy ?? ui('Checked against record')}${c.source?.page ? `, ${ui('p.')} ${c.source.page}` : ''}`
+                        : c.stage === 'FRAMED' ? ui('✗ Not yet checked against record (not counted)') : '—'}
                     </td>
                   </tr>
                 ))}
@@ -247,7 +248,7 @@ function CaseDetails({ caseId }: { caseId: string }) {
           {view === 'legal_aid' && <Link to={drafts} className={btn}>{ui('Prepare drafts for this case')}</Link>}
         </CasePanel>
       </div>
-    </Page>
+    </ScreenPage>
   );
 }
 

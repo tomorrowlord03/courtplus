@@ -8,6 +8,7 @@
   "scripts": {
     "build": "npm run build -w @courtplus/contracts && npm run build -w @courtplus/engine && npm run build -w @courtplus/intake && npm run build -w @courtplus/export && tsc -p tsconfig.json && tsc -p tsconfig.ui.json && vite build && node scripts/prepare-resources.mjs",
     "copy-model": "node scripts/copy-model.mjs",
+    "copy-guide-model": "node scripts/copy-guide-model.mjs",
     "asr-model": "node scripts/asr-model.mjs fetch whisper-small q8 && node scripts/asr-model.mjs copy whisper-small q8",
     "test": "vitest run",
     "test:smoke": "node --test tests/smoke.electron.mjs",
@@ -15,7 +16,7 @@
     "test:fuses": "node --test tests/fuses.packaged.mjs",
     "dev": "npm run build && npm run copy-model && npm run rebuild && electron .",
     "rebuild": "node scripts/rebuild.mjs",
-    "dist": "npm run build && npm run copy-model && npm run rebuild -- --arch=x64 && electron-builder --win --x64 --config electron-builder.yml --publish never"
+    "dist": "npm run build && npm run copy-model && npm run copy-guide-model && npm run rebuild -- --arch=x64 && electron-builder --win --x64 --config electron-builder.yml --publish never"
   },
   "dependencies": {
     "@courtplus/engine": "0.0.0",
@@ -23,6 +24,7 @@
     "@courtplus/intake": "0.0.0",
     "better-sqlite3-multiple-ciphers": "13.2.0",
     "canonicalize": "2.1.0",
+    "node-llama-cpp": "3.22.3",
     "onnxruntime-node": "1.31.1",
     "onnxruntime-web": "1.31.1",
     "qrcode": "1.5.4",

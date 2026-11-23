@@ -1,0 +1,1072 @@
+{
+  "screens": [
+    {
+      "id": "dashboard",
+      "route": "/",
+      "roles": [
+        "judge",
+        "lawyer",
+        "citizen"
+      ],
+      "name": {
+        "en": "See what needs attention",
+        "hi": "देखें कहाँ ध्यान देना है"
+      },
+      "what": {
+        "en": "See urgent court work or find help for your own case.",
+        "hi": "ज़रूरी अदालती काम देखें या अपने मामले के लिए मदद पाएँ।"
+      },
+      "when": {
+        "en": "Use this when you first open Court+.",
+        "hi": "Court+ खोलने पर यहाँ से शुरू करें।"
+      },
+      "start": {
+        "en": "Open the work list or choose a rights topic.",
+        "hi": "काम की सूची खोलें या अधिकारों का विषय चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Look at the overview.",
+          "hi": "सारांश देखें।"
+        },
+        {
+          "en": "Open the item you need.",
+          "hi": "ज़रूरी जानकारी खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "calendar",
+      "route": "/calendar",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "See important dates",
+        "hi": "ज़रूरी तारीखें देखें"
+      },
+      "what": {
+        "en": "See deadlines and reminders from saved case records.",
+        "hi": "सहेजे गए मामलों की समय-सीमाएँ और याद दिलाने वाली तारीखें देखें।"
+      },
+      "when": {
+        "en": "Use this when planning work for the month.",
+        "hi": "महीने का काम तय करते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose Next month to see later dates.",
+        "hi": "आगे की तारीखों के लिए अगला महीना चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose the month you need.",
+          "hi": "ज़रूरी महीना चुनें।"
+        },
+        {
+          "en": "Open a case from the calendar.",
+          "hi": "कैलेंडर से मामला खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "triage",
+      "route": "/triage",
+      "roles": [
+        "judge"
+      ],
+      "name": {
+        "en": "Which cases to hear first",
+        "hi": "कौन से मामले पहले सुनें"
+      },
+      "what": {
+        "en": "See which pending cases court rules place first.",
+        "hi": "देखें कि अदालत के नियम किन लंबित मामलों को पहले रखते हैं।"
+      },
+      "when": {
+        "en": "Use this before making the hearing list.",
+        "hi": "सुनवाई की सूची बनाने से पहले इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose All to see cases in every priority group.",
+        "hi": "हर प्राथमिकता समूह के मामले देखने के लिए सभी चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Check the saved case details.",
+          "hi": "सहेजे गए मामले की जानकारी जाँचें।"
+        },
+        {
+          "en": "Read why a case is in its group.",
+          "hi": "देखें कि मामला उस समूह में क्यों है।"
+        },
+        {
+          "en": "Confirm the hearing list when ready.",
+          "hi": "तैयार होने पर सुनवाई की सूची की पुष्टि करें।"
+        }
+      ]
+    },
+    {
+      "id": "adjournment",
+      "route": "/triage/adjournment",
+      "roles": [
+        "judge"
+      ],
+      "name": {
+        "en": "Pick a realistic next date",
+        "hi": "अगली उपयुक्त तारीख चुनें"
+      },
+      "what": {
+        "en": "Check court workload and rules before suggesting a later hearing date.",
+        "hi": "अगली सुनवाई सुझाने से पहले अदालत का काम और नियम देखें।"
+      },
+      "when": {
+        "en": "Use this when someone asks to move a hearing.",
+        "hi": "जब कोई सुनवाई टालने को कहे, तब इसे खोलें।"
+      },
+      "start": {
+        "en": "Enter the request, then choose Review request.",
+        "hi": "अनुरोध भरें, फिर अनुरोध की समीक्षा करें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose a saved case.",
+          "hi": "सहेजा हुआ मामला चुनें।"
+        },
+        {
+          "en": "Enter who asked and how many days they need.",
+          "hi": "भरें कि किसने और कितने दिन माँगे।"
+        },
+        {
+          "en": "Record the date the judge chooses.",
+          "hi": "न्यायाधीश की चुनी तारीख दर्ज करें।"
+        }
+      ]
+    },
+    {
+      "id": "board",
+      "route": "/board",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "See cases that need action",
+        "hi": "कार्रवाई वाले मामले देखें"
+      },
+      "what": {
+        "en": "See which cases need a release request, a lawyer, or another check.",
+        "hi": "देखें किन मामलों में रिहाई का आवेदन, वकील या जाँच चाहिए।"
+      },
+      "when": {
+        "en": "Use this when deciding what to work on today.",
+        "hi": "आज का काम तय करते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Open a case from the list.",
+        "hi": "सूची से कोई मामला खोलें।"
+      },
+      "steps": [
+        {
+          "en": "Look for the most urgent group.",
+          "hi": "सबसे ज़रूरी समूह देखें।"
+        },
+        {
+          "en": "Open a case to check what it needs.",
+          "hi": "ज़रूरी कार्रवाई देखने के लिए मामला खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "import",
+      "route": "/import",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "Add a court order",
+        "hi": "अदालत का आदेश जोड़ें"
+      },
+      "what": {
+        "en": "Add a court order and check the details taken from it.",
+        "hi": "अदालत का आदेश जोड़ें और उससे ली गई जानकारी जाँचें।"
+      },
+      "when": {
+        "en": "Use this when you have an order to save.",
+        "hi": "जब कोई आदेश सहेजना हो, इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose the court order file.",
+        "hi": "अदालत के आदेश की फ़ाइल चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Pick the order from your computer.",
+          "hi": "अपने कंप्यूटर से आदेश चुनें।"
+        },
+        {
+          "en": "Check suggested details against the order.",
+          "hi": "सुझाई गई जानकारी आदेश से मिलाएँ।"
+        },
+        {
+          "en": "Confirm only details you have checked.",
+          "hi": "सिर्फ़ जाँची गई जानकारी की पुष्टि करें।"
+        }
+      ]
+    },
+    {
+      "id": "cases",
+      "route": "/cases",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "Find saved cases",
+        "hi": "सहेजे गए मामले ढूँढें"
+      },
+      "what": {
+        "en": "See saved cases and find those that may need release checks.",
+        "hi": "सहेजे गए मामले देखें और रिहाई की जाँच वाले मामले ढूँढें।"
+      },
+      "when": {
+        "en": "Use this when looking for a case already in Court+.",
+        "hi": "Court+ में पहले से दर्ज मामला ढूँढने के लिए इसे खोलें।"
+      },
+      "start": {
+        "en": "Type a name or number in Search cases.",
+        "hi": "मामले खोजें में नाम या नंबर लिखें।"
+      },
+      "steps": [
+        {
+          "en": "Search by name or case number.",
+          "hi": "नाम या मामला नंबर से खोजें।"
+        },
+        {
+          "en": "Open the matching case.",
+          "hi": "मिलता हुआ मामला खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "case",
+      "route": "/case/:caseId",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "Who can apply for release",
+        "hi": "रिहाई के लिए कौन आवेदन कर सकता है"
+      },
+      "what": {
+        "en": "See why this case may qualify for release while the trial continues.",
+        "hi": "देखें कि इस मामले में मुकदमे के दौरान रिहाई क्यों मिल सकती है।"
+      },
+      "when": {
+        "en": "Use this before preparing or checking a release request.",
+        "hi": "रिहाई का आवेदन तैयार करने या जाँचने से पहले इसे खोलें।"
+      },
+      "start": {
+        "en": "Open the action shown under the case summary.",
+        "hi": "मामले के सारांश में दी गई कार्रवाई खोलें।"
+      },
+      "steps": [
+        {
+          "en": "Read the case summary.",
+          "hi": "मामले का सारांश पढ़ें।"
+        },
+        {
+          "en": "Check how the result was reached.",
+          "hi": "देखें कि नतीजा कैसे निकला।"
+        },
+        {
+          "en": "Check the saved records before using the result.",
+          "hi": "नतीजे का इस्तेमाल करने से पहले रिकॉर्ड जाँचें।"
+        }
+      ]
+    },
+    {
+      "id": "persons",
+      "route": "/persons",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "Find people in saved cases",
+        "hi": "सहेजे गए मामलों में लोग ढूँढें"
+      },
+      "what": {
+        "en": "See the people linked to cases on this computer.",
+        "hi": "इस कंप्यूटर पर दर्ज मामलों से जुड़े लोगों को देखें।"
+      },
+      "when": {
+        "en": "Use this when you know the person’s name.",
+        "hi": "जब व्यक्ति का नाम पता हो, इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose a person from the list.",
+        "hi": "सूची से किसी व्यक्ति को चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Find the person by their displayed name.",
+          "hi": "दिखाए गए नाम से व्यक्ति ढूँढें।"
+        },
+        {
+          "en": "Open their record to see related cases.",
+          "hi": "जुड़े मामले देखने के लिए उनका रिकॉर्ड खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "person",
+      "route": "/person/:personId",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "See a person’s cases",
+        "hi": "किसी व्यक्ति के मामले देखें"
+      },
+      "what": {
+        "en": "See case records linked to this person.",
+        "hi": "इस व्यक्ति से जुड़े मामलों के रिकॉर्ड देखें।"
+      },
+      "when": {
+        "en": "Use this when checking whether a person has more than one case.",
+        "hi": "जब देखना हो कि किसी के एक से ज़्यादा मामले हैं, इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose a linked case to open it.",
+        "hi": "जुड़ा हुआ मामला खोलने के लिए उसे चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Review the list of cases.",
+          "hi": "मामलों की सूची देखें।"
+        },
+        {
+          "en": "Open a case to check its details.",
+          "hi": "जानकारी जाँचने के लिए मामला खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "drafts",
+      "route": "/drafts",
+      "roles": [
+        "judge",
+        "lawyer",
+        "staff"
+      ],
+      "name": {
+        "en": "Write orders and notices",
+        "hi": "आदेश और नोटिस लिखें"
+      },
+      "what": {
+        "en": "Prepare a draft using details from a saved case.",
+        "hi": "सहेजे गए मामले की जानकारी से मसौदा तैयार करें।"
+      },
+      "when": {
+        "en": "Use this when preparing papers for someone to review.",
+        "hi": "समीक्षा के लिए कागज़ तैयार करते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose a case and draft type, then choose Export signed PDF.",
+        "hi": "मामला और मसौदे का प्रकार चुनें, फिर हस्ताक्षरित PDF निकालें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose the case and kind of draft.",
+          "hi": "मामला और मसौदे का प्रकार चुनें।"
+        },
+        {
+          "en": "Review the draft text.",
+          "hi": "मसौदे का पाठ जाँचें।"
+        },
+        {
+          "en": "Save the signed file when ready.",
+          "hi": "तैयार होने पर हस्ताक्षरित फ़ाइल सहेजें।"
+        }
+      ]
+    },
+    {
+      "id": "settlement-draft",
+      "route": "/drafts/settlement",
+      "roles": [
+        "lawyer"
+      ],
+      "name": {
+        "en": "Write a settlement proposal",
+        "hi": "समझौते का प्रस्ताव लिखें"
+      },
+      "what": {
+        "en": "Turn proposed terms into a file the parties can review.",
+        "hi": "प्रस्तावित शर्तों की ऐसी फ़ाइल बनाएँ जिसे पक्ष देख सकें।"
+      },
+      "when": {
+        "en": "Use this after discussing possible terms with the parties.",
+        "hi": "पक्षों से संभावित शर्तों पर बात करने के बाद इसे खोलें।"
+      },
+      "start": {
+        "en": "Review the terms, then choose Export signed PDF.",
+        "hi": "शर्तें जाँचें, फिर हस्ताक्षरित PDF निकालें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Check the names and proposed terms.",
+          "hi": "नाम और प्रस्तावित शर्तें जाँचें।"
+        },
+        {
+          "en": "Save the file and review it with the parties.",
+          "hi": "फ़ाइल सहेजें और पक्षों के साथ जाँचें।"
+        }
+      ]
+    },
+    {
+      "id": "settlement",
+      "route": "/lawyer",
+      "roles": [
+        "lawyer"
+      ],
+      "name": {
+        "en": "What courts awarded before",
+        "hi": "अदालतों ने पहले कितना मुआवज़ा दिया"
+      },
+      "what": {
+        "en": "Find past awards or estimate compensation using the details you enter.",
+        "hi": "पुराने मुआवज़े देखें या अपनी जानकारी से मुआवज़े का अनुमान लगाएँ।"
+      },
+      "when": {
+        "en": "Use this when discussing a possible settlement.",
+        "hi": "संभावित समझौते पर बात करते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose Find past awards after describing the case.",
+        "hi": "मामले की जानकारी भरकर पुराने मुआवज़े खोजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Describe the harm or loss.",
+          "hi": "नुकसान की जानकारी दें।"
+        },
+        {
+          "en": "Open the source for any award you want to use.",
+          "hi": "जिस मुआवज़े का उपयोग करना हो, उसका स्रोत खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "case-analyzer",
+      "route": "/lawyer/case",
+      "roles": [
+        "lawyer"
+      ],
+      "name": {
+        "en": "Review a case file",
+        "hi": "मामले की फ़ाइल जाँचें"
+      },
+      "what": {
+        "en": "Read a case file and find details worth checking.",
+        "hi": "मामले की फ़ाइल पढ़ें और जाँचने लायक जानकारी देखें।"
+      },
+      "when": {
+        "en": "Use this before preparing notes for a case.",
+        "hi": "मामले के नोट तैयार करने से पहले इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose a file, then choose Read case file.",
+        "hi": "फ़ाइल चुनें, फिर मामले की फ़ाइल पढ़ें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Add a case file from your computer.",
+          "hi": "अपने कंप्यूटर से मामले की फ़ाइल जोड़ें।"
+        },
+        {
+          "en": "Check the results against the original.",
+          "hi": "नतीजों को मूल फ़ाइल से मिलाएँ।"
+        }
+      ]
+    },
+    {
+      "id": "sc-return",
+      "route": "/sc-return",
+      "roles": [
+        "judge",
+        "staff"
+      ],
+      "name": {
+        "en": "Download the Supreme Court report",
+        "hi": "उच्चतम न्यायालय की रिपोर्ट डाउनलोड करें"
+      },
+      "what": {
+        "en": "Make a spreadsheet for reporting saved case counts.",
+        "hi": "सहेजे गए मामलों की गिनती बताने वाली तालिका बनाएँ।"
+      },
+      "when": {
+        "en": "Use this when preparing the Supreme Court return.",
+        "hi": "उच्चतम न्यायालय के लिए रिपोर्ट बनाते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Set the reporting date, then choose Download spreadsheet.",
+        "hi": "रिपोर्ट की तारीख तय करें, फिर स्प्रेडशीट डाउनलोड करें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose the reporting date.",
+          "hi": "रिपोर्ट की तारीख चुनें।"
+        },
+        {
+          "en": "Save the spreadsheet and check the totals.",
+          "hi": "तालिका सहेजें और कुल गिनती जाँचें।"
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "route": "/verify",
+      "roles": [
+        "judge",
+        "lawyer",
+        "citizen",
+        "staff"
+      ],
+      "name": {
+        "en": "Check a document is unchanged",
+        "hi": "जाँचें कि दस्तावेज़ बदला है या नहीं"
+      },
+      "what": {
+        "en": "Compare a signed document or proof file with its receipt.",
+        "hi": "हस्ताक्षरित दस्तावेज़ या सबूत की फ़ाइल उसकी रसीद से मिलाएँ।"
+      },
+      "when": {
+        "en": "Use this before relying on a document or file you received.",
+        "hi": "मिले हुए दस्तावेज़ या फ़ाइल पर भरोसा करने से पहले इसे खोलें।"
+      },
+      "start": {
+        "en": "Add the file and receipt, then choose Check file.",
+        "hi": "फ़ाइल और रसीद जोड़ें, फिर फ़ाइल जाँचें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose the document or proof file.",
+          "hi": "दस्तावेज़ या सबूत की फ़ाइल चुनें।"
+        },
+        {
+          "en": "Add its signed receipt and any required file list.",
+          "hi": "हस्ताक्षरित रसीद और ज़रूरी फ़ाइल सूची जोड़ें।"
+        },
+        {
+          "en": "Read whether it matches.",
+          "hi": "देखें कि फ़ाइल मेल खाती है या नहीं।"
+        }
+      ]
+    },
+    {
+      "id": "judge-dashboard",
+      "route": "/judge-dashboard",
+      "roles": [
+        "judge"
+      ],
+      "name": {
+        "en": "See what needs attention",
+        "hi": "देखें कहाँ ध्यान देना है"
+      },
+      "what": {
+        "en": "Open the home screen to see work that needs attention.",
+        "hi": "ज़रूरी काम देखने के लिए मुख्य पन्ना खोलें।"
+      },
+      "when": {
+        "en": "Use this when opening an older link to the judge’s home screen.",
+        "hi": "न्यायाधीश के मुख्य पन्ने का पुराना लिंक खोलते समय इसे देखें।"
+      },
+      "start": {
+        "en": "Open the work list on the home screen.",
+        "hi": "मुख्य पन्ने से काम की सूची खोलें।"
+      },
+      "steps": [
+        {
+          "en": "Wait for the home screen to open.",
+          "hi": "मुख्य पन्ना खुलने दें।"
+        },
+        {
+          "en": "Open an item to see what needs attention.",
+          "hi": "ज़रूरी काम देखने के लिए कोई मामला खोलें।"
+        }
+      ]
+    },
+    {
+      "id": "evidence",
+      "route": "/evidence",
+      "roles": [
+        "judge",
+        "staff"
+      ],
+      "name": {
+        "en": "Proof sent by citizens",
+        "hi": "नागरिकों के भेजे सबूत"
+      },
+      "what": {
+        "en": "Open proof people sent and record what the court does with it.",
+        "hi": "लोगों के भेजे सबूत खोलें और अदालत की कार्रवाई दर्ज करें।"
+      },
+      "when": {
+        "en": "Use this when checking new files sent to the court.",
+        "hi": "अदालत को भेजी नई फ़ाइलें जाँचते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose All submissions, then open a file.",
+        "hi": "सभी भेजे गए सबूत चुनें, फिर फ़ाइल खोलें।"
+      },
+      "steps": [
+        {
+          "en": "Find the case or proof you need.",
+          "hi": "ज़रूरी मामला या सबूत ढूँढें।"
+        },
+        {
+          "en": "Review the file and its receipt.",
+          "hi": "फ़ाइल और रसीद जाँचें।"
+        },
+        {
+          "en": "Record what the court decides to do.",
+          "hi": "अदालत की तय कार्रवाई दर्ज करें।"
+        }
+      ]
+    },
+    {
+      "id": "submit-proof",
+      "route": "/submit-proof",
+      "roles": [
+        "citizen"
+      ],
+      "name": {
+        "en": "Send proof to the court",
+        "hi": "अदालत को सबूत भेजें"
+      },
+      "what": {
+        "en": "Send a file with your name or as a tip without your name.",
+        "hi": "अपने नाम से या बिना नाम बताए सबूत की फ़ाइल भेजें।"
+      },
+      "when": {
+        "en": "Use this when you have proof the court should see.",
+        "hi": "जब अदालत को कोई सबूत दिखाना हो, इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose Send proof to open the form.",
+        "hi": "फ़ॉर्म खोलने के लिए सबूत भेजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose whether to give your name.",
+          "hi": "चुनें कि अपना नाम देना है या नहीं।"
+        },
+        {
+          "en": "Enter the case details and attach your file.",
+          "hi": "मामले की जानकारी भरें और फ़ाइल जोड़ें।"
+        },
+        {
+          "en": "Save any receipt code you get.",
+          "hi": "मिला हुआ रसीद कोड सहेजें।"
+        }
+      ]
+    },
+    {
+      "id": "file-evidence",
+      "route": "/file-evidence",
+      "roles": [
+        "lawyer"
+      ],
+      "name": {
+        "en": "File proof for a case",
+        "hi": "मामले के लिए सबूत दाखिल करें"
+      },
+      "what": {
+        "en": "Send a case file to the court and get a signed receipt.",
+        "hi": "मामले की फ़ाइल अदालत को भेजें और हस्ताक्षरित रसीद पाएँ।"
+      },
+      "when": {
+        "en": "Use this when filing a document or recording as proof.",
+        "hi": "दस्तावेज़ या रिकॉर्डिंग सबूत के रूप में दाखिल करते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose Send proof to open the form.",
+        "hi": "फ़ॉर्म खोलने के लिए सबूत भेजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Enter your details and the case number.",
+          "hi": "अपनी जानकारी और मामला नंबर भरें।"
+        },
+        {
+          "en": "Attach the file and save the receipt after filing.",
+          "hi": "फ़ाइल जोड़ें और दाखिल करने के बाद रसीद सहेजें।"
+        }
+      ]
+    },
+    {
+      "id": "hearings",
+      "route": "/hearings",
+      "roles": [
+        "judge",
+        "staff"
+      ],
+      "name": {
+        "en": "Record and type the hearing",
+        "hi": "सुनवाई रिकॉर्ड करें और लिखें"
+      },
+      "what": {
+        "en": "Record hearing audio and open it to prepare a written record.",
+        "hi": "सुनवाई की आवाज़ रिकॉर्ड करें और लिखित रिकॉर्ड बनाने के लिए उसे खोलें।"
+      },
+      "when": {
+        "en": "Use this when the court is ready to record a hearing.",
+        "hi": "जब अदालत सुनवाई रिकॉर्ड करने को तैयार हो, इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose a case, then choose Start recording.",
+        "hi": "मामला चुनें, फिर रिकॉर्डिंग शुरू करें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose the case being heard.",
+          "hi": "जिस मामले की सुनवाई है, उसे चुनें।"
+        },
+        {
+          "en": "Start recording and mark each speaker.",
+          "hi": "रिकॉर्डिंग शुरू करें और बोलने वाले लोगों को चिह्नित करें।"
+        },
+        {
+          "en": "Stop and seal the recording when the hearing ends.",
+          "hi": "सुनवाई खत्म हो तो रिकॉर्डिंग रोकें और सील करें।"
+        }
+      ]
+    },
+    {
+      "id": "hearing-transcript",
+      "route": "/hearings/:id",
+      "roles": [
+        "judge",
+        "staff"
+      ],
+      "name": {
+        "en": "Read and correct hearing notes",
+        "hi": "सुनवाई का लिखा रिकॉर्ड देखें और सुधारें"
+      },
+      "what": {
+        "en": "Turn saved hearing audio into text you can check and correct.",
+        "hi": "सहेजी आवाज़ को ऐसे पाठ में बदलें जिसे आप जाँच और सुधार सकें।"
+      },
+      "when": {
+        "en": "Use this after the hearing recording has been sealed.",
+        "hi": "सुनवाई की रिकॉर्डिंग सील होने के बाद इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose Make a written record when the audio is ready.",
+        "hi": "आवाज़ तैयार हो तो लिखित रिकॉर्ड बनाएँ चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Make or open the written record.",
+          "hi": "लिखित रिकॉर्ड बनाएँ या खोलें।"
+        },
+        {
+          "en": "Listen to the audio and correct the words.",
+          "hi": "आवाज़ सुनें और शब्द सुधारें।"
+        },
+        {
+          "en": "Save and sign the checked version.",
+          "hi": "जाँचा हुआ संस्करण सहेजें और उस पर हस्ताक्षर करें।"
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "route": "/research",
+      "roles": [
+        "judge",
+        "lawyer"
+      ],
+      "name": {
+        "en": "Find similar past cases",
+        "hi": "मिलते-जुलते पुराने मामले ढूँढें"
+      },
+      "what": {
+        "en": "Search published court decisions and open their sources.",
+        "hi": "प्रकाशित अदालती फ़ैसले खोजें और उनके स्रोत खोलें।"
+      },
+      "when": {
+        "en": "Use this when looking for decisions about a similar question.",
+        "hi": "मिलते-जुलते सवाल पर फ़ैसले ढूँढते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Type your question, then choose Search.",
+        "hi": "अपना सवाल लिखें, फिर खोजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Describe the issue or enter a law section.",
+          "hi": "मुद्दा लिखें या कानून की धारा भरें।"
+        },
+        {
+          "en": "Open the full decision and check it before citing it.",
+          "hi": "फ़ैसले का हवाला देने से पहले पूरा फ़ैसला खोलकर जाँचें।"
+        }
+      ]
+    },
+    {
+      "id": "rights",
+      "route": "/rights",
+      "roles": [
+        "citizen"
+      ],
+      "name": {
+        "en": "Know your rights",
+        "hi": "अपने अधिकार जानें"
+      },
+      "what": {
+        "en": "Find your rights, what to do next, and where to get help.",
+        "hi": "अपने अधिकार, अगला कदम और मदद पाने की जगह जानें।"
+      },
+      "when": {
+        "en": "Use this when you have a legal problem and need a starting point.",
+        "hi": "कानूनी समस्या हो और शुरुआत समझ न आए, तो इसे खोलें।"
+      },
+      "start": {
+        "en": "Describe what happened, then choose Find my rights and next steps.",
+        "hi": "बताएँ क्या हुआ, फिर मेरे अधिकार और अगले कदम खोजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Describe what happened or pick a topic.",
+          "hi": "बताएँ क्या हुआ या कोई विषय चुनें।"
+        },
+        {
+          "en": "Read the next steps for your situation.",
+          "hi": "अपनी स्थिति के अगले कदम पढ़ें।"
+        }
+      ]
+    },
+    {
+      "id": "track",
+      "route": "/track",
+      "roles": [
+        "citizen"
+      ],
+      "name": {
+        "en": "Track my case",
+        "hi": "मेरे मामले की स्थिति देखें"
+      },
+      "what": {
+        "en": "See hearing dates and updates that this court office has recorded.",
+        "hi": "इस अदालत के दफ़्तर में दर्ज सुनवाई की तारीखें और जानकारी देखें।"
+      },
+      "when": {
+        "en": "Use this when you want to see what has happened in your case.",
+        "hi": "अपने मामले में अब तक क्या हुआ, यह देखने के लिए इसे खोलें।"
+      },
+      "start": {
+        "en": "Enter your case number, then choose Find my case.",
+        "hi": "मामला नंबर भरें, फिर मेरा मामला खोजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Find the number on your court papers.",
+          "hi": "अदालत के कागज़ों में नंबर देखें।"
+        },
+        {
+          "en": "Search and read the latest recorded update.",
+          "hi": "खोजें और सबसे नई दर्ज जानकारी पढ़ें।"
+        }
+      ]
+    },
+    {
+      "id": "settlement-guide",
+      "route": "/settlement-guide",
+      "roles": [
+        "citizen"
+      ],
+      "name": {
+        "en": "Get help with compensation or a settlement",
+        "hi": "मुआवज़े या समझौते की मदद पाएँ"
+      },
+      "what": {
+        "en": "Estimate accident compensation and see where to get help with a settlement.",
+        "hi": "दुर्घटना के मुआवज़े का अनुमान और समझौते के लिए मदद की जगह देखें।"
+      },
+      "when": {
+        "en": "Use this when considering compensation, support payments, or a settlement.",
+        "hi": "मुआवज़े, गुज़ारे के भुगतान या समझौते पर सोचते समय इसे खोलें।"
+      },
+      "start": {
+        "en": "Enter accident details, then choose Show estimate and working.",
+        "hi": "दुर्घटना की जानकारी भरें, फिर अनुमान और हिसाब देखें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose the type of accident and enter the details.",
+          "hi": "दुर्घटना का प्रकार चुनकर जानकारी भरें।"
+        },
+        {
+          "en": "Read the estimate and the steps used to calculate it.",
+          "hi": "अनुमान और उसे निकालने के कदम पढ़ें।"
+        }
+      ]
+    },
+    {
+      "id": "stats",
+      "route": "/stats",
+      "roles": [
+        "judge",
+        "lawyer",
+        "citizen",
+        "staff"
+      ],
+      "name": {
+        "en": "See court and prison numbers",
+        "hi": "अदालत और जेल के आँकड़े देखें"
+      },
+      "what": {
+        "en": "See published figures on courts, prisons, and cases waiting to be heard.",
+        "hi": "अदालतों, जेलों और सुनवाई का इंतज़ार कर रहे मामलों के प्रकाशित आँकड़े देखें।"
+      },
+      "when": {
+        "en": "Use this when you need figures for a report or a comparison.",
+        "hi": "रिपोर्ट या तुलना के लिए आँकड़े चाहिए हों, तब इसे खोलें।"
+      },
+      "start": {
+        "en": "Read the source listed next to a figure.",
+        "hi": "किसी आँकड़े के आगे दिया गया स्रोत पढ़ें।"
+      },
+      "steps": [
+        {
+          "en": "Find the figure you need.",
+          "hi": "ज़रूरी आँकड़ा ढूँढें।"
+        },
+        {
+          "en": "Check the date and the source.",
+          "hi": "तारीख और स्रोत जाँचें।"
+        }
+      ]
+    },
+    {
+      "id": "safeguards",
+      "route": "/safeguards",
+      "roles": [
+        "judge",
+        "lawyer",
+        "citizen",
+        "staff"
+      ],
+      "name": {
+        "en": "See how Court+ protects your data",
+        "hi": "देखें Court+ आपका डेटा कैसे सुरक्षित रखता है"
+      },
+      "what": {
+        "en": "Read what Court+ can do, how it stores data, and who decides.",
+        "hi": "पढ़ें Court+ क्या करता है, डेटा कहाँ रखता है और फ़ैसला कौन करता है।"
+      },
+      "when": {
+        "en": "Use this before trusting a result or sharing information.",
+        "hi": "किसी नतीजे पर भरोसा करने या जानकारी साझा करने से पहले इसे खोलें।"
+      },
+      "start": {
+        "en": "Start with What this tool does.",
+        "hi": "यह साधन क्या करता है से शुरू करें।"
+      },
+      "steps": [
+        {
+          "en": "Read what the tool does.",
+          "hi": "पढ़ें कि साधन क्या करता है।"
+        },
+        {
+          "en": "Read where your data stays.",
+          "hi": "पढ़ें कि आपका डेटा कहाँ रहता है।"
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "route": "/profile",
+      "roles": [
+        "judge",
+        "lawyer",
+        "citizen",
+        "staff"
+      ],
+      "name": {
+        "en": "Set your name, role, and language",
+        "hi": "अपना नाम, भूमिका और भाषा तय करें"
+      },
+      "what": {
+        "en": "Set how Court+ addresses you and which language it uses.",
+        "hi": "तय करें कि Court+ आपका नाम और भाषा कैसे दिखाए।"
+      },
+      "when": {
+        "en": "Use this when setting up Court+ or updating your details.",
+        "hi": "Court+ पहली बार खोलें या जानकारी बदलें, तब इसे इस्तेमाल करें।"
+      },
+      "start": {
+        "en": "Enter your details, then choose Save profile.",
+        "hi": "अपनी जानकारी भरें, फिर प्रोफ़ाइल सहेजें चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Choose your role and language.",
+          "hi": "अपनी भूमिका और भाषा चुनें।"
+        },
+        {
+          "en": "Save your details in the desktop app.",
+          "hi": "डेस्कटॉप ऐप में अपनी जानकारी सहेजें।"
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "route": "/settings",
+      "roles": [
+        "judge",
+        "lawyer",
+        "citizen",
+        "staff"
+      ],
+      "name": {
+        "en": "Change how Court+ works for you",
+        "hi": "अपनी ज़रूरत के अनुसार Court+ बदलें"
+      },
+      "what": {
+        "en": "Change the display, app language, and role on this computer.",
+        "hi": "इस कंप्यूटर पर दिखावट, ऐप की भाषा और भूमिका बदलें।"
+      },
+      "when": {
+        "en": "Use this when you want Court+ to look or work differently.",
+        "hi": "जब Court+ की दिखावट या काम का तरीका बदलना हो, इसे खोलें।"
+      },
+      "start": {
+        "en": "Choose a setting to change.",
+        "hi": "बदलने के लिए कोई सेटिंग चुनें।"
+      },
+      "steps": [
+        {
+          "en": "Find the setting you need.",
+          "hi": "ज़रूरी सेटिंग ढूँढें।"
+        },
+        {
+          "en": "Choose the option you want.",
+          "hi": "अपनी पसंद का विकल्प चुनें।"
+        }
+      ]
+    }
+  ]
+}

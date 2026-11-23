@@ -3,10 +3,12 @@ import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-route
 import { Icon, type IconName } from './components/icons';
 import { RouteErrorBoundary } from './components/RouteErrorBoundary';
 import { TopBar } from './components/TopBar';
+import { Guide } from './components/guide/Guide';
 import { useApp } from './lib/context';
 import { WorkDataProvider } from './lib/deadlines';
 import { t, ui } from './lib/i18n';
 import { dashboardTitle, NAV_SECTIONS, setRoleOverride, useRole, type RoleGroup } from './lib/roles';
+import { Companion } from './components/companion';
 
 const ImportOrder = lazy(() => import('./screens/ImportOrder').then(({ ImportOrder }) => ({ default: ImportOrder })));
 const Board = lazy(() => import('./screens/Board').then(({ Board }) => ({ default: Board })));
@@ -38,29 +40,29 @@ const CitizenSettlement = lazy(() => import('./screens/CitizenSettlement').then(
 
 type NavItem = { to: string; key: string; label: string; icon: IconName };
 const NAV: NavItem[] = [
-  { to: '/', key: 'dashboard', label: 'Dashboard', icon: 'home' },
-  { to: '/calendar', key: 'calendar', label: 'Deadline Calendar', icon: 'calendar' },
-  { to: '/triage', key: 'triage', label: 'Smart triage', icon: 'cases' },
-  { to: '/triage/adjournment', key: 'nav.adjournments', label: 'Adjournments', icon: 'calendar' },
-  { to: '/research', key: 'nav.research', label: 'Research', icon: 'search' },
-  { to: '/rights', key: 'nav.rights', label: 'Rights advisor', icon: 'shield' },
+  { to: '/', key: 'dashboard', label: 'See what needs attention', icon: 'home' },
+  { to: '/calendar', key: 'calendar', label: 'See important dates', icon: 'calendar' },
+  { to: '/triage', key: 'triage', label: 'Which cases to hear first', icon: 'cases' },
+  { to: '/triage/adjournment', key: 'nav.adjournments', label: 'Pick a realistic next date', icon: 'calendar' },
+  { to: '/research', key: 'nav.research', label: 'Find similar past cases', icon: 'search' },
+  { to: '/rights', key: 'nav.rights', label: 'Know your rights', icon: 'shield' },
   { to: '/track', key: 'nav.track', label: 'Track my case', icon: 'search' },
-  { to: '/settlement-guide', key: 'nav.settlementGuide', label: 'Settlement guide', icon: 'drafts' },
-  { to: '/file-evidence', key: 'nav.fileEvidence', label: 'File evidence', icon: 'import' },
-  { to: '/board', key: 'nav.board', label: 'Action board', icon: 'board' },
-  { to: '/import', key: 'nav.import', label: 'Import order', icon: 'import' },
-  { to: '/cases', key: 'nav.cases', label: 'Cases', icon: 'cases' },
-  { to: '/persons', key: 'nav.persons', label: 'People', icon: 'people' },
-  { to: '/drafts', key: 'nav.drafts', label: 'Drafts', icon: 'drafts' },
-  { to: '/lawyer/case', key: 'nav.caseAnalyzer', label: 'Case analyzer', icon: 'cases' },
-  { to: '/lawyer', key: 'nav.settlement', label: 'Settlement', icon: 'drafts' },
-  { to: '/sc-return', key: 'nav.sc', label: 'SC return', icon: 'sheet' },
-  { to: '/verify', key: 'nav.verify', label: 'Verifier', icon: 'verify' },
-  { to: '/evidence', key: 'nav.evidence', label: 'Evidence inbox', icon: 'verify' },
-  { to: '/submit-proof', key: 'nav.submitProof', label: 'Submit proof', icon: 'import' },
-  { to: '/hearings', key: 'nav.hearings', label: 'Hearing recorder', icon: 'mic' },
-  { to: '/stats', key: 'nav.stats', label: 'Statistics', icon: 'stats' },
-  { to: '/safeguards', key: 'nav.safeguards', label: 'Safeguards', icon: 'shield' },
+  { to: '/settlement-guide', key: 'nav.settlementGuide', label: 'Get help with compensation or a settlement', icon: 'drafts' },
+  { to: '/file-evidence', key: 'nav.fileEvidence', label: 'File proof for a case', icon: 'import' },
+  { to: '/board', key: 'nav.board', label: 'See cases that need action', icon: 'board' },
+  { to: '/import', key: 'nav.import', label: 'Add a court order', icon: 'import' },
+  { to: '/cases', key: 'nav.cases', label: 'Find saved cases', icon: 'cases' },
+  { to: '/persons', key: 'nav.persons', label: 'Find people in saved cases', icon: 'people' },
+  { to: '/drafts', key: 'nav.drafts', label: 'Write orders and notices', icon: 'drafts' },
+  { to: '/lawyer/case', key: 'nav.caseAnalyzer', label: 'Review a case file', icon: 'cases' },
+  { to: '/lawyer', key: 'nav.settlement', label: 'What courts awarded before', icon: 'drafts' },
+  { to: '/sc-return', key: 'nav.sc', label: 'Download the Supreme Court report', icon: 'sheet' },
+  { to: '/verify', key: 'nav.verify', label: 'Check a document is unchanged', icon: 'verify' },
+  { to: '/evidence', key: 'nav.evidence', label: 'Proof sent by citizens', icon: 'verify' },
+  { to: '/submit-proof', key: 'nav.submitProof', label: 'Send proof to the court', icon: 'import' },
+  { to: '/hearings', key: 'nav.hearings', label: 'Record and type the hearing', icon: 'mic' },
+  { to: '/stats', key: 'nav.stats', label: 'See court and prison numbers', icon: 'stats' },
+  { to: '/safeguards', key: 'nav.safeguards', label: 'See how Court+ protects your data', icon: 'shield' },
 ];
 
 const promptKey = 'courtplus.profilePromptDismissed';
@@ -87,7 +89,7 @@ export function App({ importScreen, settingsScreen }: { importScreen?: ReactNode
     <NavLink to={to} end={to === '/' || to === '/triage' || to === '/lawyer'} title={t(key, label)} aria-label={t(key, label)}
       onClick={() => { if (group && group !== role) setRoleOverride(group); }}
       className={({ isActive }) => 'nav-item' + (isActive && (!group || group === role) ? ' active' : '')}>
-      <Icon name={icon} /><span className="sidebar-label">{t(key, label)}</span>
+      <Icon name={icon} /><span className="sidebar-label whitespace-normal leading-tight">{t(key, label)}</span>
     </NavLink>
   </li>;
 
@@ -171,5 +173,6 @@ export function App({ importScreen, settingsScreen }: { importScreen?: ReactNode
         </main>
       </div>
     </div>
+    <Guide renderCompanion={open => <Companion keepDocked={open} />} />
   </WorkDataProvider>;
 }

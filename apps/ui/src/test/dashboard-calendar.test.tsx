@@ -84,7 +84,7 @@ describe('release dashboard and calendar', () => {
     show(<App />, mock);
     const bell = await screen.findByRole('link', { name: '2 deadlines due in the next 7 days' });
     await userEvent.click(bell);
-    expect(await screen.findByRole('heading', { name: 'Deadline Calendar' })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: 'See important dates' })).toBeVisible();
   });
   it('uses engine-confirmed future dates and leaves unsupported milestones out of the bell', async () => {
     const mock = api();

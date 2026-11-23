@@ -2,7 +2,8 @@ import { ui } from '../lib/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { CaseRecord, HearingListItem, HearingRecording, SpeakerMarker } from '@courtplus/contracts';
-import { Empty, ErrorNote, Page, btn, btnPrimary, errMsg } from '../components/ui';
+import { Empty, ErrorNote, btn, btnPrimary, errMsg } from '../components/ui';
+import { ScreenPage } from '../components/ScreenIntro';
 import { useApp } from '../lib/context';
 import { caseLabel, clock, hearingBridge, speakerName, speakerOptions } from './hearing-tools';
 
@@ -17,7 +18,7 @@ const preferredMime = 'audio/webm;codecs=opus';
 export function HearingRecorder() {
   const hearing = hearingBridge();
   if (!hearing) {
-    return <Page title={ui("Hearing recorder")}><Empty title={ui("Recording hearings works in the Court+ desktop app.")} hint={ui("Open the desktop app on the court computer.")} /></Page>;
+    return <ScreenPage screenId="hearings" judgeHint><Empty title={ui("Recording hearings works in the Court+ desktop app.")} hint={ui("Open the desktop app on the court computer.")} /></ScreenPage>;
   }
   return <Recorder hearing={hearing} />;
 }
@@ -143,7 +144,7 @@ function Recorder({ hearing }: { hearing: NonNullable<ReturnType<typeof hearingB
   const recording = phase === 'recording' || phase === 'paused';
   const byId = new Map(cases.map(record => [record.id, record]));
   return (
-    <Page title={ui("Hearing recorder")} note={ui("Records the hearing on this computer. The original audio is sealed with a SHA-256 hash, a signed receipt and an audit-log entry when you stop, and is never changed afterwards.")}>
+    <ScreenPage screenId="hearings" judgeHint note={ui("Hearing recording and transcription. Stopping seals the original audio and creates a signed receipt.")}>
       <ErrorNote error={error} />
       <section className="panel" aria-label={ui("Recorder")}>
         <label className="block font-semibold">{ui("Case")}<select className="field-control" value={caseId} disabled={recording || phase === 'saving'} onChange={e => setCaseId(e.target.value)}>
@@ -152,7 +153,7 @@ function Recorder({ hearing }: { hearing: NonNullable<ReturnType<typeof hearingB
           </select>
         </label>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          {!recording && <button className={btnPrimary} disabled={!caseId || phase === 'saving'} onClick={() => void start()}>{ui("Start recording")}</button>}
+          {!recording && <button data-guide="start" className={btnPrimary} disabled={!caseId || phase === 'saving'} onClick={() => void start()}>{ui("Start recording")}</button>}
           {recording && <button className={btn} onClick={pause}>{phase === 'paused' ? ui("Resume") : ui("Pause")}</button>}
           {recording && <button className={btnPrimary} onClick={() => void stop()}>{ui("Stop and seal")}</button>}
           <span className="text-2xl font-bold tabular-nums" aria-label={ui("Elapsed time")} role="timer">{clock(elapsed)}</span>
@@ -203,6 +204,6 @@ function Recorder({ hearing }: { hearing: NonNullable<ReturnType<typeof hearingB
           </tr>)}</tbody>
         </table>}
       </section>
-    </Page>
+    </ScreenPage>
   );
 }

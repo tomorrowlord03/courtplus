@@ -85,13 +85,13 @@ describe('Display preferences', () => {
     }), { status: 200 }));
     portal('/track');
     const user = userEvent.setup();
-    await user.type(await screen.findByLabelText('Case number or CNR'), 'FICTIONAL 7/2026');
+    await user.type(await screen.findByLabelText('Case number or Case Number Record (CNR)'), 'FICTIONAL 7/2026');
     await user.selectOptions(screen.getByRole('combobox', { name: 'App language' }), 'hi');
     expect(document.documentElement.lang).toBe('hi');
-    expect(screen.getByRole('heading', { name: 'मेरे मामले की स्थिति' })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'मुख्य मेनू' })).toHaveTextContent('अधिकार मार्गदर्शक');
+    expect(screen.getByRole('heading', { name: 'मेरे मामले की स्थिति देखें' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'मुख्य मेनू' })).toHaveTextContent('अपने अधिकार जानें');
     expect(screen.getByRole('heading', { name: 'समझौते का अनुमान' })).toBeInTheDocument();
-    expect(screen.getByLabelText('मामला संख्या या सीएनआर')).toHaveValue('FICTIONAL 7/2026');
+    expect(screen.getByLabelText('मामला नंबर या केस नंबर रिकॉर्ड (सीएनआर)')).toHaveValue('FICTIONAL 7/2026');
     await user.click(screen.getByRole('button', { name: 'मेरा मामला खोजें' }));
     const caseStatus = await screen.findByRole('region', { name: 'मामले की स्थिति' });
     expect(within(caseStatus).getByText('Fictional court approved summary.')).toBeInTheDocument();
@@ -106,10 +106,10 @@ describe('Display preferences', () => {
     tracking.unmount();
 
     portal('/profile');
-    expect(await screen.findByRole('heading', { name: 'मेरी प्रोफ़ाइल' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'अपना नाम, भूमिका और भाषा तय करें' })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe('hi');
     await user.selectOptions(screen.getByRole('combobox', { name: 'ऐप की भाषा' }), 'en');
-    expect(screen.getByRole('heading', { name: 'My profile' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Set your name, role, and language' })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe('en');
   });
 
@@ -117,7 +117,7 @@ describe('Display preferences', () => {
     localStorage.setItem('courtplus.uiLanguage', 'hi');
     setRoleOverride('judge');
     const dashboard = portal('/');
-    const release = await screen.findByRole('heading', { name: 'विचाराधीन बंदी की रिहाई की जाँच' });
+    const release = await screen.findByRole('heading', { name: 'रिहाई के लिए कौन आवेदन कर सकता है' });
     const backlog = screen.getByRole('heading', { name: 'लंबित अदालती मामले' });
     const benchmarks = screen.getByRole('heading', { name: 'लंबित मामलों के आधिकारिक आँकड़े' });
     expect(release.compareDocumentPosition(backlog) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -141,7 +141,7 @@ describe('Display preferences', () => {
     recorder.unmount();
 
     const verifier = portal('/verify');
-    expect(await screen.findByRole('button', { name: 'सत्यापित करें' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'फ़ाइल जाँचें' })).toBeInTheDocument();
     verifier.unmount();
   });
 
@@ -149,7 +149,7 @@ describe('Display preferences', () => {
     localStorage.setItem('courtplus.uiLanguage', 'hi');
     setRoleOverride('judge');
     portal('/drafts');
-    expect(await screen.findByRole('heading', { name: 'मसौदा कार्यस्थल' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'आदेश और नोटिस लिखें' })).toBeInTheDocument();
     const kind = screen.getByRole('combobox', { name: 'मसौदे का प्रकार' });
     expect(within(kind).getByRole('option', { name: 'अंतरिम आदेश पत्रक' })).toBeInTheDocument();
     expect(within(kind).queryByRole('option', { name: /नियमित ज़मानत/ })).not.toBeInTheDocument();
