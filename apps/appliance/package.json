@@ -31,5 +31,5 @@
   "peerDependenciesMeta": {
     "@courtplus/intake": { "optional": true }
   },
-  "devDependencies": { "@types/node": "^22.0.0", "@types/qrcode": "^1.5.5" }
+  "devDependencies": { "@types/node": "^26.6.6", "@types/qrcode": "^1.5.5" }
 }
