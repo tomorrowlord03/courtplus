@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4.4.0
         with:
           node-version: 22
+      - name: Install a system font
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-dejavu-core
       - name: Use current npm
         run: npm install -g npm@11.19.1
       - name: Install
