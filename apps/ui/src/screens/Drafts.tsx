@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import type { CaseRecord, CourtPlusApi, Status } from '@courtplus/contracts';
-import { DRAFT_LANGS, RIGHTS_CARD_LANGS, translations } from '../lib/i18n';
+import { DRAFT_LANGS, RIGHTS_CARD_LANGS, isReviewedLanguage } from '../lib/i18n';
 import { todayIST, useApp } from '../lib/context';
 import { Empty, ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
 
@@ -17,9 +18,10 @@ const baseName = (p: string) => p.split(/[\\/]/).pop()!.replace(/\.[^.]+$/, '');
 
 export function Drafts() {
   const { api, view } = useApp();
+  const [searchParams] = useSearchParams();
+  const requestedCaseId = searchParams.get('caseId');
   const [cases, setCases] = useState<CaseRecord[] | null>(null);
-  const [caseId, setCaseId] = useState('');
-  const [kind, setKind] = useState<Kind>('S479_3_APPLICATION');
+  const [selection, setSelection] = useState<{ requestedCaseId: string | null; caseId: string; kind?: Kind }>();
   const [lang, setLang] = useState('en');
   const [out, setOut] = useState<{ pdfPath: string; receiptPath: string; manifestPath: string } | null>(null);
   const [qr, setQr] = useState('');
@@ -28,9 +30,15 @@ export function Drafts() {
   // Engine status for the selected case; undefined while loading or if screening failed.
   const [status, setStatus] = useState<{ caseId: string; asOf: string; status: Status }>();
 
-  useEffect(() => { api.listCases().then((c) => { setCases(c); setCaseId(c[0]?.id ?? ''); }, (e) => setError(errMsg(e))); }, [api]);
+  useEffect(() => {
+    let live = true;
+    api.listCases().then((c) => { if (live) setCases(c); }, (e) => { if (live) setError(errMsg(e)); });
+    return () => { live = false; };
+  }, [api]);
 
-  const record = cases?.find((c) => c.id === caseId);
+  const currentSelection = selection?.requestedCaseId === requestedCaseId ? selection : undefined;
+  const record = cases?.find((c) => c.id === (currentSelection?.caseId ?? requestedCaseId)) ?? cases?.[0];
+  const caseId = record?.id ?? '';
   useEffect(() => {
     if (!record) return;
     let live = true;
@@ -46,18 +54,16 @@ export function Drafts() {
   // Fail closed: the s.479(3) application is offered only once the engine says APPLY_NOW.
   const canApply = status?.caseId === caseId && status.status === 'APPLY_NOW';
   const kinds = KINDS.filter(([k]) => k !== 'S479_3_APPLICATION' || canApply);
-  useEffect(() => {
-    if (!kinds.some(([k]) => k === kind)) { setKind(kinds[0][0]); setLang('en'); }
-  }, [canApply, kind]); // eslint-disable-line react-hooks/exhaustive-deps -- kinds derives from canApply
-
-  const langs: [string, string][] = kind === 'RIGHTS_CARD' ? RIGHTS_CARD_LANGS : DRAFT_LANGS.map((l) => [l, l === 'en' ? 'English' : 'हिन्दी (Hindi)']);
-
-  const isReviewed = lang === 'en' || (translations[lang] as unknown as { _meta?: { reviewed?: boolean } })?._meta?.reviewed === true;
+  const defaultKind = record?.bailGrantedOn ? 'DLSA_7_DAY' : 'AI_ASSISTANCE_NOTE';
+  const selectedKind = currentSelection?.kind;
+  const kind = selectedKind && kinds.some(([k]) => k === selectedKind) ? selectedKind : defaultKind;
+  const langs = kind === 'RIGHTS_CARD' ? RIGHTS_CARD_LANGS : DRAFT_LANGS;
+  const exportLang = langs.some(([code]) => code === lang) ? lang : 'en';
 
   const run = async () => {
     setBusy(true); setError(null); setOut(null);
     try {
-      const res = await api.exportDraft(kind, caseId, lang);
+      const res = await api.exportDraft(kind, caseId, exportLang);
       setOut(res);
       setQr(await QRCode.toDataURL(baseName(res.receiptPath), { margin: 1, width: 160 }));
     } catch (e) {
@@ -76,12 +82,12 @@ export function Drafts() {
       <ErrorNote error={error} />
       <div className="grid max-w-xl gap-3">
         <label>Case
-          <select className="mt-1 block w-full rounded border px-2 py-1.5" value={caseId} onChange={(e) => setCaseId(e.target.value)}>
+          <select className="mt-1 block w-full rounded border px-2 py-1.5" value={caseId} onChange={(e) => { setSelection({ requestedCaseId, caseId: e.target.value }); setLang('en'); }}>
             {cases?.map((c) => <option key={c.id} value={c.id}>{c.caseNo ?? c.cnr ?? c.id}</option>)}
           </select>
         </label>
         <label>Draft type
-          <select className="mt-1 block w-full rounded border px-2 py-1.5" value={kind} onChange={(e) => { setKind(e.target.value as Kind); setLang('en'); }}>
+          <select className="mt-1 block w-full rounded border px-2 py-1.5" value={kind} onChange={(e) => { setSelection({ requestedCaseId, caseId, kind: e.target.value as Kind }); setLang('en'); }}>
             {kinds.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
           </select>
         </label>
@@ -92,15 +98,13 @@ export function Drafts() {
           </p>
         )}
         <label>Language
-          <select className="mt-1 block w-full rounded border px-2 py-1.5" value={lang} onChange={(e) => setLang(e.target.value)}>
+          <select className="mt-1 block w-full rounded border px-2 py-1.5" value={exportLang} onChange={(e) => setLang(e.target.value)}>
             {langs.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
           </select>
         </label>
-        {kind === 'RIGHTS_CARD' && !isReviewed && (
+        {kind === 'RIGHTS_CARD' && !isReviewedLanguage(exportLang) && (
           <p className="text-sm text-amber-800">
-            {lang === 'hi'
-              ? '▲ Machine translation, not yet reviewed. Only the English card and the reviewed Hindi legal drafts are authoritative.'
-              : '▲ Machine translation, not legally reviewed. The English text is authoritative.'}
+            ▲ Machine translation, not legally reviewed. The English text is authoritative.
           </p>
         )}
         <button className={btnPrimary} disabled={!caseId || busy} onClick={() => void run()}>

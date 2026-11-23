@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -12,84 +12,94 @@ async function allocatePort() {
   return port;
 }
 
-async function waitForEndpoint(url) {
-  for (let attempts = 0; attempts < 300; attempts += 1) {
+async function waitForEndpoint(url, child, timeout, log) {
+  const begun = Date.now();
+  let reported = begun;
+  while (Date.now() - begun < timeout) {
+    if (child.exitCode !== null) throw new Error('CourtPlus exited early with code ' + child.exitCode + '.');
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(500) });
       if (response.ok) return await response.json();
     } catch {}
-    await delay(150);
+    if (Date.now() - reported > 15_000) {
+      reported = Date.now();
+      log('still waiting for CourtPlus to start (' + Math.round((reported - begun) / 1000) + ' s)');
+    }
+    await delay(250);
   }
-  throw new Error('Portable Electron debugging endpoint timed out.');
+  throw new Error('CourtPlus DevTools endpoint did not open within ' + timeout / 1000 + ' s.');
 }
 
-// The NSIS launcher forwards switches but keeps the Electron child's stderr off Playwright's pipe.
-export async function launchPortable(executable, profile) {
-  const [mainPort, browserPort] = await Promise.all([allocatePort(), allocatePort()]);
-  const browserOrigin = 'http://127.0.0.1:' + browserPort;
-  const mainOrigin = 'http://127.0.0.1:' + mainPort;
-  const child = spawn(executable, [
-    '--inspect=127.0.0.1:' + mainPort,
-    '--remote-debugging-port=' + browserPort,
-    '--remote-debugging-address=127.0.0.1',
-    '--courtplus-profile=' + profile,
-  ], { windowsHide: true, stdio: 'ignore' });
-  let socket;
-  let browser;
-  let messageId = 0;
+// The portable exe unpacks ~650 MB to TEMP before Electron starts: about 2 minutes on a cold run.
+export const isPortable = executable => /-portable\.exe$/i.test(executable);
+export const startupTimeout = executable => isPortable(executable) ? 300_000 : 60_000;
 
-  const mainModule = 'process.getBuiltinModule("module").createRequire(process.resourcesPath + "/app.asar/package.json")("electron")';
-  function evaluate(fn, arg) {
-    const id = ++messageId;
-    const expression = '(' + fn.toString() + ')(' + mainModule + ', ' + JSON.stringify(arg) + ')';
-    return new Promise((resolve, reject) => {
-      function receive(event) {
-        const message = JSON.parse(event.data);
-        if (message.id !== id) return;
-        clearTimeout(timer);
-        socket.removeEventListener('message', receive);
-        if (message.error || message.result.exceptionDetails) {
-          reject(new Error(JSON.stringify(message.error ?? message.result.exceptionDetails)));
-        } else resolve(message.result.result.value);
-      }
-      const timer = setTimeout(() => {
-        socket.removeEventListener('message', receive);
-        reject(new Error('Portable Electron main process did not respond.'));
-      }, 5000);
-      socket.addEventListener('message', receive);
-      socket.send(JSON.stringify({ id, method: 'Runtime.evaluate', params: { expression, returnByValue: true } }));
-    });
+const isApp = page => page.url().startsWith('courtplus://app/');
+
+// A new page's URL is often still blank when its 'page' event fires, so poll instead.
+async function findPage(context, match, timeout = 60_000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const page = context.pages().find(match);
+    if (page) return page;
+    await delay(200);
+  }
+  throw new Error('No CourtPlus window matched within ' + timeout / 1000 + ' s.');
+}
+
+// Drives a packaged CourtPlus.exe (win-unpacked or portable) through Chromium's DevTools endpoint only.
+// The exe is built with the EnableNodeCliInspectArguments fuse off, so --inspect (and with it
+// Playwright's _electron.launch) can never reach the main process; this helper needs no such hook.
+export async function launchPackaged(executable, profile, log = () => {}) {
+  const port = await allocatePort();
+  const origin = 'http://127.0.0.1:' + port;
+  const args = ['--remote-debugging-port=' + port, '--remote-debugging-address=127.0.0.1', '--courtplus-profile=' + profile];
+  // The portable launcher keeps the Electron child's output to itself, so only collect it when present.
+  const child = spawn(executable, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  let output = '';
+  const collect = chunk => { output = (output + chunk).slice(-8000); };
+  child.stdout.on('data', collect);
+  child.stderr.on('data', collect);
+  let browser;
+
+  function killTree() {
+    if (child.exitCode === null && child.pid) spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true });
   }
 
   async function close() {
-    if (socket?.readyState === WebSocket.OPEN) {
-      await evaluate(({ app }) => { setTimeout(() => app.quit(), 50); }).catch(() => undefined);
-      socket.close();
+    if (browser) {
+      // Browser.close quits Electron cleanly so the encrypted store is closed, not torn. It can
+      // stall behind an open native dialog, hence the bound and the kill below.
+      await Promise.race([
+        browser.newBrowserCDPSession().then(session => session.send('Browser.close')).catch(() => undefined),
+        delay(5000),
+      ]);
+      await Promise.race([browser.close().catch(() => undefined), delay(5000)]);
     }
-    await browser?.close().catch(() => undefined);
-    if (child.exitCode === null) await Promise.race([once(child, 'exit'), delay(5000)]);
-    if (child.exitCode === null) child.kill();
+    if (child.exitCode === null) await Promise.race([once(child, 'exit'), delay(10_000)]);
+    killTree();
   }
 
   try {
-    const [targets] = await Promise.all([
-      waitForEndpoint(mainOrigin + '/json/list'), waitForEndpoint(browserOrigin + '/json/version'),
-    ]);
-    socket = new WebSocket(targets[0].webSocketDebuggerUrl);
-    await Promise.race([
-      once(socket, 'open'),
-      delay(5000).then(() => { throw new Error('Portable Electron main debugger did not connect.'); }),
-    ]);
-    browser = await chromium.connectOverCDP(browserOrigin);
+    await waitForEndpoint(origin + '/json/version', child, startupTimeout(executable), log);
+    log('DevTools endpoint open on port ' + port);
+    browser = await chromium.connectOverCDP(origin);
     const context = browser.contexts()[0];
     return {
-      evaluate, close,
-      firstWindow: () => context.pages().find(page => page.url().startsWith('courtplus://app/'))
-        ?? context.waitForEvent('page'),
-      waitForEvent: event => context.waitForEvent(event === 'window' ? 'page' : event),
+      output: () => output,
+      close,
+      firstWindow: () => findPage(context, page => isApp(page) && !page.url().includes('#/verify')),
+      // A second launch with --verifier is how a user opens the verifier from a shortcut; the
+      // single-instance lock (keyed by the profile) forwards it to the running app.
+      openVerifier: () => {
+        const second = spawn(executable, ['--verifier', '--courtplus-profile=' + profile], { windowsHide: true, stdio: 'ignore' });
+        second.on('error', () => undefined);
+        // A portable second launch unpacks again before it can hand over to the running app.
+        return findPage(context, page => isApp(page) && page.url().includes('#/verify'), startupTimeout(executable));
+      },
     };
   } catch (error) {
     await close();
-    throw error;
+    throw new Error(error.message + (output ? '\nApp output:\n' + output : ''), { cause: error });
   }
 }

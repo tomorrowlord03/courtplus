@@ -30,6 +30,14 @@ describe('document rendering', () => {
     }
   });
 
+  it.each(['S479_3_APPLICATION', 'DLSA_7_DAY', 'AI_ASSISTANCE_NOTE'] as const)(
+    'prints a bilingual DRAFT watermark for the Hindi %s draft',
+    (kind) => {
+      expect(renderHtml(kind, drafts[kind], 'hi')).toMatch(/class="watermark"[^>]*>DRAFT \/ प्रारूप<\/div>/);
+      expect(renderHtml(kind, drafts[kind], 'en')).toContain('<div class="watermark">DRAFT</div>');
+    },
+  );
+
   it('prints the named confirmer, DLSA deadline and handoff anchor', () => {
     const ai = renderHtml('AI_ASSISTANCE_NOTE', drafts.AI_ASSISTANCE_NOTE, 'en');
     expect(ai).toContain('Fictional Reviewer');

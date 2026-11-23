@@ -5,12 +5,24 @@ import { useApp } from '../lib/context';
 import { ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
 
 type Result = Awaited<ReturnType<CourtPlusApi['verify']>>;
+const TONES = {
+  good: 'border-green-700 bg-green-50 text-green-900',
+  bad: 'border-red-700 bg-red-50 text-red-900',
+  neutral: 'border-slate-300 bg-slate-50 text-slate-700',
+};
 
 const BADGES: { key: keyof Result; title: string; good: string; text: Record<string, string> }[] = [
   { key: 'signature', title: 'Signature', good: 'valid', text: { valid: '✓ Valid', invalid: '✗ Invalid', unknown_signer: '? Unknown signer' } },
   { key: 'pdf', title: 'PDF', good: 'unchanged', text: { unchanged: '✓ Unchanged', changed: '✗ Changed' } },
   { key: 'chain', title: 'Audit chain', good: 'intact', text: { intact: '✓ Intact', mismatch: '✗ Mismatch', not_checked: '– Not checked' } },
 ];
+
+function verdict(result: Result): { text: string; tone: keyof typeof TONES } {
+  if (result.signature === 'unknown_signer') return { text: 'Could not verify the PDF: unknown signer', tone: 'neutral' };
+  if (result.signature === 'invalid') return { text: 'Could not verify the PDF: invalid signature', tone: 'bad' };
+  if (result.pdf === 'changed') return { text: 'Changed after signing', tone: 'bad' };
+  return { text: 'Unchanged since signing', tone: 'good' };
+}
 
 async function decodeQr(file: File): Promise<string | null> {
   const bmp = await createImageBitmap(file);
@@ -55,6 +67,7 @@ export function Verifier() {
   const [qrText, setQrText] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const summary = result && verdict(result);
 
   const run = async () => {
     if (!pdf || !receipt || !manifest) return;
@@ -84,20 +97,26 @@ export function Verifier() {
         {qrText && <p role="status" className="text-sm">QR says: <code>{qrText}</code></p>}
         <button className={btnPrimary} disabled={!pdf || !receipt || !manifest} onClick={() => void run()}>Verify</button>
       </div>
-      {result && (
-        <div className="mt-6 grid gap-3 md:grid-cols-3" aria-live="polite">
-          {BADGES.map((b) => {
-            const v = result[b.key];
-            const ok = v === b.good;
-            return (
-              <div key={b.key} className={`rounded-lg border-2 p-4 text-center ${ok ? 'border-green-700 bg-green-50' : 'border-red-700 bg-red-50'}`}>
-                <p className="text-sm uppercase">{b.title}</p>
-                <p className="text-2xl font-bold">{b.text[v]}</p>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div aria-live="polite">
+        {result && summary && (
+          <section className="mt-6 space-y-3" aria-label="Verification result">
+            <p className={`rounded-lg border-2 px-4 py-3 font-semibold ${TONES[summary.tone]}`}>{summary.text}</p>
+            <div className="grid gap-3 md:grid-cols-3">
+              {BADGES.map((b) => {
+                const value = result[b.key];
+                const notChecked = value === 'not_checked' || (b.key === 'pdf' && result.signature !== 'valid');
+                const tone = notChecked || value === 'unknown_signer' ? 'neutral' : value === b.good ? 'good' : 'bad';
+                return (
+                  <div key={b.key} className={`rounded-lg border-2 p-4 text-center ${TONES[tone]}`}>
+                    <p className="text-sm uppercase">{b.title}</p>
+                    <p className="text-2xl font-bold">{notChecked ? '– Not checked' : b.text[value]}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+      </div>
     </Page>
   );
 }

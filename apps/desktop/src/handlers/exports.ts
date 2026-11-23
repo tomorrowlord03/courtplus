@@ -68,6 +68,11 @@ export function createExports(
     // Offline (or signed out) exports stay possible: the QR then carries the offline receipt lookup.
     const online = Boolean(backendUrl && cloud.status().role);
     const sources = [...record.charges, ...record.custody, ...record.events].flatMap(item => item.source ? [item.source] : []);
+    const confirmedBy = sources.find(source => source.verifiedBy?.trim())?.verifiedBy?.trim();
+    // Checked before the folder dialog so the officer is not asked where to save a draft that cannot be made.
+    if (kind === 'AI_ASSISTANCE_NOTE' && !confirmedBy) {
+      throw new Error('This case has no recorded confirmer. Import the order again and enter who confirmed the facts.');
+    }
     const directory = await ports.folder();
     if (!directory) throw new Error('Export cancelled.');
     const options = { localizationRoot: ports.localizationRoot };
@@ -83,7 +88,7 @@ export function createExports(
         model: 'CourtPlus LegalNER',
         orderReference: sources[0]?.docId ?? '',
         suggestedFields: [...new Set(sources.flatMap(source => store.document(source.docId)?.suggestedFields ?? []))],
-        confirmedBy: sources.find(source => source.verifiedBy)?.verifiedBy ?? '',
+        confirmedBy: confirmedBy ?? '',
       }, lang, options),
       RIGHTS_CARD: () => exports.renderHtml('RIGHTS_CARD', { dlsaName: district }, lang, options),
     };

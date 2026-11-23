@@ -4,6 +4,7 @@
   "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "build": "npm run -ws --if-present build",
+    "pretest": "npm run build -w @courtplus/contracts -w @courtplus/engine -w @courtplus/intake -w @courtplus/export",
     "test": "npm run -ws --if-present test",
     "lint": "npm run -ws --if-present lint"
   },

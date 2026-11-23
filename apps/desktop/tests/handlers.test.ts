@@ -10,6 +10,8 @@ import { loadFigures } from '../src/handlers/documents';
 import { createHandlers } from '../src/handlers';
 import { appendAudit, verifyAuditChain } from '../src/audit';
 import { openEncryptedDatabase, openStore, type Store } from '../src/store';
+import { buildCaseRecord } from '../ui/import-facts';
+import { fictionalOrder } from './fictional-order.mjs';
 
 const asOf = '2026-11-23';
 const person = (id: string, prisonerType: Person['prisonerType'] = 'undertrial'): Person => ({
@@ -114,6 +116,30 @@ describe('desktop CourtPlus API', () => {
       await handlers.saveCase(eligible, eligibleCase(eligible));
       await expect(handlers.exportDraft('S479_3_APPLICATION', 'case-eligible', 'en')).resolves.toHaveProperty('pdfPath');
       expect(printed[0]).toContain('479(3)');
+    });
+  });
+
+  it('imports without the model and names the confirmer on the AI assistance note', async () => {
+    await withHandlers(async ({ handlers, printed }) => {
+      // The test resource directory has no model, so this exercises the "AI unavailable" fallback.
+      const order = await handlers.importOrder({ name: 'fictional.pdf', bytes: fictionalOrder() });
+      expect(order).toMatchObject({ aiUnavailable: 'AI unavailable: manual entry', entities: [] });
+      expect(order.suggestions).toContainEqual(expect.objectContaining({ field: 'section' }));
+
+      const owner = person('confirmed');
+      const facts = { section: 'IPC 379', judicialStart: '2024-01-10', firstRemandOn: '2024-01-10' };
+      const unconfirmed = record(owner, '2024-01-02');
+      await handlers.saveCase(owner, { ...unconfirmed, events: [{ kind: 'remand', on: '2024-01-10', source: { docId: order.docId } }] });
+      await expect(handlers.exportDraft('AI_ASSISTANCE_NOTE', unconfirmed.id, 'en')).rejects.toThrow(/confirmer/);
+      expect(printed).toHaveLength(0);
+
+      const confirmed = buildCaseRecord({
+        id: unconfirmed.id, personId: owner.id, docId: order.docId, confirmedBy: 'Fictional Officer (jail office)',
+        confirmedAt: '2026-11-23T05:00:00.000Z', facts, stage: 'FIR', pendingStatus: 'trial', ongoing: true,
+      });
+      await handlers.saveCase(owner, confirmed);
+      await expect(handlers.exportDraft('AI_ASSISTANCE_NOTE', confirmed.id, 'en')).resolves.toHaveProperty('pdfPath');
+      expect(printed[0]).toContain('Fictional Officer (jail office)');
     });
   });
 

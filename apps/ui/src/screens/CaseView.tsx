@@ -34,10 +34,11 @@ export function CaseView() {
   const { api, view } = useApp();
   const [rec, setRec] = useState<CaseRecord | null | undefined>(undefined);
   const [person, setPerson] = useState<Person | null>(null);
-  const [result, setResult] = useState<ScreeningResult | null>(null);
+  const [screening, setResult] = useState<ScreeningResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const today = todayIST();
   const [asOf, setAsOf] = useState(today);
+  const result = screening?.caseId === caseId && screening.asOf === asOf ? screening : null;
 
   useEffect(() => {
     Promise.all([api.listCases(), api.listPersons()]).then(([cs, ps]) => {
@@ -57,9 +58,9 @@ export function CaseView() {
 
   const minDate = useMemo(() => {
     const starts = rec?.custody.map((s) => s.start).sort() ?? [];
-    return starts[0] ?? addDays(today, -365);
+    return [starts[0] ?? addDays(today, -365), rec?.orderDate ?? today, today].sort()[0];
   }, [rec, today]);
-  const maxDate = addDays(today, 365);
+  const maxDate = [addDays(today, 365), rec?.orderDate ?? today].sort()[1];
 
   if (rec === undefined) return <Page title="Case"><ErrorNote error={error} />{!error && <p>Loading…</p>}</Page>;
   if (rec === null) return <Page title="Case"><Empty title="Case not found" to="/cases" cta="All cases" /></Page>;
@@ -88,6 +89,7 @@ export function CaseView() {
   );
 
   const polices = rec.custody.filter((s) => s.kind === 'police');
+  const { orderDate } = rec;
   const policeAlerts = result?.alerts.filter((a) => a.kind.startsWith('POLICE_CUSTODY')) ?? [];
 
   return (
@@ -103,7 +105,10 @@ export function CaseView() {
           />
           <div className="flex justify-between text-xs text-slate-600">
             <span>{minDate}</span>
-            <button className="underline" onClick={() => setAsOf(today)}>Back to today</button>
+            <div className="flex flex-wrap justify-center gap-x-3">
+              <button className="underline" onClick={() => setAsOf(today)}>Back to today</button>
+              {orderDate && <button className="underline" onClick={() => setAsOf(orderDate)}>As of order date</button>}
+            </div>
             <span>{maxDate}</span>
           </div>
           {result && (
@@ -135,7 +140,7 @@ export function CaseView() {
             {result?.alerts.map((a, i) => <li key={i}>▲ {a.message}{a.dueOn && ` (due ${a.dueOn})`}</li>)}
           </ul>
           {view === 'legal_aid'
-            ? <Link to="/drafts" className="mt-2 inline-block text-blue-800 underline">Prepare drafts for this case</Link>
+            ? <Link to={{ pathname: '/drafts', search: new URLSearchParams({ caseId }).toString() }} className="mt-2 inline-block text-blue-800 underline">Prepare drafts for this case</Link>
             : <p className="mt-2 text-sm text-slate-600">Review queue: check the proof trace below each alert before the committee meets.</p>}
         </section>
 

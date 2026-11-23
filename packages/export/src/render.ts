@@ -250,11 +250,14 @@ export function renderDocument<K extends DraftKind>(
     ? 'इस हिंदी कानूनी पाठ की किसी दक्ष विधिक पाठक से समीक्षा आवश्यक है। Needs review by a fluent legal reader.'
     : notice;
   const qrLabel = lang === 'hi' ? 'रसीद खोजने के लिए QR कोड' : 'Receipt lookup QR code';
+  const watermark = lang === 'hi'
+    ? '<div class="watermark" style="font-family: inherit">DRAFT / प्रारूप</div>'
+    : '<div class="watermark">DRAFT</div>';
   return template('layout.html', { lang, direction: lang === 'ur' ? 'rtl' : 'ltr', title }, {
     fontFamily: font.family,
     fonts: font.css,
     notice: warning ? '<p class="notice" dir="auto">' + escapeHtml(warning) + '</p>' : '',
-    watermark: draft ? '<div class="watermark">DRAFT</div>' : '',
+    watermark: draft ? watermark : '',
     body,
     qr: receiptQr ? '<div class="receipt"><img alt="" src="' + escapeHtml(receiptQr) + '">' + qrLabel + '</div>' : '',
   });
