@@ -20,7 +20,7 @@
     "@courtplus/export": "0.0.0",
     "@courtplus/intake": "0.0.0",
     "better-sqlite3-multiple-ciphers": "13.2.0",
-    "canonicalize": "2.1.0",
+    "canonicalize": "5.1.0",
     "onnxruntime-node": "1.31.1",
     "onnxruntime-web": "1.31.1",
     "qrcode": "1.5.4",
