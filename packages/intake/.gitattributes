@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.traineddata binary
+*.ttf binary
+assets/tessdata/LICENSE -text
