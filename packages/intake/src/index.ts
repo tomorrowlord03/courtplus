@@ -12,7 +12,7 @@ export { extractText } from './extract.js';
 export type { ExtractedOrder, ExtractedPage } from './extract.js';
 export { runNer } from './ner.js';
 export { normaliseOrderText } from './normalise.js';
-export { parseChargeSuggestion, suggestFields } from './suggest.js';
+export { chargedOffenceSuggestions, parseChargeSuggestion, suggestFields } from './suggest.js';
 
 type OrderFile = Parameters<CourtPlusApi['importOrder']>[0];
 type ImportedOrder = Awaited<ReturnType<CourtPlusApi['importOrder']>>;

@@ -13,12 +13,13 @@ const statuteNames: [string, RegExp][] = [
   ['PMLA', /\bPMLA\b|\bPrevention of Money[- ]Laundering Act\b/iu],
   ['POCSO', /\bPOCSO\b|\bProtection of Children from Sexual Offences Act\b/iu],
   ['PC_ACT', /\bPC Act\b|\bPrevention of Corruption Act\b/iu],
-  ['ARMS', /\bArms Act\b/iu],
-  ['EXCISE', /\bExcise Act\b/iu],
+  ['ARMS', /\bArms(?:\s+Act)?\b/iu],
+  ['EXCISE', /\bExcise(?:\s+Act)?\b/iu],
+  ['OTHER', /\b(?:Information Technology|IT|Motor Vehicles?|Chhattisgarh (?:Freedom of Religion|Agricultural Cattle Preservation)) Act\b/iu],
 ];
 
 const actPattern = new RegExp(statuteNames.map(([, pattern]) => pattern.source).join('|'), 'giu');
-const numberPart = '[0-9०-९]+[A-Z]?(?:\\s*\\([0-9०-९A-Z]+\\))*';
+const numberPart = '[0-9०-९]+-?[A-Z]?(?:\\s*\\([0-9०-९A-Z-]+\\))*';
 const sectionList = new RegExp('(?:\\b(?:sections?|sec\\.?|u\\s*\\/\\s*s|s\\.)|धारा(?:एँ|ओं)?)\\s*(' + numberPart
   + '(?:(?:\\s*[,/&]\\s*|\\s+(?:and|or|और|व)\\s+|\\s+read\\s+with\\s+)' + numberPart + ')*)', 'dgiu');
 const sectionNumber = new RegExp(numberPart, 'giu');
@@ -35,7 +36,7 @@ const roles: [string, RegExp][] = [
   ['firstRemandOn', /\b(?:first|initial)\s+(?:judicial\s+|police\s+)?remand\b/giu],
   ['remandOn', /\bremand(?:ed)?\b|रिमांड|अभिरक्षा में भेज/giu],
   ['bailDate', /\bbail\b|ज़मानत|जमानत/giu],
-  ['orderDate', /\border\s+date(?:d)?\b|\bdate\s+of\s+order\b|आदेश\s+दिनांक/giu],
+  ['orderDate', /\border\s+(?:on\s+board|date(?:d)?)\b|\bdate\s+of\s+(?:this\s+)?order\b|आदेश\s+दिनांक/giu],
 ];
 
 function asciiDigits(text: string): string {
@@ -62,12 +63,13 @@ function sentences(text: string): Sentence[] {
 }
 
 function actName(text: string): string {
-  return statuteNames.find(([, pattern]) => pattern.test(text))?.[0] ?? text.trim();
+  const normalized = text.replace(/\s+/gu, ' ').trim();
+  return statuteNames.find(([, pattern]) => pattern.test(normalized))?.[0] ?? normalized;
 }
 
 function sections(sentence: Sentence, entities: Entity[]): Candidate[] {
   const { text, start } = sentence;
-  const statutes = [...entities.filter(e => e.label === 'STATUTE'),
+  const statutes = [...entities.filter(e => e.label === 'STATUTE' && e.text.trim().length >= 4),
     ...[...text.matchAll(actPattern)].map(m => ({ text: m[0], start: start + m.index, end: start + m.index + m[0].length, score: 0.88 }))];
   const provisions = entities.filter(e => e.label === 'PROVISION').flatMap(entity =>
     [...entity.text.matchAll(sectionNumber)].map(m => ({
@@ -87,9 +89,12 @@ function sections(sentence: Sentence, entities: Entity[]): Candidate[] {
     }).sort((left, right) => Number(right.direct) - Number(left.direct) || left.distance - right.distance)[0];
     if (!match) return;
 
-    const section = asciiDigits(number).replace(/\s/g, '').replace(/\(([A-Z])\)/giu, (_, part: string) => '(' + part.toLowerCase() + ')');
+    const section = asciiDigits(number).replace(/\s/gu, '').replace(/^(\d+)-(?=[A-Z])/iu, '$1')
+      .replace(/\(([A-Z])\)/giu, (_, part: string) => '(' + part.toLowerCase() + ')');
     const context = text.slice(Math.max(0, groupStart - start - 35), Math.min(text.length, groupEnd - start + 65));
-    const cited = actName(match.statute.text) === 'BNSS' || /\b(?:bar|embargo|restriction|reasoning|consider|applies|requirement|in view of)\b/iu.test(context)
+    const act = actName(match.statute.text);
+    const cited = act === 'BNSS' || act === 'IPC' && section === '34' || act === 'BNS' && section === '3(5)'
+      || /\b(?:bar|embargo|restriction|reasoning|consider|applies|requirement|in view of)\b/iu.test(context)
       && !/\b(?:charged|offence|offense|crime|fir|registered|punishable)\b/iu.test(context);
     candidates.push({
       field: cited ? 'citedProvision' : 'section', value: actName(match.statute.text) + ' ' + section,
@@ -190,15 +195,41 @@ function matchFields(sentence: Sentence, entities: Entity[]): Candidate[] {
       dates.push({ field: 'date', value, start: a, end: b, confidence: 0.78 });
     }
   }
-  for (const date of dates) suggestions.push({ ...date, field: dateRole(sentence, date, dates) });
+  for (const date of dates) {
+    let field = dateRole(sentence, date, dates);
+    const before = text.slice(Math.max(0, date.start - start - 90), date.start - start);
+    if (sentence.page === 1 && sentence.start < 1800 &&
+      (/\b(?:order\s+on\s+board|date\s+of\s+(?:this\s+)?order|order\s+date(?:d)?)\b/iu.test(before)
+        || /(?:^|\n)\s*(?:order|dated)\s*[:.-]?\s*$/iu.test(before))) field = 'orderDate';
+    suggestions.push({ ...date, field });
+  }
   return suggestions;
+}
+
+function outcomeSuggestion(text: string): FieldSuggestion | undefined {
+  const tailStart = Math.max(0, text.length - 1600);
+  const tail = text.slice(tailStart);
+  const patterns: [string, RegExp][] = [
+    ['granted', /\b(?:application|petition|bail)[^.!?\n]{0,90}\b(?:is|stands|are|hereby)?\s*allowed\b|\breleased?\s+on\s+bail\b|\bbail\s+is\s+granted\b/giu],
+    ['rejected', /\b(?:application|petition|bail)[^.!?\n]{0,90}\b(?:is|stands|are|hereby)?\s*(?:rejected|dismissed)\b/giu],
+    ['withdrawn', /\b(?:dismissed|rejected)\s+as\s+withdrawn\b|\b(?:application|petition)[^.!?\n]{0,90}\bwithdrawn\b/giu],
+  ];
+  const hits = patterns.flatMap(([value, pattern]) => [...tail.matchAll(pattern)].map(match => ({ value, start: tailStart + match.index, text: match[0] })));
+  if (!hits.length) return undefined;
+  hits.sort((a, b) => a.start - b.start || (a.value === 'withdrawn' ? 1 : -1));
+  const evidence = hits.at(-1)!;
+  const near = hits.filter(hit => evidence.start - hit.start < 260);
+  const value = new Set(near.map(hit => hit.value)).size > 1
+    && /\b(?:applicants?|accused)\s*(?:no\.?|nos\.?|numbers?)\s*\d|\b(?:one|other|another|first|second)\s+(?:bail\s+)?(?:application|applicant)\b/iu.test(tail.slice(Math.max(0, evidence.start - tailStart - 260)))
+    ? 'mixed' : evidence.value;
+  return { field: 'bailOutcome', value, sentence: evidence.text, page: text.slice(0, evidence.start).split('\f').length, confidence: 0.78 };
 }
 
 /** Values are proposals. Dates carry their inferred role in field, with date as a fallback. */
 export function suggestFields(text: string, entities: Entity[]): FieldSuggestion[] {
   const ordered = entities.filter(e => validSpan(text, e.start, e.end)).sort((a, b) => a.start - b.start);
   let cursor = 0;
-  return sentences(text).flatMap(sentence => {
+  const suggestions: FieldSuggestion[] = sentences(text).flatMap(sentence => {
     const related: Entity[] = [];
     while (cursor < ordered.length && ordered[cursor].start < sentence.end) {
       const entity = ordered[cursor++];
@@ -214,6 +245,22 @@ export function suggestFields(text: string, entities: Entity[]): FieldSuggestion
         sentence: sentence.text, page: sentence.page, confidence: candidate.confidence,
       }];
     });
+  });
+  const outcome = outcomeSuggestion(text);
+  if (outcome) suggestions.push(outcome);
+  return suggestions;
+}
+
+/** The earliest offence-bearing section sentence is the conservative charge proposal; later citations remain available for review. */
+export function chargedOffenceSuggestions(suggestions: FieldSuggestion[]): FieldSuggestion[] {
+  const first = suggestions.find(suggestion => suggestion.field === 'section');
+  if (!first) return [];
+  const seen = new Set<string>();
+  return suggestions.filter(suggestion => {
+    if (suggestion.field !== 'section' || suggestion.page !== first.page || suggestion.sentence !== first.sentence
+      || seen.has(suggestion.value)) return false;
+    seen.add(suggestion.value);
+    return true;
   });
 }
 

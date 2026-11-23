@@ -1,9 +1,58 @@
 import type { Entity } from '@courtplus/contracts';
 import { describe, expect, it } from 'vitest';
-import { parseChargeSuggestion, suggestFields } from '../src/suggest.js';
+import { chargedOffenceSuggestions, parseChargeSuggestion, suggestFields } from '../src/suggest.js';
 import { normaliseOrderText } from '../src/normalise.js';
 
 describe('suggestions for fictional orders', () => {
+  it('reads a fictional header order date and operative grant', () => {
+    const text = 'MCRC No. 12/2025\nFiction Alpha Versus State\nOrder On Board\n17.10.2025\n'
+      + 'The accused was arrested on 01.09.2025. The application is allowed and the applicant shall be released on bail.';
+    expect(suggestFields(text, [])).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'orderDate', value: '2025-10-17' }),
+      expect.objectContaining({ field: 'bailOutcome', value: 'granted' }),
+    ]));
+  });
+
+  it('reads fictional standalone Order and Date of Order header lines', () => {
+    for (const label of ['Order', 'Date of Order:']) {
+      const text = `Fictional Case No. 3/2025\n${label}\n05.04.2025\nThe subject appeared.`;
+      expect(suggestFields(text, [])).toContainEqual(expect.objectContaining({ field: 'orderDate', value: '2025-04-05' }));
+    }
+  });
+
+  it('reports rejected, withdrawn and mixed outcomes from fictional operative text', () => {
+    expect(suggestFields('The bail application is rejected.', []).at(-1)).toEqual(expect.objectContaining({ field: 'bailOutcome', value: 'rejected' }));
+    expect(suggestFields('The application is dismissed as withdrawn.', []).at(-1)).toEqual(expect.objectContaining({ field: 'bailOutcome', value: 'withdrawn' }));
+    expect(suggestFields('The first bail application is allowed. The second bail application is rejected.', []).at(-1))
+      .toEqual(expect.objectContaining({ field: 'bailOutcome', value: 'mixed' }));
+  });
+
+  it('collects a fictional full charge list and separates bail provisions', () => {
+    const text = 'The accused faces offences under Sections 101, 103 and 115 of the BNS. '
+      + 'Section 480 of the BNSS governs bail. Section 37 of the NDPS Act is a bail restriction.';
+    const values = suggestFields(text, []).map(s => [s.field, s.value]);
+    expect(values).toEqual(expect.arrayContaining([
+      ['section', 'BNS 101'], ['section', 'BNS 103'], ['section', 'BNS 115'],
+      ['citedProvision', 'BNSS 480'], ['citedProvision', 'NDPS 37'],
+    ]));
+    expect(chargedOffenceSuggestions(suggestFields(text, [])).map(s => s.value))
+      .toEqual(['BNS 101', 'BNS 103', 'BNS 115']);
+  });
+
+  it('recognises fictional special Act charges and leaves common intention as cited law', () => {
+    const text = 'The fictional FIR alleges Sections 66C and 66D of the Information Technology Act, '
+      + 'Section 25(1-B)(a) of the Arms Act and Section 3(5) of the BNS.';
+    expect(suggestFields(text, []).map(s => [s.field, s.value])).toEqual(expect.arrayContaining([
+      ['section', 'OTHER 66C'], ['section', 'OTHER 66D'], ['section', 'ARMS 25(1-B)(a)'],
+      ['citedProvision', 'BNS 3(5)'],
+    ]));
+  });
+
+  it('starts the charge proposal after a cited bail provision', () => {
+    const text = 'Section 483 of the BNSS governs this fictional bail application. '
+      + 'The FIR alleges Sections 379 and 411 of the IPC. Section 37 of the NDPS Act is discussed.';
+    expect(chargedOffenceSuggestions(suggestFields(text, [])).map(s => s.value)).toEqual(['IPC 379', 'IPC 411']);
+  });
   it('pairs IPC, BNS and Hindi provisions with their acts and source sentences', () => {
     const text = 'Fictional matter concerns sections 379 and 411 IPC. Another example cites u/s 303(2) BNS.\n\f\nउदाहरण में भारतीय न्याय संहिता की धारा ३०३(२) है।';
     const charges = suggestFields(text, []).map(({ field, value, page, sentence }) => [field, value, page, sentence]);

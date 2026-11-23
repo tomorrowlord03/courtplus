@@ -18,9 +18,41 @@ it('masks fictional names consistently, plus contact, address, relative and opti
     + 'पिता [Relative]। CNR No. [CNR]; FIR No. [FIR].');
   expect(masked.mapping.get('Fiction Alpha')).toBe('Accused-1');
   expect(masked.mapping.get('FICTION ALPHA')).toBe('Accused-1');
-  const originalIds = anonymise(text, entities).text;
+  const originalIds = anonymise(text, entities, { maskIds: false }).text;
   expect(originalIds).toContain('XYZZ000000002026');
   expect(originalIds).toContain('99990/2026');
+});
+
+it('finds fictional party, relative, narrative, counsel and Hindi names without model entities', () => {
+  const text = 'Fiction Alpha S/o Trial Parent, R/o Sample Lane\n... Applicant\n'
+    + 'The accused Fiction Alpha met witness Sample Person. Advocate Counsel Example appeared. '
+    + 'Sample Person spoke to Trial Parent. Hon\'ble Shri Justice Bench Example heard the case.\n'
+    + 'काल्पनिक नाम पुत्र काल्पनिक पिता। काल्पनिक नाम फिर आया।';
+  const result = anonymise(text, []);
+  for (const name of ['Fiction Alpha', 'Trial Parent', 'Sample Person', 'Counsel Example', 'Bench Example', 'काल्पनिक नाम']) {
+    expect(result.text).not.toContain(name);
+  }
+  expect(result.text).toContain('[Address]');
+});
+
+it('masks recurring fictional Hindi relatives named after kinship markers', () => {
+  const text = 'कल्पना पात्र आत्मज नमूना पिता। नमूना पिता दोबारा आए।';
+  expect(anonymise(text, []).text).not.toContain('नमूना पिता');
+});
+
+it('covers fictional daughter, wife, complainant, victim and deceased names without model help', () => {
+  const text = 'Trial Daughter D/o Sample Mother. Trial Wife W/o Sample Partner. '
+    + 'Complainant Example Speaker spoke. Victim Sample Survivor and deceased Example Person were mentioned. '
+    + 'Sample Survivor spoke again. काल्पनिक पत्नी पत्नी नमूना।';
+  const masked = anonymise(text, []).text;
+  for (const name of ['Trial Daughter', 'Sample Mother', 'Trial Wife', 'Sample Partner', 'Example Speaker',
+    'Sample Survivor', 'Example Person', 'काल्पनिक पत्नी']) expect(masked).not.toContain(name);
+});
+
+it('masks fictional case, crime, appeal, FIR and CNR identifiers by default', () => {
+  const text = 'MCRC No. 12/2025 CRA 33/2025 Crime No. 4/2025 FIR No. 9/2025 CNR XYZZ000000002026';
+  expect(anonymise(text, []).text).toBe('[Case Number] [Case Number] [Case Number] FIR No. [FIR] CNR [CNR]');
+  expect(anonymise(text, [], { maskIds: false }).text).toBe(text);
 });
 
 it('uses whole-word model offsets and merges touching names of the same role', () => {

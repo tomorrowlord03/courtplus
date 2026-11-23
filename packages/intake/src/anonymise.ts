@@ -1,5 +1,5 @@
 import type { Entity } from '@courtplus/contracts';
-import { cnrPattern, firPattern, validSpan } from './patterns.js';
+import { caseIdLoosePattern, caseIdPattern, cnrPattern, firPattern, validSpan } from './patterns.js';
 
 const personRoles: Partial<Record<Entity['label'], string>> = {
   PETITIONER: 'Accused', RESPONDENT: 'Respondent', WITNESS: 'Witness',
@@ -13,8 +13,19 @@ export interface AnonymisedOrder { text: string; mapping: Map<string, string> }
 const phonePattern = /(?<![\p{L}\p{N}/-])((?:(?:\+91|0091)[\t -]*)?[6-9](?:[\t -]?[0-9]){9}|(?:\+91[\t -]*)?\(?0[1-9][0-9]{1,3}\)?[\t -]+[0-9]{6,8})(?![\p{L}\p{N}/-])/dgu;
 const addressStart = /\br\s*\/\s*o\b|\bresident\s+of\b|निवासी/giu;
 const addressEnd = /\n[ \t]*\n|\f|[ \t\n]+(?:\.{3}[ \t]*)?(?=(?:applicants?|petitioners?|respondents?|versus|vs\.?)\b)|\n[ \t]*\d+[ \t]*[-.)]|\.(?=[ \t]+(?:The|He|She|They|This|That)\b)/giu;
-const relativeStart = /\b[sdw]\s*\/\s*o\b|\b(?:son|daughter|wife)\s+of\b|पिता(?:\s+का\s+नाम)?/giu;
+const relativeStart = /\b[sdw]\s*\/\s*o\b|\b(?:son|daughter|wife)\s+of\b|आत्मज|पिता(?:\s+का\s+नाम)?/giu;
 const relativeEnd = /(?=,[ \t]*(?:r\s*\/\s*o\b|resident\s+of\b|निवासी))|[ \t]+(?=(?:r\s*\/\s*o\b|resident\s+of\b|निवासी))|\n[ \t]*\n|\f|[ \t\n]+(?:\.{3}[ \t]*)?(?=(?:applicants?|petitioners?|respondents?|versus|vs\.?)\b)|\n[ \t]*\d+[ \t]*[-.)]|[;।!?]|\.(?=[ \t]+(?:The|He|She|They|This|That)\b)/giu;
+const englishName = String.raw`(?:[A-Z][\p{Ll}\p{M}]+|[A-Z]{2,})(?:[ \t]+(?:[A-Z][\p{Ll}\p{M}]+|[A-Z]{2,})){0,3}`;
+const hindiName = String.raw`[\p{Script=Devanagari}][\p{Script=Devanagari}\p{M}]+(?:[ \t]+[\p{Script=Devanagari}][\p{Script=Devanagari}\p{M}]+){0,3}`;
+const nameCues: { pattern: RegExp; role: string }[] = [
+  { pattern: new RegExp(`(?<name>${englishName})[ \\t]*(?:,?[ \\t]*(?:[SDWsdw]\\s*\\/\\s*[Oo]|[Ss]on of|[Dd]aughter of|[Ww]ife of)\\b)`, 'dgu'), role: 'Accused' },
+  { pattern: new RegExp(`(?:\\b[SDWsdw]\\s*\\/\\s*[Oo]\\b|\\b(?:[Ss]on|[Dd]aughter|[Ww]ife) of\\b|आत्मज|पिता)[ \\t:,-]*(?<name>${englishName})`, 'dgu'), role: 'Relative' },
+  { pattern: new RegExp(`(?:आत्मज|पिता)[ \\t:,-]*(?<name>${hindiName})`, 'dgu'), role: 'Relative' },
+  { pattern: new RegExp(`\\b(?:[Aa]pplicants?|[Aa]ccused|[Cc]omplainants?|[Ww]itness(?:es)?|[Dd]eceased|[Vv]ictims?|[Pp]etitioners?)\\b[ \\t:,-]+(?<name>${englishName})`, 'dgu'), role: 'Person' },
+  { pattern: new RegExp(`\\b(?:[Aa]dvocate|[Ll]earned counsel|Hon'?ble[ \\t]+Shri[ \\t]+Justice|[Jj]udge)\\b[ \\t:,-]+(?<name>${englishName})`, 'dgu'), role: 'Lawyer' },
+  { pattern: new RegExp(`(?<name>${hindiName})[ \\t]+(?:पुत्री?|पत्नी)`, 'dgu'), role: 'Person' },
+];
+const nonNames = /^(?:The|This|That|State|Court|High|Bail|Application|Applicant|Accused|Witness|Victim|Deceased|Learned|Counsel|Justice|Judge|Order|Section|Police|Station|District|Government|Hon|Honble)$/iu;
 
 function ruleMasks(text: string, pattern: RegExp, replacement: string): Mask[] {
   return [...text.matchAll(pattern)].map(match => {
@@ -44,7 +55,7 @@ function wordBounded(text: string, start: number, end: number): boolean {
     && (!word.test(text[end] ?? '') || !word.test(text[end - 1]));
 }
 
-export function anonymise(text: string, entities: Entity[], { maskIds = false }: AnonymiseOptions = {}): AnonymisedOrder {
+export function anonymise(text: string, entities: Entity[], { maskIds = true }: AnonymiseOptions = {}): AnonymisedOrder {
   const aliases = new Map<string, string>();
   const mapping = new Map<string, string>();
   const roleCounts = new Map<string, number>();
@@ -53,9 +64,19 @@ export function anonymise(text: string, entities: Entity[], { maskIds = false }:
     ...blockMasks(text, addressStart, addressEnd, '[Address]'),
     ...blockMasks(text, relativeStart, relativeEnd, '[Relative]'),
   ];
-  if (maskIds) masks.push(...ruleMasks(text, cnrPattern, '[CNR]'), ...ruleMasks(text, firPattern, '[FIR]'));
+  if (maskIds) masks.push(...ruleMasks(text, cnrPattern, '[CNR]'), ...ruleMasks(text, firPattern, '[FIR]'),
+    ...[...text.matchAll(caseIdPattern), ...text.matchAll(caseIdLoosePattern)].map(match => ({ start: match.index, end: match.index + match[0].length,
+      replacement: '[Case Number]', priority: 1 })));
 
-  const sortedNames = entities.filter(entity => personRoles[entity.label] && validSpan(text, entity.start, entity.end))
+  const discovered: Entity[] = nameCues.flatMap(({ pattern, role }) => [...text.matchAll(pattern)].flatMap(match => {
+    const span = match.indices?.groups?.name;
+    if (!span) return [];
+    const name = text.slice(span[0], span[1]);
+    if (name.split(/[ \t]+/u).every(part => nonNames.test(part))) return [];
+    const label: Entity['label'] = role === 'Accused' ? 'PETITIONER' : role === 'Relative' ? 'OTHER_PERSON' : role === 'Lawyer' ? 'LAWYER' : 'OTHER_PERSON';
+    return [{ label, text: name, start: span[0], end: span[1], score: 0.8 }];
+  }));
+  const sortedNames = [...entities, ...discovered].filter(entity => personRoles[entity.label] && validSpan(text, entity.start, entity.end))
     .sort((a, b) => a.start - b.start || b.end - a.end);
   const names: Entity[] = [];
   for (const entity of sortedNames) {
@@ -81,7 +102,12 @@ export function anonymise(text: string, entities: Entity[], { maskIds = false }:
       aliases.set(key, replacement);
     }
     mapping.set(name, replacement);
-    masks.push({ start, end, replacement, priority: 0, role });
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&').replace(/[ \t]+/gu, '[ \\t]+');
+    for (const occurrence of text.matchAll(new RegExp(escaped, 'giu'))) {
+      const a = occurrence.index;
+      const b = a + occurrence[0].length;
+      if (wordBounded(text, a, b)) masks.push({ start: a, end: b, replacement, priority: 0, role });
+    }
   }
 
   const merged: Mask[] = [];

@@ -1,6 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { basename, join } from 'node:path';
-import { importOrder } from '../dist/index.js';
+import { chargedOffenceSuggestions, importOrder } from '../dist/index.js';
 
 const [folder, modelFlag, modelDir, goldFlag, goldPath] = process.argv.slice(2);
 if (!folder || modelFlag !== '--model' || !modelDir || (goldFlag && (goldFlag !== '--gold' || !goldPath))) {
@@ -9,7 +9,8 @@ if (!folder || modelFlag !== '--model' || !modelDir || (goldFlag && (goldFlag !=
 }
 
 const gold = goldPath ? JSON.parse(await readFile(goldPath, 'utf8')) : undefined;
-const files = gold ? gold.map(row => row.file) : (await readdir(folder)).filter(file => file.toLowerCase().endsWith('.pdf'));
+const files = Array.isArray(gold) ? gold.map(row => row.file)
+  : (await readdir(folder)).filter(file => file.toLowerCase().endsWith('.pdf')).sort();
 const fields = Object.create(null);
 const fieldCounts = [];
 const recall = Object.fromEntries(['DATE', 'PROVISION', 'STATUTE', 'CASE_NUMBER'].map(field => [field, { found: 0, gold: 0 }]));
@@ -17,11 +18,20 @@ let maskedNames = 0;
 let possibleLeakLines = 0;
 let processed = 0;
 let errors = 0;
+const quality = { orderDate: 0, bailOutcome: 0, fullChargeSet: 0, chargeCoverage: 0, visibleCaseNumber: 0 };
 
 function normalizedDate(value) {
   const match = value.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/u);
   return match ? `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}` : value;
 }
+const normalizedCharge = value => {
+  const compact = value.replace(/\s+/gu, ' ').trim();
+  const section = compact.match(/(\d+[a-z]?(?:\([^)]+\))*)$/iu)?.[0].toLowerCase();
+  if (!section) return compact.toLowerCase();
+  const act = compact.slice(0, compact.length - section.length).trim();
+  const known = /^(?:IPC|BNS|NDPS|UAPA|PMLA|POCSO|PC_ACT|ARMS|EXCISE)$/iu.test(act) ? act.toLowerCase() : 'other';
+  return `${known} ${section}`;
+};
 
 function normalizedCase(value) {
   const match = value.match(/(\d{1,6})\s*(?:of|\/)\s*(\d{4})/iu);
@@ -59,10 +69,22 @@ for (const file of files) {
     processed++;
     maskedNames += [...result.redactedText.matchAll(/\b(?:Accused|Respondent|Witness|Person|Lawyer|Judge)-\d+\b/gu)].length;
     possibleLeakLines += result.redactedText.split(/\r?\n|\f/gu).filter(possibleLeak).length;
+    if (/\b(?:MCRC|CRA|Crime|Case)\s*(?:No\.?)?\s*\d+\s*(?:\/|of)\s*\d{4}\b|\bFIR\s*(?:No\.?)?\s*\d+\s*\/\s*\d{4}\b/iu.test(result.redactedText)) quality.visibleCaseNumber++;
     const present = new Set(result.suggestions.map(suggestion => suggestion.field));
     fieldCounts.push(present.size);
     for (const field of present) fields[field] = (fields[field] ?? 0) + 1;
-    const row = gold?.find(item => item.file === file);
+    const row = Array.isArray(gold) ? gold.find(item => item.file === file) : undefined;
+    const verified = !Array.isArray(gold) && gold?.[`order-${String(files.indexOf(file) + 1).padStart(2, '0')}`]?.facts;
+    if (verified) {
+      const date = new Set(result.suggestions.filter(s => s.field === 'orderDate').map(s => s.value));
+      const outcome = new Set(result.suggestions.filter(s => s.field === 'bailOutcome').map(s => s.value));
+      const charges = new Set(chargedOffenceSuggestions(result.suggestions).map(s => normalizedCharge(s.value)));
+      const expected = new Set(verified.charges.map(normalizedCharge));
+      if (date.has(verified.orderDate)) quality.orderDate++;
+      if (outcome.has(verified.bailOutcome)) quality.bailOutcome++;
+      if ([...expected].every(value => charges.has(value))) quality.chargeCoverage++;
+      if (expected.size === charges.size && [...expected].every(value => charges.has(value))) quality.fullChargeSet++;
+    }
     if (!row) continue;
     const predicted = {
       DATE: new Set(result.suggestions.filter(s => /^(?:date|\w+On|bailDate|custodySince)$/u.test(s.field)).map(s => s.value)),
@@ -98,8 +120,9 @@ const output = {
   ordersWithField: fields,
   maskedNameCount: maskedNames,
   possibleLeakLines,
+  ...(gold && !Array.isArray(gold) ? { quality } : {}),
 };
-if (gold) output.fieldRecall = Object.fromEntries(Object.entries(recall).map(([field, value]) =>
+if (Array.isArray(gold)) output.fieldRecall = Object.fromEntries(Object.entries(recall).map(([field, value]) =>
   [field, { ...value, recall: value.gold ? Number((value.found / value.gold).toFixed(3)) : 0 }]));
 // PDF/OCR runtimes can retain workers after the aggregate has been printed.
 process.stdout.write(JSON.stringify(output) + '\n', () => process.exit(errors ? 1 : 0));
