@@ -16,8 +16,9 @@ export function Safeguards() {
         <section className="rounded border bg-white p-3">
           <h2 className="font-semibold">What it does not do</h2>
           <ul className="list-disc pl-5 text-sm">
-            <li><strong>No prediction.</strong> It never predicts a court's decision, a person's risk or an outcome (SC draft AI policy r.20(1)(d)).</li>
-            <li>It does not decide eligibility, grant bail or file anything. A person decides.</li>
+            <li><strong>No prediction.</strong> It never predicts a court's decision, a person's risk or an outcome (SC draft Regulations for Use of AI in Courts, 2026, r.20(1)(d); not yet in force).</li>
+            <li>No AI in the screen: the custody count and status come from fixed rules shown in the proof trace. The AI only suggests fields from orders, and a person confirms each one.</li>
+            <li>It does not decide eligibility, grant bail or file anything. The jail superintendent files the s.479(3) application; the court decides release.</li>
             <li>Framed charges count only after a person verifies them against the order.</li>
           </ul>
         </section>
@@ -27,7 +28,7 @@ export function Safeguards() {
         </section>
         <section className="rounded border bg-white p-3">
           <h2 className="font-semibold">Your data stays here</h2>
-          <p className="text-sm">No data is sent over the internet. Names are masked on screen by default. Files are stored encrypted on this computer or on the prison LAN appliance.</p>
+          <p className="text-sm">Desktop and prison-LAN installs send no data over the internet. The optional cloud appliance stores data encrypted on the operator's server and is reached over HTTPS. Names are masked on screen by default.</p>
         </section>
         <section className="rounded border bg-white p-3">
           <h2 className="font-semibold">Model card (summary)</h2>

@@ -5,8 +5,8 @@ import { useApp, todayIST } from '../lib/context';
 import { Empty, ErrorNote, Page, errMsg } from '../components/ui';
 
 export const LANES: { lane: Lane; title: string; hint: string }[] = [
-  { lane: 'APPLY_NOW', title: 'Apply now', hint: 'Eligible today' },
-  { lane: 'DUE_30', title: 'Due in 30 days', hint: 'Becomes eligible within 30 days' },
+  { lane: 'APPLY_NOW', title: 'Apply now', hint: 'Threshold reached: superintendent to apply; court decides' },
+  { lane: 'DUE_30', title: 'Due in 30 days', hint: 'Threshold date falls within 30 days' },
   { lane: 'LAWYER_REVIEW', title: 'Needs a lawyer', hint: 'A person must decide' },
   { lane: 'BAIL_NOT_RELEASED', title: 'Bail granted but still in jail', hint: 'Check surety, holds, release' },
   { lane: 'COURT_JAIL_MISMATCH', title: 'Court and jail records disagree', hint: 'Reconcile before acting' },

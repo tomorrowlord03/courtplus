@@ -4,6 +4,7 @@
   "rights_bnss_479_release": "Under section 479 of the Bharatiya Nagarik Suraksha Sanhita (BNSS), an undertrial who has never been convicted of any offence may be released on bond after spending one-third of the maximum prison term for the offence in custody; other undertrials may be released on bail after one-half. This does not apply to offences punishable with death or life imprisonment. It may not apply if more than one offence or case is pending; ask a lawyer to check. The court decides. After hearing the Public Prosecutor, the court may order continued custody, giving written reasons.",
   "rights_superintendent_duty": "Under BNSS Section 479(3), the jail superintendent must make a formal application to the court when the required custody time is reached.",
   "rights_post_bail_7_days": "If bail is granted but you are not released within 7 days, the jail authority must inform the District Legal Services Authority (DLSA), pursuant to the Supreme Court order dated 31 January 2023.",
+  "rights_post_bail_1_month": "If you cannot furnish the bail bond or surety within one month of bail being granted, the court that granted bail may consider relaxing the conditions on its own. You can also ask the DLSA lawyer to apply to reduce the bond.",
   "rights_ask_lawyer": "You can ask the DLSA for a free legal aid lawyer.",
   "rights_contact": "Contact: {dlsaName}, Phone: {dlsaPhone}.",
   "rights_disclaimer": "This document provides legal information only. It does not constitute a guarantee or promise of release, which remains subject to judicial orders.",

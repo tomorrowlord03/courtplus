@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CaseRecord, CourtPlusApi, ISODate, Person, ScreeningResult } from '@courtplus/contracts';
-import { documentFont, resourceRoot, type Language, type RenderOptions } from './resources.js';
+import { documentFont, readOptional, resourceRoot, type Language, type RenderOptions } from './resources.js';
 import { rightsCopy } from './rights.js';
 
 const statuteQuotes: Record<'bnss479_1' | 'bnss479_2' | 'bnss479_3', { text: string }> =
@@ -184,21 +184,41 @@ function handoff(data: DlsaHandoffData, lang: LegalLanguage): DocumentBody {
   };
 }
 
+function load1MonthPostBail(root: string, lang: Language): string | undefined {
+  const file = readOptional(join(root, 'data', 'i18n', lang + '.json'));
+  if (!file) return undefined;
+  try {
+    const parsed = JSON.parse(file.toString('utf8').replace(/^\uFEFF/, ''));
+    if (typeof parsed?.rights_post_bail_1_month === 'string' && parsed.rights_post_bail_1_month.trim()) {
+      return parsed.rights_post_bail_1_month;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
 function rightsCard(data: RightsCardData, _lang: LegalLanguage, root: string, requested: string): DocumentBody {
   const { copy, lang, notice } = rightsCopy(root, requested);
   const contacts = { dlsaName: data.dlsaName ?? '—', dlsaPhone: data.dlsaPhone ?? '—' };
   const contact = copy.rights_contact.replace(/\{(dlsaName|dlsaPhone)\}/g,
     (_match, key: keyof typeof contacts) => contacts[key],
   );
+  const postBail1Month = load1MonthPostBail(root, lang) ?? (lang !== 'en' ? load1MonthPostBail(root, 'en') : undefined);
+  const rightsItems = [
+    copy.rights_legal_aid_statutory,
+    copy.rights_bnss_479_release,
+    copy.rights_superintendent_duty,
+    copy.rights_post_bail_7_days,
+    ...(postBail1Month ? [postBail1Month] : []),
+    copy.rights_ask_lawyer,
+  ];
   return {
     title: copy.rights_card_title,
     lang,
     notice,
     body: template('rights-card.html', { contact, disclaimer: copy.rights_disclaimer }, {
-      rights: listItems([
-        copy.rights_legal_aid_statutory, copy.rights_bnss_479_release, copy.rights_superintendent_duty,
-        copy.rights_post_bail_7_days, copy.rights_ask_lawyer,
-      ]),
+      rights: listItems(rightsItems),
     }),
   };
 }
