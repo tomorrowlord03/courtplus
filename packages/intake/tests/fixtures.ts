@@ -47,6 +47,8 @@ export function fictionalOrderPdf(scan?: Buffer): Buffer {
 }
 
 export function fictionalBilingualImage() {
+  const englishFont = fileURLToPath(new URL('../../../assets/fonts/NotoSans/NotoSans-Regular.ttf', import.meta.url));
+  if (!GlobalFonts.registerFromPath(englishFont, 'Intake English Fixture')) throw new Error('Could not register the English test font');
   const font = fileURLToPath(new URL('./fonts/NotoSansDevanagari-Regular.ttf', import.meta.url));
   if (!GlobalFonts.registerFromPath(font, 'Intake Hindi Fixture')) throw new Error('Could not register the test font');
   const canvas = createCanvas(1000, 360);
@@ -54,7 +56,7 @@ export function fictionalBilingualImage() {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, 1000, 360);
   ctx.fillStyle = 'black';
-  ctx.font = '50px sans-serif';
+  ctx.font = '50px "Intake English Fixture"';
   ctx.fillText('Fictional test sentence.', 70, 132);
   ctx.font = '54px "Intake Hindi Fixture"';
   ctx.fillText('यह एक काल्पनिक वाक्य है।', 70, 235);
