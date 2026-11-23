@@ -28,7 +28,7 @@ export function evidenceBridge(): EvidenceBridge | undefined {
 const METHODS = [
   'listPersons', 'listCases', 'importOrder', 'saveCase', 'screen', 'board', 'updateCard',
   'exportDraft', 'exportScReturn', 'verify', 'stats', 'role',
-  'analyzeAdjournments', 'judgeDashboard',
+  'judgeDashboard',
 ] as const;
 
 // Uint8Array does not survive JSON; send base64 and let the server decode it.
@@ -81,7 +81,6 @@ export function createDevStub(): CourtPlusApi {
     verify: () => none('Verify'),
     stats: async () => null,
     role: async () => 'legal_aid',
-    analyzeAdjournments: () => none('Analyze adjournments'),
     judgeDashboard: () => none('Judge dashboard'),
   };
 }

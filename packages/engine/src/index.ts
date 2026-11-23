@@ -9,7 +9,6 @@ import { defaultBailCheck, investigationLimit, policeCheck } from './remand.js';
 
 export { lookupOffence } from './offences.js';
 export { policeCustodyCheck } from './remand.js';
-export { analyzeAdjournments, extractAdjournmentEvents, recommendNextHearing } from './adjournments.js';
 export { computeJudgePerformance, classifyAging, OFFICIAL_NJDG_BENCHMARKS } from './judge-analytics.js';
 export type { DatedEvidence, EngineCaseRecord, EngineCharge, EnginePerson } from './facts.js';
 export const RULE_VERSION = 'rules-2026-11-23.2';

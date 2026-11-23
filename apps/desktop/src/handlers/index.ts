@@ -112,10 +112,6 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
       peopleCount: listPersons().length, caseCount: listCases().length,
       figures: loadFigures(join(ports.resourceDirectory, 'data', 'stats')),
     }),
-    analyzeAdjournments: async (caseId, asOf) => {
-      const { record } = context(caseId);
-      return engine.analyzeAdjournments(record, asOf ?? boardDate ?? indiaDate());
-    },
     judgeDashboard: async (asOf, judgeName) => {
       return engine.computeJudgePerformance(listCases(), asOf ?? boardDate ?? indiaDate(), judgeName);
     },

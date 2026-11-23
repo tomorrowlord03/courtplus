@@ -42,11 +42,3 @@ export const juvenile = authority('JJ Act', '21, 94',
   'https://upload.indiacode.nic.in/showfile?actid=AC_CEN_13_14_000010_201602_1517807328168&filename=a2016-2.pdf&type=actfile');
 export const mentalHealth = authority('MHCA', '103', 'Review the statutory pathway for prisoners with mental illness.',
   'https://upload.indiacode.nic.in/showfile?actid=AC_CEN_12_13_00024_201710_1517807327874&filename=a2017-10.pdf&type=actfile');
-
-export const order17Rule1 = authority('Code of Civil Procedure, 1908', 'Order XVII Rule 1 proviso',
-  'Provided that no such adjournment shall be granted more than three times to a party during hearing of the suit; and reasonable costs shall be ordered for delay.',
-  'https://www.indiacode.nic.in/handle/123456789/2191?sam_handle=123456789/1362');
-
-export const bnss346 = authority('Bharatiya Nagarik Suraksha Sanhita, 2023', 'Section 346',
-  'Proceedings shall be held day-to-day until all witnesses in attendance are examined; no adjournment shall be granted without recording reasons in writing; costs may be awarded against party causing delay.',
-  'https://www.indiacode.nic.in/handle/123456789/2249?sam_handle=123456789/1362');

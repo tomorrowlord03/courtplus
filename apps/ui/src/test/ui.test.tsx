@@ -16,14 +16,6 @@ const mockApi = (over: Partial<CourtPlusApi>): CourtPlusApi => ({
   listPersons: vi.fn(async () => []), listCases: vi.fn(async () => []), importOrder: vi.fn(),
   saveCase: vi.fn(), screen: vi.fn(), board: vi.fn(async () => []), updateCard: vi.fn(),
   exportDraft: vi.fn(), exportScReturn: vi.fn(), verify: vi.fn(), stats: vi.fn(), role: vi.fn(),
-  analyzeAdjournments: vi.fn(async () => ({
-    caseId: 'c1', totalAdjournments: 0, totalDelayDays: 0, averageAdjournmentSpanDays: 0,
-    partyBreakdown: { petitioner: 0, respondent: 0, prosecution: 0, court: 0, joint: 0, other: 0 },
-    reasonsBreakdown: { counsel_absent: 0, witness_absent: 0, documents_awaited: 0, interlocutory_application: 0, settlement_talks: 0, bench_unavailable: 0, police_report_pending: 0, general: 0 },
-    order17Rule1Exceeded: false, bnss346DayToDayViolation: false, riskLevel: 'LOW' as const, events: [],
-    recommendation: { earliestDate: '2026-03-09', suggestedDays: 7, docketLoadLevel: 'light' as const, statutoryAdvice: ['On track'], justificationRequired: false },
-    statutoryWarnings: [],
-  })),
   judgeDashboard: vi.fn(async () => ({
     asOf: '2026-03-01', totalJudges: 1, totalActiveCases: 0, totalDisposedCases: 10, benchClearanceRate: 100,
     stateNjdg10YearComparison: { district10YearPending: 5256293, chhattisgarh10YearPending: 1166, ratioToNational: 0.02 },

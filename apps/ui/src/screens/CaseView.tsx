@@ -5,7 +5,6 @@ import { addDays, daysBetween, todayIST, useApp } from '../lib/context';
 import { Empty, ErrorNote, Page, errMsg } from '../components/ui';
 import { HintsPanel } from '../components/HintsPanel';
 import { useRole } from '../lib/roles';
-import { AdjournmentAnalyzer } from '../components/AdjournmentAnalyzer';
 
 const STATUS_TEXT: Record<ScreeningResult['status'], string> = {
   APPLY_NOW: '● Apply now',
@@ -194,13 +193,6 @@ export function CaseView() {
           <ul className="text-sm">{polices.map((s, i) => <li key={i}>{s.start} to {s.end ?? 'ongoing'}</li>)}</ul>
           {policeAlerts.map((a, i) => <p key={i} className="text-sm text-amber-800">▲ {a.message}</p>)}
         </section>
-
-        <AdjournmentAnalyzer
-          caseRecord={rec}
-          person={person}
-          asOf={asOf}
-          onCaseUpdated={(updated) => setRec(updated)}
-        />
       </div>
     </Page>
   );

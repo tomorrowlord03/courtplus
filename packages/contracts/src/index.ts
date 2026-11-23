@@ -16,31 +16,11 @@ export interface CustodySpell {
   start: ISODate; end?: ISODate; ongoing?: boolean; source?: SourceRef;
 }
 
-export type AdjournmentParty = 'prosecution' | 'petitioner' | 'respondent' | 'court' | 'joint' | 'other';
-export type AdjournmentReason =
-  | 'counsel_absent'
-  | 'witness_absent'
-  | 'documents_awaited'
-  | 'interlocutory_application'
-  | 'settlement_talks'
-  | 'bench_unavailable'
-  | 'police_report_pending'
-  | 'general';
-
-export interface AdjournmentDetail {
-  requestedBy: AdjournmentParty;
-  reason: AdjournmentReason;
-  recordedJustification?: string;
-  costsImposed?: number; // In rupees, per BNSS s.346 / CPC O.17 R.1
-  daysGranted: number;
-}
-
 export interface CourtEvent {
   on: ISODate;
-  kind: 'remand' | 'chargesheet' | 'framing' | 'bail_granted' | 'bail_rejected' | 'acquitted' | 'convicted' | 'released' | 'hearing' | 'adjournment' | 'other';
+  kind: 'remand' | 'chargesheet' | 'framing' | 'bail_granted' | 'bail_rejected' | 'acquitted' | 'convicted' | 'released' | 'hearing' | 'other';
   note?: string;
   source?: SourceRef;
-  adjournment?: AdjournmentDetail;
   judgeName?: string;
   courtRoom?: string;
 }
@@ -95,45 +75,6 @@ export type LookupOffenceFn = (act: string, section: string, subsection?: string
 // NER suggestions (packages/intake)
 export interface Entity { label: 'COURT'|'PETITIONER'|'RESPONDENT'|'JUDGE'|'LAWYER'|'DATE'|'ORG'|'GPE'|'STATUTE'|'PROVISION'|'PRECEDENT'|'CASE_NUMBER'|'WITNESS'|'OTHER_PERSON'; text: string; start: number; end: number; score: number; page?: number }
 export interface FieldSuggestion { field: string; value: string; entity?: Entity; sentence: string; page?: number; confidence: number }
-
-// Adjournment Analyzer
-export interface AdjournmentRecommendation {
-  earliestDate: ISODate;
-  suggestedDays: number;
-  targetCourtRoom?: string;
-  docketLoadLevel: 'light' | 'moderate' | 'heavy' | 'critical';
-  statutoryAdvice: string[];
-  justificationRequired: boolean;
-  costWarning?: string;
-}
-
-export interface AdjournmentEvent {
-  on: ISODate;
-  party: AdjournmentParty;
-  reason: AdjournmentReason;
-  daysGranted: number;
-  costsImposed?: number;
-  recordedJustification?: string;
-  note?: string;
-}
-
-export interface AdjournmentAnalysis {
-  caseId: string;
-  caseNo?: string;
-  court?: string;
-  judgeName?: string;
-  totalAdjournments: number;
-  totalDelayDays: number;
-  averageAdjournmentSpanDays: number;
-  partyBreakdown: Record<AdjournmentParty, number>;
-  reasonsBreakdown: Record<AdjournmentReason, number>;
-  order17Rule1Exceeded: boolean; // CPC Order XVII Rule 1: max 3 adjournments to a party
-  bnss346DayToDayViolation: boolean; // BNSS Section 346: mandate for day-to-day hearing
-  riskLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
-  events: AdjournmentEvent[];
-  recommendation: AdjournmentRecommendation;
-  statutoryWarnings: string[];
-}
 
 // Judge Performance & Backlog Dashboard
 export interface AgingBucket {
@@ -198,7 +139,6 @@ export interface CourtPlusApi {
   verify(bundle: { pdf: Uint8Array; receipt: string; manifest: string }): Promise<{ signature: 'valid'|'invalid'|'unknown_signer'; pdf: 'unchanged'|'changed'; chain: 'intact'|'mismatch'|'not_checked' }>;
   stats(): Promise<unknown>;
   role(): Promise<'legal_aid'|'utrc'|'superintendent'|'dlsa'>;
-  analyzeAdjournments(caseId: string, asOf?: ISODate): Promise<AdjournmentAnalysis>;
   judgeDashboard(asOf?: ISODate, judgeName?: string): Promise<BenchBacklogSummary>;
 }
 

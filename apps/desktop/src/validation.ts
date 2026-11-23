@@ -110,7 +110,6 @@ export const argumentSchemas = {
   verify: z.tuple([z.strictObject({ pdf: bytes, receipt: z.string().min(1), manifest: z.string().min(1) })]),
   stats: z.tuple([]),
   role: z.tuple([]),
-  analyzeAdjournments: z.tuple([id, civilDate.optional()]),
   judgeDashboard: z.tuple([civilDate.optional(), z.string().optional()]),
 } satisfies ApiSchemas;
 

@@ -122,7 +122,7 @@ export function computeJudgePerformance(
 
       // Count adjournments in this case
       const adjCount = c.events.filter(e =>
-        e.kind === 'adjournment' || Boolean(e.adjournment) || (e.kind === 'hearing' && /adjourn/i.test(e.note ?? ''))
+        e.kind === 'hearing' && /adjourn/i.test(e.note ?? '')
       ).length;
       totalAdjournmentsGranted += adjCount;
 
