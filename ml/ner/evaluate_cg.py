@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from collections import defaultdict
@@ -65,12 +66,10 @@ def person(value: str) -> str:
     return re.sub(r"^(?:hon ble |shri |smt |mr |mrs |ms |justice )+", "", plain).strip()
 
 
-def main():
-    gold = json.loads((DATA / "cg_gold.json").read_text(encoding="utf-8"))
+def evaluate(gold_path: Path, source_dir: Path, artifact: Path):
+    gold = json.loads(gold_path.read_text(encoding="utf-8"))
     if len(gold) != 10:
         raise RuntimeError("Expected ten hand-annotated orders")
-    source_dir = Path("D:/Projects/Court plus/repo/orders")
-    artifact = ROOT / "artifacts" / "courtplus-legalner"
     totals = defaultdict(lambda: {"tp": 0, "predicted": 0, "gold": 0})
     for row in gold:
         path = source_dir / row["file"]
@@ -92,17 +91,36 @@ def main():
         totals["PERSON"]["tp"] += matched
         totals["PERSON"]["gold"] += len(expected_names)
         totals["PERSON"]["predicted"] += len(set(predicted_names))
-        print(f"CG checked {path.name}: {len(entities)} predicted entities", flush=True)
     report = {label: {**counts,
                       "precision": (counts["tp"] / counts["predicted"] if counts["predicted"] else 0)
                       if label != "PERSON" else None,
                       "recall": counts["tp"] / counts["gold"] if counts["gold"] else 0}
               for label, counts in totals.items()}
+    return len(gold), report
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--gold", type=Path, default=DATA / "cg_gold.json")
+    parser.add_argument("--orders", type=Path, default=Path("D:/Projects/Court plus/repo/orders"))
+    parser.add_argument("--artifact", type=Path, default=ROOT / "artifacts" / "courtplus-legalner")
+    parser.add_argument("--output", type=Path, help="Write aggregate JSON to a separate experiment file")
+    args = parser.parse_args()
+    order_count, report = evaluate(args.gold, args.orders, args.artifact)
+    for label, result in report.items():
+        precision = "n/a" if result["precision"] is None else f"{result['precision']:.3f}"
+        print(f"CG {label}: P={precision} R={result['recall']:.3f} "
+              f"TP={result['tp']} predicted={result['predicted']} gold={result['gold']}")
+
+    if args.output:
+        args.output.write_text(json.dumps({"orders": order_count, "scores": report}, indent=2) + "\n",
+                               encoding="utf-8")
+        return
     (DATA / "cg_field_results.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     metrics_path = ROOT / "metrics.json"
     metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
     metrics["cg_field_evaluation"] = {
-        "orders": len(gold), "unit": "distinct normalized field value per order",
+        "orders": order_count, "unit": "distinct normalized field value per order",
         "person_unit": "distinct written person name per order; full-name match for recall",
         "source": "local published Chhattisgarh High Court orders; never used for training",
         "scores": report,
@@ -118,10 +136,6 @@ def main():
     markdown = ROOT / "METRICS.md"
     previous = markdown.read_text(encoding="utf-8").split("\n## Chhattisgarh order field check\n")[0]
     markdown.write_text(previous.rstrip() + "\n" + "\n".join(lines) + "\n", encoding="utf-8")
-    for label, result in report.items():
-        precision = "n/a" if result["precision"] is None else f"{result['precision']:.3f}"
-        print(f"CG {label}: P={precision} R={result['recall']:.3f} "
-              f"TP={result['tp']} predicted={result['predicted']} gold={result['gold']}")
 
 
 if __name__ == "__main__":

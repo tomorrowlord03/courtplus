@@ -64,3 +64,47 @@ Ten locally held published High Court orders were hand annotated from pypdf text
 | PERSON | n/a | 0.788 | 67 | 78 | 85 |
 
 This convenience sample is small, English text layer only, and drawn from one court. Name recall does not establish safe anonymisation of addresses, relatives, or identifiers.
+
+## Real bail-order adaptation
+
+| Candidate | Official F1 combined | Judgment | Preamble | CG dates R | CG cases R | CG statutes R | CG names R | IBJ IPC P / R | IBJ court P / R / top accuracy | L-NER fold 3 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Current | 0.8742 | 0.8586 | 0.9035 | 0.077 | 0.048 | 0.174 | 0.788 | 0.695 / 0.794 | 0.117 / 0.420 / 0.335 | — |
+| DAPT | 0.8746 | 0.8591 | 0.9036 | 0.000 | 0.000 | 0.174 | 0.753 | 0.685 / 0.802 | 0.115 / 0.380 / 0.280 | — |
+| DAPT + L-NER | — | — | — | — | — | — | — | — | — | — |
+
+**Release decision. Keep the current model.** Official combined F1 changed by +0.0004. CG recall improved in 0 of four gate fields (none). Release requires improvement in at least two CG fields and an official combined F1 loss of at most 0.005.
+
+### Leakage and data sources
+
+| Candidate source | Units | Official test | Official dev | CG gold | Excluded for overlap |
+|---|---:|---:|---:|---:|---:|
+| IBJ-1200 | 1200 | 13 | 17 | 0 | 29 |
+| hf-tuner train | 6220 | 0 | 0 | 0 | 0 |
+| hf-tuner validation | 613 | 9 | 613 | 0 | 613 |
+| Figshare | 50 | 0 | 0 | 0 | 0 |
+
+Counts can intersect across split columns. The audit compared normalized text and removed duplicate and near-duplicate IBJ orders. Seed 42 selected 200 held-out orders from 1009 eligible orders after also checking official train. The masked-language run used 824 PDF text layers for 1329 optimizer steps in 12.1 minutes. The objective used PDF text only. NER fine-tuning used official train and selected the checkpoint on official dev. [IndianBailJudgments-1200, CC BY 4.0](https://huggingface.co/datasets/SnehaDeshmukh/IndianBailJudgments-1200)
+
+All 6,833 hf-tuner rows match normalized rows in official InLegalNER. The repackage was excluded. The 50-document Figshare workbook has token-level BILOU annotations with partial coverage and incompatible classes. For example, its date tag covers judgment dates and its party-type tag covers role markers. The workbook was excluded. [Indian Court Decision Annotated Corpus, CC BY 4.0](https://doi.org/10.6084/m9.figshare.19719088.v2)
+
+IL-TUR returned HTTP 403 on the authenticated retry. The DAPT + L-NER candidate, L-NER fold 3, and the 20-document HLDC smoke test are unavailable. [IL-TUR, CC BY-NC-SA 4.0](https://huggingface.co/datasets/Exploration-Lab/IL-TUR)
+
+IBJ compares distinct IPC section numbers and courts per order using the production intake model and rules. Section numbers ignore prefixes and subsections, and court names use normalized written aliases. Court top accuracy checks only the first suggestion. The author-provided IPC and court reference annotations were machine-generated with consistency checks and may be incomplete. [Dataset paper](https://arxiv.org/abs/2507.02506)
+
+### Reproduce the IBJ-only run
+
+From the repository root in PowerShell, use a Python environment for ml/ner and a built intake package from the same revision. The intermediate files default to E:/AI-cache/courtplus-ml/w28.
+
+```powershell
+$python = 'ml/ner/.venv/Scripts/python.exe'
+$intake = 'packages/intake/dist'
+$env:TEMP = 'E:/AI-cache/tmp'
+$env:TMP = $env:TEMP
+$env:HF_HOME = 'E:/AI-cache/huggingface'
+& $python -I -B ml/ner/real_data.py audit
+& $python -I -B ml/ner/real_data.py train
+& $python -I -B ml/ner/real_data.py evaluate --candidate current --intake-dist $intake
+& $python -I -B ml/ner/real_data.py evaluate --candidate dapt --intake-dist $intake
+& $python -I -B ml/ner/real_data.py report
+```

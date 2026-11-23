@@ -26,9 +26,9 @@ OFFICIAL_FILES = {
 }
 
 
-def load_official(split: str) -> Dataset:
+def load_official(split: str, data_dir: Path = DATA) -> Dataset:
     """Read the pinned official Label Studio annotations without a second cache."""
-    path = DATA / "official" / "data" / OFFICIAL_FILES[split]
+    path = data_dir / "official" / "data" / OFFICIAL_FILES[split]
     rows = []
     for source in parquet.read_table(path).to_pylist():
         text = source["data"]["text"]

@@ -19,7 +19,7 @@ from transformers import (
     Trainer, TrainerCallback, TrainingArguments, set_seed,
 )
 
-from data_utils import LABELS, LABEL_TO_ID, ROOT, load_official, tokenize_spans
+from data_utils import DATA, LABELS, LABEL_TO_ID, ROOT, load_official, tokenize_spans
 
 
 MODEL_ID = "law-ai/InLegalBERT"
@@ -64,6 +64,9 @@ class TimeBudget(TrainerCallback):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", type=Path, default=DATA)
+    parser.add_argument("--model-path", type=Path, default=MODEL_PATH)
+    parser.add_argument("--run-dir", type=Path, default=RUN_DIR)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--cpu", action="store_true")
@@ -81,20 +84,20 @@ def main():
         args.epochs = min(args.epochs, 1)
         print("Reduced CPU plan: batch 2, one epoch", flush=True)
 
-    tokenizer = AutoTokenizer.from_pretrained(str(MODEL_PATH), local_files_only=True, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(str(args.model_path), local_files_only=True, use_fast=True)
     model = AutoModelForTokenClassification.from_pretrained(
-        str(MODEL_PATH), local_files_only=True, num_labels=len(LABELS),
+        str(args.model_path), local_files_only=True, num_labels=len(LABELS),
         id2label={i: label for i, label in enumerate(LABELS)}, label2id=LABEL_TO_ID,
     )
-    train = load_official("train")
-    dev = load_official("dev")
+    train = load_official("train", args.data_dir)
+    dev = load_official("dev", args.data_dir)
     if args.limit_train:
         train = train.select(range(min(args.limit_train, len(train))))
     print(f"official source rows: train={len(train)}, dev={len(dev)}", flush=True)
     train = train.map(lambda batch: tokenize_spans(batch, tokenizer), batched=True, remove_columns=train.column_names)
     dev = dev.map(lambda batch: tokenize_spans(batch, tokenizer), batched=True, remove_columns=dev.column_names)
     print(f"tokenized chunks: train={len(train)}, dev={len(dev)}", flush=True)
-    run_dir = RUN_DIR
+    run_dir = args.run_dir
     run_dir.mkdir(parents=True, exist_ok=True)
     effective_batch = 32
     accumulation = math.ceil(effective_batch / args.batch_size)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -13,11 +14,20 @@ from transformers import AutoTokenizer
 from data_utils import ROOT
 
 
-def predict(text: str, artifact: Path):
+@lru_cache(maxsize=1)
+def load_artifact(artifact: Path):
     tokenizer = AutoTokenizer.from_pretrained(str(artifact), local_files_only=True)
     config = json.loads((artifact / "config.json").read_text(encoding="utf-8"))
     labels = config["id2label"]
-    session = ort.InferenceSession(str(artifact / "onnx" / "model.onnx"), providers=["CPUExecutionProvider"])
+    options = ort.SessionOptions()
+    options.intra_op_num_threads = 2
+    session = ort.InferenceSession(str(artifact / "onnx" / "model.onnx"), options,
+                                   providers=["CPUExecutionProvider"])
+    return tokenizer, labels, session
+
+
+def predict(text: str, artifact: Path):
+    tokenizer, labels, session = load_artifact(artifact.resolve())
     encoded = tokenizer(text, truncation=True, max_length=256, stride=64, return_overflowing_tokens=True,
                         return_offsets_mapping=True, return_tensors=None)
     token_predictions = {}

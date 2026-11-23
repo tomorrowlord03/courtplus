@@ -282,5 +282,673 @@
         "recall": 0.788235294117647
       }
     }
+  },
+  "real_data_experiment": {
+    "audit": {
+      "protocol": {
+        "normalization": "Unicode NFKC, casefold, dehyphenate line breaks, compare word sequences",
+        "passages": "exact normalized rows plus bidirectional whole-passage containment (minimum eight words)",
+        "near_documents": "at least 30 shared distinct 12-word shingles and at least 60% coverage of shorter document",
+        "ibj_holdout": "200 orders, sorted source IDs shuffled with seed 42 after deduplication and official train/dev/test and CG exclusion"
+      },
+      "hf_tuner": {
+        "train": {
+          "rows": 6220,
+          "official_test": 0,
+          "official_dev": 0,
+          "cg_gold": 0,
+          "excluded_overlap": 0,
+          "matches_any_official_exact_row": 6220,
+          "official_train_exact": 6220,
+          "official_dev_exact": 0,
+          "official_test_exact": 0,
+          "remaining_after_overlap": 6220
+        },
+        "validation": {
+          "rows": 613,
+          "official_test": 9,
+          "official_dev": 613,
+          "cg_gold": 0,
+          "excluded_overlap": 613,
+          "matches_any_official_exact_row": 613,
+          "official_train_exact": 0,
+          "official_dev_exact": 613,
+          "official_test_exact": 5,
+          "remaining_after_overlap": 0
+        },
+        "used": false,
+        "reason": "No licence stated and substantial reuse of official texts"
+      },
+      "figshare": {
+        "documents": 50,
+        "token_label_counts": {
+          "AAPL": 1,
+          "APPL": 112,
+          "APT": 1,
+          "AUTH": 60,
+          "BCH": 74,
+          "BD": 2,
+          "CD": 13,
+          "CIVL": 36,
+          "CRNL": 8,
+          "CRTOF": 60,
+          "DC": 4,
+          "DOC": 63,
+          "DOJUD": 50,
+          "HC": 328,
+          "JD": 322,
+          "JDG": 290,
+          "JUR-ADVSY": 1,
+          "JUR-APLT": 14,
+          "JUR-OGNL": 2,
+          "O": 75640,
+          "ORD": 74,
+          "ORG": 4,
+          "PC": 1,
+          "PETR": 216,
+          "PLC": 5,
+          "PT": 100,
+          "PTN": 44,
+          "RES": 267,
+          "SC": 34,
+          "STE": 38
+        },
+        "official_test": 0,
+        "official_dev": 0,
+        "cg_gold": 0,
+        "excluded_overlap": 0,
+        "remaining_after_overlap": 50,
+        "used": false,
+        "reason": "Partial and incompatible entity scope, including judgment dates and jurisdiction; outside tags are unsafe negatives"
+      },
+      "ibj1200": {
+        "orders": 1200,
+        "official_test": 13,
+        "official_dev": 17,
+        "cg_gold": 0,
+        "excluded_overlap": 29,
+        "too_little_text": 0,
+        "duplicate_text": 147,
+        "external_pool": 1009,
+        "external_official_train_overlap": 15,
+        "held_out": 200,
+        "dapt_orders": 824,
+        "held_out_ids_sha256": "2b5664d6d645eefab5e0b71c2475caa61ec7cb372e4777df9d50118cfdd165a0"
+      }
+    },
+    "il_tur": {
+      "download_http_status": 403,
+      "lner_fold_3": null,
+      "hldc": null
+    },
+    "ibj_reference": "Author-provided machine-assisted IPC and court annotations",
+    "candidates": {
+      "current": {
+        "official": {
+          "combined": {
+            "precision": 0.8621267297887837,
+            "recall": 0.8866002546625721,
+            "f1": 0.8741922381005133,
+            "support": 13351
+          },
+          "judgment": {
+            "rows": 4060,
+            "chunks": 4060,
+            "overall": {
+              "precision": 0.8461195361284567,
+              "recall": 0.8714827150568508,
+              "f1": 0.8586138613861386,
+              "support": 8707
+            },
+            "per_label": {
+              "COURT": {
+                "precision": 0.9202059202059202,
+                "recall": 0.8948685857321652,
+                "f1": 0.9073604060913706,
+                "support": 799
+              },
+              "PETITIONER": {
+                "precision": 0.7636363636363637,
+                "recall": 0.65625,
+                "f1": 0.7058823529411765,
+                "support": 64
+              },
+              "RESPONDENT": {
+                "precision": 0.7058823529411765,
+                "recall": 0.75,
+                "f1": 0.7272727272727272,
+                "support": 32
+              },
+              "JUDGE": {
+                "precision": 0.7254901960784313,
+                "recall": 0.8809523809523809,
+                "f1": 0.7956989247311828,
+                "support": 42
+              },
+              "LAWYER": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "DATE": {
+                "precision": 0.9335106382978723,
+                "recall": 0.9486486486486486,
+                "f1": 0.9410187667560321,
+                "support": 1110
+              },
+              "ORG": {
+                "precision": 0.683531746031746,
+                "recall": 0.7554824561403509,
+                "f1": 0.7177083333333333,
+                "support": 912
+              },
+              "GPE": {
+                "precision": 0.7493261455525606,
+                "recall": 0.7732962447844228,
+                "f1": 0.7611225188227242,
+                "support": 719
+              },
+              "STATUTE": {
+                "precision": 0.9149797570850202,
+                "recall": 0.9281314168377823,
+                "f1": 0.9215086646279307,
+                "support": 974
+              },
+              "PROVISION": {
+                "precision": 0.9321895424836601,
+                "recall": 0.9352459016393443,
+                "f1": 0.9337152209492635,
+                "support": 1220
+              },
+              "PRECEDENT": {
+                "precision": 0.7290132547864506,
+                "recall": 0.7638888888888888,
+                "f1": 0.7460437076111528,
+                "support": 648
+              },
+              "CASE_NUMBER": {
+                "precision": 0.7550471063257066,
+                "recall": 0.841079460269865,
+                "f1": 0.7957446808510638,
+                "support": 667
+              },
+              "WITNESS": {
+                "precision": 0.9116945107398569,
+                "recall": 0.9249394673123487,
+                "f1": 0.9182692307692308,
+                "support": 413
+              },
+              "OTHER_PERSON": {
+                "precision": 0.8838248436103664,
+                "recall": 0.8934056007226739,
+                "f1": 0.8885893980233602,
+                "support": 1107
+              }
+            }
+          },
+          "preamble": {
+            "rows": 441,
+            "chunks": 925,
+            "overall": {
+              "precision": 0.8922721545569089,
+              "recall": 0.914944013781223,
+              "f1": 0.903465872847119,
+              "support": 4644
+            },
+            "per_label": {
+              "COURT": {
+                "precision": 0.8984198645598194,
+                "recall": 0.943127962085308,
+                "f1": 0.9202312138728324,
+                "support": 422
+              },
+              "PETITIONER": {
+                "precision": 0.859514687100894,
+                "recall": 0.8444165621079046,
+                "f1": 0.8518987341772152,
+                "support": 797
+              },
+              "RESPONDENT": {
+                "precision": 0.8158362989323843,
+                "recall": 0.8490740740740741,
+                "f1": 0.8321234119782214,
+                "support": 1080
+              },
+              "JUDGE": {
+                "precision": 0.9263157894736842,
+                "recall": 0.9635036496350365,
+                "f1": 0.9445438282647586,
+                "support": 548
+              },
+              "LAWYER": {
+                "precision": 0.9564017660044151,
+                "recall": 0.9643850862548692,
+                "f1": 0.9603768356885565,
+                "support": 1797
+              },
+              "DATE": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "ORG": {
+                "precision": 0,
+                "recall": 0,
+                "f1": 0,
+                "support": 0
+              },
+              "GPE": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "STATUTE": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "PROVISION": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "PRECEDENT": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "CASE_NUMBER": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "WITNESS": {
+                "precision": 0,
+                "recall": 0,
+                "f1": 0,
+                "support": 0
+              },
+              "OTHER_PERSON": {
+                "precision": 0,
+                "recall": 0,
+                "f1": 0,
+                "support": 0
+              }
+            }
+          }
+        },
+        "cg": {
+          "orders": 10,
+          "scores": {
+            "PROVISION": {
+              "tp": 14,
+              "predicted": 18,
+              "gold": 36,
+              "precision": 0.7777777777777778,
+              "recall": 0.3888888888888889
+            },
+            "STATUTE": {
+              "tp": 4,
+              "predicted": 9,
+              "gold": 23,
+              "precision": 0.4444444444444444,
+              "recall": 0.17391304347826086
+            },
+            "DATE": {
+              "tp": 2,
+              "predicted": 2,
+              "gold": 26,
+              "precision": 1.0,
+              "recall": 0.07692307692307693
+            },
+            "CASE_NUMBER": {
+              "tp": 1,
+              "predicted": 1,
+              "gold": 21,
+              "precision": 1.0,
+              "recall": 0.047619047619047616
+            },
+            "COURT": {
+              "tp": 10,
+              "predicted": 11,
+              "gold": 10,
+              "precision": 0.9090909090909091,
+              "recall": 1.0
+            },
+            "PERSON": {
+              "tp": 67,
+              "predicted": 78,
+              "gold": 85,
+              "precision": null,
+              "recall": 0.788235294117647
+            }
+          }
+        },
+        "ibj1200": {
+          "orders": 200,
+          "ipc_sections": {
+            "tp": 632,
+            "predicted": 910,
+            "reference": 796,
+            "precision": 0.6945054945054945,
+            "recall": 0.7939698492462312
+          },
+          "empty_ipc_reference_orders": 25,
+          "court": {
+            "tp": 84,
+            "predicted": 721,
+            "reference": 200,
+            "precision": 0.11650485436893204,
+            "recall": 0.42,
+            "top_suggestion_correct": 67,
+            "top_suggestion_accuracy": 0.335
+          }
+        },
+        "lner_fold_3": null
+      },
+      "dapt": {
+        "official": {
+          "combined": {
+            "precision": 0.8644811942045953,
+            "recall": 0.8848775372631263,
+            "f1": 0.8745604619313766,
+            "support": 13351
+          },
+          "judgment": {
+            "rows": 4060,
+            "chunks": 4060,
+            "overall": {
+              "precision": 0.8496012580029204,
+              "recall": 0.8687263121626277,
+              "f1": 0.8590573537762636,
+              "support": 8707
+            },
+            "per_label": {
+              "COURT": {
+                "precision": 0.9132124352331606,
+                "recall": 0.8823529411764706,
+                "f1": 0.8975175047740293,
+                "support": 799
+              },
+              "PETITIONER": {
+                "precision": 0.6779661016949152,
+                "recall": 0.625,
+                "f1": 0.6504065040650406,
+                "support": 64
+              },
+              "RESPONDENT": {
+                "precision": 0.6060606060606061,
+                "recall": 0.625,
+                "f1": 0.6153846153846154,
+                "support": 32
+              },
+              "JUDGE": {
+                "precision": 0.8,
+                "recall": 0.9523809523809523,
+                "f1": 0.8695652173913043,
+                "support": 42
+              },
+              "LAWYER": {
+                "precision": 0,
+                "recall": 0,
+                "f1": 0,
+                "support": 0
+              },
+              "DATE": {
+                "precision": 0.9242424242424242,
+                "recall": 0.9342342342342342,
+                "f1": 0.9292114695340501,
+                "support": 1110
+              },
+              "ORG": {
+                "precision": 0.7061183550651956,
+                "recall": 0.7719298245614035,
+                "f1": 0.7375589313776846,
+                "support": 912
+              },
+              "GPE": {
+                "precision": 0.7768707482993197,
+                "recall": 0.7941585535465925,
+                "f1": 0.7854195323246218,
+                "support": 719
+              },
+              "STATUTE": {
+                "precision": 0.9207317073170732,
+                "recall": 0.9301848049281314,
+                "f1": 0.9254341164453523,
+                "support": 974
+              },
+              "PROVISION": {
+                "precision": 0.9240196078431373,
+                "recall": 0.9270491803278689,
+                "f1": 0.9255319148936171,
+                "support": 1220
+              },
+              "PRECEDENT": {
+                "precision": 0.7212389380530974,
+                "recall": 0.7546296296296297,
+                "f1": 0.7375565610859729,
+                "support": 648
+              },
+              "CASE_NUMBER": {
+                "precision": 0.7547169811320755,
+                "recall": 0.8395802098950524,
+                "f1": 0.7948899929027679,
+                "support": 667
+              },
+              "WITNESS": {
+                "precision": 0.9016393442622951,
+                "recall": 0.9322033898305084,
+                "f1": 0.9166666666666666,
+                "support": 413
+              },
+              "OTHER_PERSON": {
+                "precision": 0.9037037037037037,
+                "recall": 0.8816621499548328,
+                "f1": 0.8925468678555099,
+                "support": 1107
+              }
+            }
+          },
+          "preamble": {
+            "rows": 441,
+            "chunks": 925,
+            "overall": {
+              "precision": 0.8922947722023935,
+              "recall": 0.9151593453919036,
+              "f1": 0.9035824386095461,
+              "support": 4644
+            },
+            "per_label": {
+              "COURT": {
+                "precision": 0.9202733485193622,
+                "recall": 0.957345971563981,
+                "f1": 0.9384436701509873,
+                "support": 422
+              },
+              "PETITIONER": {
+                "precision": 0.8576874205844981,
+                "recall": 0.8469259723964868,
+                "f1": 0.8522727272727273,
+                "support": 797
+              },
+              "RESPONDENT": {
+                "precision": 0.8322813345356177,
+                "recall": 0.8546296296296296,
+                "f1": 0.8433074463225216,
+                "support": 1080
+              },
+              "JUDGE": {
+                "precision": 0.8981324278438031,
+                "recall": 0.9653284671532847,
+                "f1": 0.93051890941073,
+                "support": 548
+              },
+              "LAWYER": {
+                "precision": 0.9502487562189055,
+                "recall": 0.9565943238731218,
+                "f1": 0.9534109816971713,
+                "support": 1797
+              },
+              "DATE": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "ORG": {
+                "precision": 0,
+                "recall": 0,
+                "f1": 0,
+                "support": 0
+              },
+              "GPE": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "STATUTE": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "PROVISION": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "PRECEDENT": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "CASE_NUMBER": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "WITNESS": {
+                "precision": 0,
+                "recall": 0,
+                "f1": 0,
+                "support": 0
+              },
+              "OTHER_PERSON": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              }
+            }
+          }
+        },
+        "cg": {
+          "orders": 10,
+          "scores": {
+            "PROVISION": {
+              "tp": 6,
+              "predicted": 10,
+              "gold": 36,
+              "precision": 0.6,
+              "recall": 0.16666666666666666
+            },
+            "STATUTE": {
+              "tp": 4,
+              "predicted": 8,
+              "gold": 23,
+              "precision": 0.5,
+              "recall": 0.17391304347826086
+            },
+            "DATE": {
+              "tp": 0,
+              "predicted": 0,
+              "gold": 26,
+              "precision": 0,
+              "recall": 0.0
+            },
+            "CASE_NUMBER": {
+              "tp": 0,
+              "predicted": 0,
+              "gold": 21,
+              "precision": 0,
+              "recall": 0.0
+            },
+            "COURT": {
+              "tp": 10,
+              "predicted": 10,
+              "gold": 10,
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "PERSON": {
+              "tp": 64,
+              "predicted": 82,
+              "gold": 85,
+              "precision": null,
+              "recall": 0.7529411764705882
+            }
+          }
+        },
+        "ibj1200": {
+          "orders": 200,
+          "empty_ipc_reference_orders": 25,
+          "ipc_sections": {
+            "tp": 638,
+            "predicted": 931,
+            "reference": 796,
+            "precision": 0.6852846401718582,
+            "recall": 0.8015075376884422
+          },
+          "court": {
+            "tp": 76,
+            "predicted": 661,
+            "reference": 200,
+            "precision": 0.11497730711043873,
+            "recall": 0.38,
+            "top_suggestion_correct": 56,
+            "top_suggestion_accuracy": 0.28
+          }
+        },
+        "lner_fold_3": null,
+        "pretraining": {
+          "orders": 824,
+          "chunks": 14153,
+          "seed": 42,
+          "epochs": 3.0,
+          "steps": 1329,
+          "planned_steps": 1329,
+          "elapsed_seconds": 726.6,
+          "gpu_limit_seconds": 1650,
+          "max_length": 256,
+          "mlm_probability": 0.15
+        }
+      },
+      "dapt_plus_lner": null
+    },
+    "gate": {
+      "decision": "keep_current",
+      "minimum_improved_fields": 2,
+      "minimum_combined_f1_delta": -0.005,
+      "cg_recall_delta": {
+        "dates": -0.07692307692307693,
+        "case_numbers": -0.047619047619047616,
+        "statutes": 0.0,
+        "names": -0.03529411764705881
+      },
+      "cg_improved_fields": [],
+      "combined_f1_delta": 0.00036822383086332344
+    }
   }
 }

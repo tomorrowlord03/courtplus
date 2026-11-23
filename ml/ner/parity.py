@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
+from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
@@ -13,7 +15,7 @@ from seqeval.metrics import f1_score
 from seqeval.scheme import IOB2
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 
-from data_utils import LABELS, ROOT, load_official, tokenize_spans
+from data_utils import DATA, LABELS, ROOT, load_official, tokenize_spans
 from train import RUN_DIR
 
 
@@ -49,15 +51,23 @@ def test_sentences(test, tokenizer, limit=25):
 
 
 def main():
-    artifact = ROOT / "artifacts" / "courtplus-legalner"
-    best = RUN_DIR / "best"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--run-dir", type=Path, default=RUN_DIR)
+    parser.add_argument("--data-dir", type=Path, default=DATA)
+    parser.add_argument("--artifact", type=Path, default=ROOT / "artifacts" / "courtplus-legalner")
+    parser.add_argument("--output", type=Path, default=ROOT / "parity.json")
+    args = parser.parse_args()
+    artifact = args.artifact
+    best = args.run_dir / "best"
+    torch.set_num_threads(2)
     tokenizer = AutoTokenizer.from_pretrained(str(artifact), local_files_only=True)
     model = AutoModelForTokenClassification.from_pretrained(str(best), local_files_only=True).eval()
-    sessions = {
-        "fp32": ort.InferenceSession(str(artifact / "onnx" / "model.onnx"), providers=["CPUExecutionProvider"]),
-        "int8": ort.InferenceSession(str(artifact / "onnx" / "model_quantized.onnx"), providers=["CPUExecutionProvider"]),
-    }
-    test = load_official("test")
+    options = ort.SessionOptions()
+    options.intra_op_num_threads = 2
+    sessions = {name: ort.InferenceSession(str(artifact / "onnx" / filename), options,
+                                           providers=["CPUExecutionProvider"])
+                for name, filename in (("fp32", "model.onnx"), ("int8", "model_quantized.onnx"))}
+    test = load_official("test", args.data_dir)
     sentences = Dataset.from_list([
         row for part in ("judgment", "preamble")
         for row in test_sentences(test.filter(lambda row: row["part"] == part), tokenizer)
@@ -91,7 +101,7 @@ def main():
         "label_agreement": {name: same / total for name, (same, total) in agreements.items()},
         "entity_f1_delta_from_torch": {name: scores[name] - scores["torch"] for name in agreements},
     }
-    (ROOT / "parity.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     for name in agreements:
         print(f"PARITY {name}: label agreement={report['label_agreement'][name]:.4f}; "
               f"entity F1 delta={report['entity_f1_delta_from_torch'][name]:+.4f}; sentences=50")
