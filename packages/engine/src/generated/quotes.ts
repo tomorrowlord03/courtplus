@@ -56,22 +56,28 @@ export const quotes = {
     "text": "(1) The amount of every bond executed under this Chapter shall be fixed with due regard to the circumstances of the case and shall not be excessive.\n\n(2) The High Court or the Court of Session may direct that the bail required by a police officer or Magistrate be reduced.",
     "url": "https://www.indiacode.nic.in/bitstream/123456789/21920/1/the_bharatiya_nagarik_suraksha_sanhita%2C_2023.pdf"
   },
+  "bnss531": {
+    "act": "BNSS",
+    "section": "531(2)(a)",
+    "text": "Summary of section 531. Pending appeals, applications, trials, inquiries and investigations generally continue under the saved CrPC procedure.",
+    "url": "https://www.indiacode.nic.in/bitstream/123456789/21920/1/the_bharatiya_nagarik_suraksha_sanhita%2C_2023.pdf"
+  },
   "crpc436A": {
     "act": "CrPC",
     "section": "436A",
     "text": "Where a person has, during the period of investigation, inquiry or trial under this Code of an offence under any law (not being an offence for which the punishment of death has been specified as one of the punishments under that law) undergone detention for a period extending up to one-half of the maximum period of imprisonment specified for that offence under that law, he shall be released by the Court on his personal bond with or without sureties:\n\nProvided that the Court may, after hearing the Public Prosecutor and for reasons to be recorded by it in writing, order the continued detention of such person for a period longer than one-half of the said period or release him on bail instead of the personal bond with or without sureties:\n\nProvided further that no such person shall in any case be detained during the period of investigation, inquiry or trial for more than the maximum period of imprisonment provided for the said offence under that law.\n\nExplanation.—In computing the period of detention under this section for granting bail, the period of detention passed due to delay in proceeding caused by the accused shall be excluded.",
-    "url": "https://www.indiacode.nic.in/bitstream/123456789/15269/1/crpc.pdf"
+    "url": "https://www.indiacode.nic.in/bitstream/123456789/15272/1/the_code_of_criminal_procedure%2C_1973.pdf"
   },
   "crpc167_2": {
     "act": "CrPC",
     "section": "167(2)(a)(i)–(ii)",
     "text": "(i) ninety days, where the investigation relates to an offence punishable with death, imprisonment for life or imprisonment for a term of not less than ten years;\n\n(ii) sixty days, where the investigation relates to any other offence",
-    "url": "https://www.indiacode.nic.in/bitstream/123456789/15269/1/crpc.pdf"
+    "url": "https://www.indiacode.nic.in/bitstream/123456789/15272/1/the_code_of_criminal_procedure%2C_1973.pdf"
   },
   "poorPrisoners": {
     "act": "MHA",
     "section": "Revised Support to Poor Prisoners SOP, undertrial paragraph 6, pp. 3–4",
-    "text": "Exclusions: “This benefit will not be available to persons who are accused of offences under” the listed Acts. The heinous-offence category says “may exercise due caution in this regard.”",
+    "text": "Summary of the SOP. The listed Acts exclude an undertrial from the scheme. The committee may exercise caution when considering a heinous offence.",
     "url": "https://cdnbbsr.s3waas.gov.in/s3ec05ba304f3809ed31d0ad97b5a2b5df/uploads/2025/12/2025121733.pdf#page=18"
   }
 } satisfies Record<string, Authority>;

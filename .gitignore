@@ -11,3 +11,5 @@ ml/**/artifacts/
 *.safetensors
 *.bin
 .venv/
+scripts/cohort/out/
+apps/desktop/resources/model/

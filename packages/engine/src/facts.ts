@@ -84,13 +84,19 @@ export function activeCharges(c: EngineCaseRecord, asOf: number) {
   const framingDates = c.events.filter(event => event.kind === 'framing').map(event => day(event.on));
   const futureFramingOnly = framingDates.some(value => value !== undefined && value > asOf)
     && !framingDates.some(value => value !== undefined && value <= asOf);
-  const framed = c.charges.filter(charge => charge.stage === 'FRAMED' && (charge.framedOn
-    ? visibleDate(charge.framedOn, asOf) !== undefined
-    : !futureFramingOnly));
-  const verified = framed.filter(charge => charge.verified);
-  const latestFraming = Math.max(...verified.map(charge => day(charge.framedOn) ?? -Infinity));
+  const framed = c.charges.filter(charge => charge.stage === 'FRAMED')
+    .map(charge => {
+      const date = day(charge.framedOn);
+      const page = charge.source?.page;
+      const verified = date !== undefined && charge.verified && Boolean(charge.source?.docId.trim())
+        && page !== undefined && Number.isInteger(page) && page > 0;
+      return { charge, date, verified };
+    })
+    .filter(({ charge, date }) => date === undefined ? charge.framedOn !== undefined || !futureFramingOnly : date <= asOf);
+  const verified = framed.filter(entry => entry.verified);
+  const latestFraming = Math.max(...verified.map(({ date }) => date!));
   const selected = verified.length
-    ? verified.filter(charge => !charge.framedOn || day(charge.framedOn) === latestFraming)
+    ? verified.filter(({ date }) => date === latestFraming).map(({ charge }) => charge)
     : c.charges.filter(charge => charge.stage === 'FIR');
   const unique = new Map(selected.map(charge => [
     [charge.act, charge.section, charge.subsection, charge.variant].map(part => part?.trim().toLowerCase()).join('|'),
@@ -99,9 +105,7 @@ export function activeCharges(c: EngineCaseRecord, asOf: number) {
   return {
     charges: [...unique.values()],
     framed: verified.length > 0,
-    unverified: framed.some(charge => !charge.verified
-      && (!charge.framedOn || day(charge.framedOn)! >= latestFraming))
-      || c.charges.some(charge => charge.stage === 'FRAMED' && charge.framedOn && day(charge.framedOn) === undefined)
+    unverified: framed.some(entry => !entry.verified && (entry.date === undefined || entry.date >= latestFraming))
   };
 }
 
@@ -121,14 +125,14 @@ export function custody(c: CaseRecord, asOf: number, released: number | undefine
     const end = spell.end === undefined ? undefined : day(spell.end);
     if (start === undefined || (spell.end !== undefined && end === undefined)
       || (end !== undefined && end < start) || (end === undefined && !spell.ongoing
-        && (released === undefined || start > released || spell.kind === 'interim_bail' || spell.kind === 'accused_delay'))) {
+        && (released === undefined || start >= released || spell.kind === 'interim_bail' || spell.kind === 'accused_delay'))) {
       unresolved = true;
       warnings.push('A custody spell has an invalid or unresolved date.');
       continue;
     }
     const detentionSpell = spell.kind === 'police' || spell.kind === 'judicial';
-    const releaseEnd = detentionSpell && released !== undefined && start! <= released ? released : Infinity;
-    const interval = { start: start!, end: Math.min(end ?? Infinity, asOf + 1, releaseEnd) };
+    const releaseEnd = detentionSpell && released !== undefined && start < released ? released : Infinity;
+    const interval = { start, end: Math.min(end ?? Infinity, asOf + 1, releaseEnd) };
     if (interval.end <= interval.start) continue;
     if (detentionSpell) detention.push(interval);
     else if (spell.kind === 'interim_bail') gaps.push(interval);

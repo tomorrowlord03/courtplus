@@ -1,104 +1,106 @@
 act,section,subsection,variant,title,min_years,max_years_or_life,death,life,fine_only,bns_equivalent,source_url,source_page,notes
-IPC,143,,,Membership of an unlawful assembly,0,6m,false,false,false,189(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,76,BPR&D correspondence table PDF p. 20.
-IPC,144,,,Armed membership of an unlawful assembly,0,2,false,false,false,189(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,77,BPR&D correspondence table PDF p. 20.
-IPC,145,,,Remaining in an unlawful assembly after dispersal order,0,2,false,false,false,189(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,77,BPR&D correspondence table PDF p. 20.
-IPC,147,,,Rioting,0,2,false,false,false,191(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,77,BPR&D correspondence table PDF p. 21.
-IPC,148,,,Rioting while armed with a deadly weapon,0,3,false,false,false,191(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,78,BPR&D correspondence table PDF p. 21.
-IPC,151,,,Remaining in a gathering after a dispersal command,0,6m,false,false,false,189(5),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,79,BPR&D correspondence table PDF p. 20.
-IPC,160,,,Affray,0,1m,false,false,false,194(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,83,BPR&D correspondence table PDF p. 21.
-IPC,166,,,Public servant disobeying law with intent to cause injury,0,1,false,false,false,198,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,84,BPR&D correspondence table PDF p. 22.
-IPC,167,,,Public servant framing an incorrect document with intent to cause injury,0,3,false,false,false,201,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,84,BPR&D correspondence table PDF p. 22.
-IPC,171E,,ordinary,Election bribery,0,1,false,false,false,173,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,87,BPR&D correspondence table PDF p. 19. Treating is a fine-only exception.
-IPC,171E,,treating,Election bribery by treating,0,0,false,false,true,173,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,87,BPR&D correspondence table PDF p. 19.
-IPC,186,,,Obstructing a public servant,0,3m,false,false,false,221,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,96,BPR&D correspondence table PDF p. 24.
-IPC,224,,,Resistance to one's lawful apprehension,0,2,false,false,false,262,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,117,BPR&D correspondence table PDF p. 27.
-IPC,228,,,Insult or interruption to a public servant in judicial proceedings,0,6m,false,false,false,267,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,120,BPR&D correspondence table PDF p. 27.
-IPC,283,,,Danger or obstruction in a public way,0,0,false,false,true,285,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,139,BPR&D correspondence table PDF p. 28.
-IPC,290,,,Public nuisance not otherwise provided for,0,0,false,false,true,292,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,142,BPR&D correspondence table PDF p. 29.
-IPC,294,,,Obscene acts and songs,0,3m,false,false,false,296,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,146,BPR&D correspondence table PDF p. 29.
-IPC,295,,,Injuring or defiling a place of worship,0,2,false,false,false,298,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,147,BPR&D correspondence table PDF p. 29.
-IPC,295A,,,Deliberate and malicious insult to religion,0,3,false,false,false,299,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,147,BPR&D correspondence table PDF p. 29.
-IPC,296,,,Disturbing a religious assembly,0,1,false,false,false,300,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,147,BPR&D correspondence table PDF p. 29.
-IPC,297,,,Trespassing on burial places,0,1,false,false,false,301,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,149,BPR&D correspondence table PDF p. 29.
-IPC,298,,,Deliberately wounding religious feelings,0,1,false,false,false,302,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,149,BPR&D correspondence table PDF p. 30.
-IPC,302,,,Murder,0,life,true,true,false,103(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,157,BPR&D correspondence table PDF p. 11.
-IPC,304,,I,"Culpable homicide not amounting to murder, intention",0,life,false,true,false,105,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,159,BPR&D correspondence table PDF p. 12. Part I is the intention limb. BNS finite alternative is five to ten years.
-IPC,304,,II,"Culpable homicide not amounting to murder, knowledge",0,10,false,false,false,105,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,159,BPR&D correspondence table PDF p. 12. Part II is the knowledge limb. BNS makes the fine mandatory.
-IPC,304A,,,Causing death by negligence,0,2,false,false,false,106(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,160,BPR&D correspondence table PDF p. 12. BNS registered-medical-practitioner limb has a separate two-year maximum.
-IPC,304B,,,Dowry death,7,life,false,true,false,80(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,160,BPR&D correspondence table PDF p. 9.
-IPC,305,,,Abetment of suicide of a child or person of unsound mind,0,life,true,true,false,107,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,161,BPR&D correspondence table PDF p. 12.
-IPC,306,,,Abetment of suicide,0,10,false,false,false,108,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,161,BPR&D correspondence table PDF p. 12.
-IPC,307,,,Attempt to murder,0,life,false,true,false,109(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,162,BPR&D correspondence table PDF p. 12. Life is available if hurt is caused. Use no_hurt for its separate ten-year ceiling.
-IPC,307,,life_convict_hurt,Attempt to murder by a life convict causing hurt,0,life,true,true,false,,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,162,Second paragraph. BPR&D correspondence table PDF p. 12.
-IPC,307,,no_hurt,Attempt to murder without hurt,0,10,false,false,false,109(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,162,BPR&D correspondence table PDF p. 12.
-IPC,308,,hurt,Attempt to commit culpable homicide causing hurt,0,7,false,false,false,110,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,164,BPR&D correspondence table PDF p. 12.
-IPC,308,,no_hurt,Attempt to commit culpable homicide without hurt,0,3,false,false,false,110,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,164,BPR&D correspondence table PDF p. 12.
-IPC,323,,,Voluntarily causing hurt,0,1,false,false,false,115(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,170,BPR&D correspondence table PDF p. 13.
-IPC,324,,,Voluntarily causing hurt by dangerous weapons or means,0,3,false,false,false,118(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,170,BPR&D correspondence table PDF p. 14.
-IPC,325,,,Voluntarily causing grievous hurt,0,7,false,false,false,117(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,171,BPR&D correspondence table PDF p. 13.
-IPC,326,,,Grievous hurt by dangerous weapons or means,0,life,false,true,false,118(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,171,BPR&D correspondence table PDF p. 14. The BNS determinate alternative has a one-year minimum.
-IPC,334,,,Voluntarily causing hurt on provocation,0,1m,false,false,false,122(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,174,BPR&D correspondence table PDF p. 14.
-IPC,335,,,Voluntarily causing grievous hurt on provocation,0,4,false,false,false,122(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,175,BPR&D correspondence table PDF p. 14.
-IPC,336,,,Act endangering life or personal safety,0,3m,false,false,false,125,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,175,BPR&D correspondence table PDF p. 15.
-IPC,337,,,Causing hurt by an act endangering life or safety,0,6m,false,false,false,125(a),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,175,BPR&D correspondence table PDF p. 15.
-IPC,338,,,Causing grievous hurt by an act endangering life or safety,0,2,false,false,false,125(b),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,175,BPR&D correspondence table PDF p. 15.
-IPC,341,,,Wrongful restraint,0,1m,false,false,false,126(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,176,BPR&D correspondence table PDF p. 15.
-IPC,342,,,Wrongful confinement,0,1,false,false,false,127(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,177,BPR&D correspondence table PDF p. 15.
-IPC,343,,,Wrongful confinement for three or more days,0,2,false,false,false,127(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,177,BPR&D correspondence table PDF p. 15.
-IPC,352,,,Assault or criminal force otherwise than on grave provocation,0,3m,false,false,false,131,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,181,BPR&D correspondence table PDF p. 16.
-IPC,353,,,Assault or force to deter a public servant,0,2,false,false,false,132,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,182,BPR&D correspondence table PDF p. 16.
-IPC,355,,,Assault or criminal force with intent to dishonour,0,2,false,false,false,133,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,182,BPR&D correspondence table PDF p. 16.
-IPC,356,,,Assault or criminal force in attempt to steal property carried by a person,0,2,false,false,false,134,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,182,BPR&D correspondence table PDF p. 16.
-IPC,357,,,Assault or force in attempt to wrongfully confine,0,1,false,false,false,135,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,183,BPR&D correspondence table PDF p. 16.
-IPC,358,,,Assault or force on grave provocation,0,1m,false,false,false,136,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,183,BPR&D correspondence table PDF p. 16.
-IPC,363,,,Kidnapping,0,7,false,false,false,137(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,184,BPR&D correspondence table PDF p. 16.
-IPC,364,,,Kidnapping or abduction in order to murder,0,life,false,true,false,140(1),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,186,BPR&D correspondence table PDF p. 16.
-IPC,364A,,,Kidnapping for ransom,0,life,true,true,false,140(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,186,BPR&D correspondence table PDF p. 16.
-IPC,365,,,Kidnapping or abduction for secret wrongful confinement,0,7,false,false,false,140(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,186,BPR&D correspondence table PDF p. 16.
-IPC,367,,,Kidnapping or abduction for grievous hurt or slavery,0,10,false,false,false,140(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,187,BPR&D correspondence table PDF p. 16.
-IPC,379,,,Theft,0,3,false,false,false,303(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,197,BPR&D correspondence table PDF p. 30. BNS second or subsequent conviction is a separate variant. The low-value first-theft proviso requires return or restoration.
-IPC,380,,,Theft in a dwelling or place used for custody of property,0,7,false,false,false,305,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,197,BPR&D correspondence table PDF p. 30. BNS also covers additional situations.
-IPC,381,,,Theft by clerk or servant,0,7,false,false,false,306,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,198,BPR&D correspondence table PDF p. 30.
-IPC,382,,,"Theft after preparation for death, hurt or restraint",0,10,false,false,false,307,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,198,BPR&D correspondence table PDF p. 30.
-IPC,384,,,Extortion,0,3,false,false,false,308(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,199,BPR&D correspondence table PDF p. 30.
-IPC,385,,,Putting in fear of injury in order to commit extortion,0,2,false,false,false,308(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,199,BPR&D correspondence table PDF p. 30.
-IPC,386,,,Extortion by fear of death or grievous hurt,0,10,false,false,false,308(5),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,199,BPR&D correspondence table PDF p. 30.
-IPC,387,,,Putting in fear of death or grievous hurt in order to commit extortion,0,7,false,false,false,308(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,200,BPR&D correspondence table PDF p. 30.
-IPC,392,,,Robbery,0,10,false,false,false,309(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,203,BPR&D correspondence table PDF p. 31. Highway robbery between sunset and sunrise has a separate 14-year maximum.
-IPC,392,,highway_night,Highway robbery between sunset and sunrise,0,14,false,false,false,309(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,203,BPR&D correspondence table PDF p. 31.
-IPC,393,,,Attempted robbery,0,7,false,false,false,309(5),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,203,BPR&D correspondence table PDF p. 31.
-IPC,394,,,Voluntarily causing hurt in committing robbery,0,life,false,true,false,309(6),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,203,BPR&D correspondence table PDF p. 31.
-IPC,395,,,Dacoity,0,life,false,true,false,310(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,204,BPR&D correspondence table PDF p. 31. BPRD summary describes a minimum but the Act says the determinate alternative may extend to ten years.
-IPC,396,,,Dacoity with murder,0,life,true,true,false,310(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,204,BPR&D correspondence table PDF p. 31. BNS specifies a ten-year minimum for the determinate alternative.
-IPC,399,,,Preparation to commit dacoity,0,10,false,false,false,310(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,205,BPR&D correspondence table PDF p. 31.
-IPC,400,,,Belonging to a gang of dacoits,0,life,false,true,false,310(6),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,205,BPR&D correspondence table PDF p. 31.
-IPC,401,,,Belonging to a gang of thieves or robbers,0,7,false,false,false,313,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,206,BPR&D correspondence table PDF p. 31.
-IPC,402,,,Assembling to commit dacoity,0,7,false,false,false,310(5),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,206,BPR&D correspondence table PDF p. 31.
-IPC,403,,,Dishonest misappropriation of property,0,2,false,false,false,314,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,206,BPR&D correspondence table PDF p. 31.
-IPC,406,,,Criminal breach of trust,0,3,false,false,false,316(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,210,BPR&D correspondence table PDF p. 31.
-IPC,407,,,Criminal breach of trust by carrier or warehouse keeper,0,7,false,false,false,316(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,210,BPR&D correspondence table PDF p. 31.
-IPC,408,,,Criminal breach of trust by clerk or servant,0,7,false,false,false,316(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,210,BPR&D correspondence table PDF p. 31.
-IPC,409,,,"Criminal breach of trust by public servant, banker or agent",0,life,false,true,false,316(5),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,211,BPR&D correspondence table PDF p. 32.
-IPC,411,,,Dishonestly receiving stolen property,0,3,false,false,false,317(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,212,BPR&D correspondence table PDF p. 32.
-IPC,412,,,Receiving property stolen in dacoity,0,life,false,true,false,317(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,213,BPR&D correspondence table PDF p. 32.
-IPC,413,,,Habitually dealing in stolen property,0,life,false,true,false,317(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,213,BPR&D correspondence table PDF p. 32.
-IPC,414,,,Assisting in concealment of stolen property,0,3,false,false,false,317(5),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,213,BPR&D correspondence table PDF p. 32.
-IPC,417,,,Cheating,0,1,false,false,false,318(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,215,BPR&D correspondence table PDF p. 32.
-IPC,418,,,Cheating where bound to protect another's interest,0,3,false,false,false,318(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,215,BPR&D correspondence table PDF p. 32.
-IPC,419,,,Cheating by personation,0,3,false,false,false,319(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,216,BPR&D correspondence table PDF p. 32.
-IPC,420,,,Cheating and dishonestly inducing delivery of property,0,7,false,false,false,318(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,216,BPR&D correspondence table PDF p. 32.
-IPC,426,,,"Mischief, basic offence",0,3m,false,false,false,324(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,219,BPR&D correspondence table PDF p. 32.
-IPC,447,,,Criminal trespass,0,3m,false,false,false,329(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,225,BPR&D correspondence table PDF p. 34.
-IPC,448,,,House-trespass,0,1,false,false,false,329(4),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,226,BPR&D correspondence table PDF p. 34.
-IPC,449,,,House-trespass to commit an offence punishable with death,0,life,false,true,false,332(a),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,226,BPR&D correspondence table PDF p. 35.
-IPC,450,,,House-trespass to commit an offence punishable with life imprisonment,0,10,false,false,false,332(b),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,226,BPR&D correspondence table PDF p. 35.
-IPC,451,,,House-trespass to commit an offence punishable with imprisonment,0,2,false,false,false,332(c),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,227,BPR&D correspondence table PDF p. 35. If theft is intended the maximum is seven years.
-IPC,451,,theft,House-trespass to commit theft,0,7,false,false,false,332(c),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,227,BPR&D correspondence table PDF p. 35.
-IPC,452,,,"House-trespass after preparation for hurt, assault or restraint",0,7,false,false,false,333,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,227,BPR&D correspondence table PDF p. 35.
-IPC,498A,,,Cruelty by husband or his relative,0,3,false,false,false,85,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,247,BPR&D correspondence table PDF p. 10.
-IPC,504,,,Intentional insult to provoke breach of peace,0,2,false,false,false,352,https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,253,BPR&D correspondence table PDF p. 37.
-IPC,506,,I,"Criminal intimidation, ordinary",0,2,false,false,false,351(2),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,255,BPR&D correspondence table PDF p. 37.
-IPC,506,,II,"Criminal intimidation, aggravated threat",0,7,false,false,false,351(3),https://hyderabadpolice.gov.in/PDF/acts/Indianpenalcode1860.pdf,255,BPR&D correspondence table PDF p. 37.
+IPC,143,,,Membership of an unlawful assembly,0,6m,false,false,false,189(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,39,BPR&D correspondence table PDF p. 20.
+IPC,144,,,Armed membership of an unlawful assembly,0,2,false,false,false,189(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,39,BPR&D correspondence table PDF p. 20.
+IPC,145,,,Remaining in an unlawful assembly after dispersal order,0,2,false,false,false,189(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,40,BPR&D correspondence table PDF p. 20.
+IPC,147,,,Rioting,0,2,false,false,false,191(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,40,BPR&D correspondence table PDF p. 21.
+IPC,148,,,Rioting while armed with a deadly weapon,0,3,false,false,false,191(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,40,BPR&D correspondence table PDF p. 21.
+IPC,151,,,Remaining in a gathering after a dispersal command,0,6m,false,false,false,189(5),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,40,BPR&D correspondence table PDF p. 20.
+IPC,160,,,Affray,0,1m,false,false,false,194(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,42,BPR&D correspondence table PDF p. 21.
+IPC,166,,,Public servant disobeying law with intent to cause injury,0,1,false,false,false,198,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,44,BPR&D correspondence table PDF p. 22.
+IPC,167,,,Public servant framing an incorrect document with intent to cause injury,0,3,false,false,false,201,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,44,BPR&D correspondence table PDF p. 22.
+IPC,171E,,ordinary,Election bribery,0,1,false,false,false,173,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,46,BPR&D correspondence table PDF p. 19. Treating is a fine-only exception.
+IPC,171E,,treating,Election bribery by treating,0,0,false,false,true,173,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,46,BPR&D correspondence table PDF p. 19.
+IPC,186,,,Obstructing a public servant,0,3m,false,false,false,221,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,50,BPR&D correspondence table PDF p. 24.
+IPC,224,,,Resistance to one's lawful apprehension,0,2,false,false,false,262,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,59,BPR&D correspondence table PDF p. 27.
+IPC,228,,,Insult or interruption to a public servant in judicial proceedings,0,6m,false,false,false,267,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,60,BPR&D correspondence table PDF p. 27.
+IPC,283,,,Danger or obstruction in a public way,0,0,false,false,true,285,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,68,BPR&D correspondence table PDF p. 28.
+IPC,290,,,Public nuisance not otherwise provided for,0,0,false,false,true,292,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,69,BPR&D correspondence table PDF p. 29.
+IPC,294,,,Obscene acts and songs,0,3m,false,false,false,296,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,71,BPR&D correspondence table PDF p. 29.
+IPC,295,,,Injuring or defiling a place of worship,0,2,false,false,false,298,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,71,BPR&D correspondence table PDF p. 29.
+IPC,295A,,,Deliberate and malicious insult to religion,0,3,false,false,false,299,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,72,BPR&D correspondence table PDF p. 29.
+IPC,296,,,Disturbing a religious assembly,0,1,false,false,false,300,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,72,BPR&D correspondence table PDF p. 29.
+IPC,297,,,Trespassing on burial places,0,1,false,false,false,301,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,72,BPR&D correspondence table PDF p. 29.
+IPC,298,,,Deliberately wounding religious feelings,0,1,false,false,false,302,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,72,BPR&D correspondence table PDF p. 30.
+IPC,302,,,Murder,0,life,true,true,false,103(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,74,BPR&D correspondence table PDF p. 11.
+IPC,304,,I,"Culpable homicide not amounting to murder, intention",0,life,false,true,false,105,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,74,BPR&D correspondence table PDF p. 12. Part I is the intention limb. BNS finite alternative is five to ten years.
+IPC,304,,II,"Culpable homicide not amounting to murder, knowledge",0,10,false,false,false,105,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,75,BPR&D correspondence table PDF p. 12. Part II is the knowledge limb. BNS makes the fine mandatory.
+IPC,304A,,,Causing death by negligence,0,2,false,false,false,106(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,75,BPR&D correspondence table PDF p. 12. BNS registered-medical-practitioner limb has a separate two-year maximum.
+IPC,304B,,,Dowry death,7,life,false,true,false,80(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,75,BPR&D correspondence table PDF p. 9.
+IPC,305,,,Abetment of suicide of a child or person of unsound mind,0,life,true,true,false,107,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,75,BPR&D correspondence table PDF p. 12.
+IPC,306,,,Abetment of suicide,0,10,false,false,false,108,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,76,BPR&D correspondence table PDF p. 12.
+IPC,307,,,Attempt to murder,0,life,false,true,false,109(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,76,BPR&D correspondence table PDF p. 12. Life is available if hurt is caused. Use no_hurt for its separate ten-year ceiling.
+IPC,307,,life_convict_hurt,Attempt to murder by a life convict causing hurt,0,life,true,true,false,109(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,76,Second paragraph. BPR&D correspondence table PDF p. 12.
+IPC,307,,no_hurt,Attempt to murder without hurt,0,10,false,false,false,109(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,76,BPR&D correspondence table PDF p. 12.
+IPC,308,,hurt,Attempt to commit culpable homicide causing hurt,0,7,false,false,false,110,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,76,BPR&D correspondence table PDF p. 12.
+IPC,308,,no_hurt,Attempt to commit culpable homicide without hurt,0,3,false,false,false,110,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,76,BPR&D correspondence table PDF p. 12.
+IPC,323,,,Voluntarily causing hurt,0,1,false,false,false,115(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,78,BPR&D correspondence table PDF p. 13.
+IPC,324,,,Voluntarily causing hurt by dangerous weapons or means,0,3,false,false,false,118(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,78,BPR&D correspondence table PDF p. 14.
+IPC,325,,,Voluntarily causing grievous hurt,0,7,false,false,false,117(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,78,BPR&D correspondence table PDF p. 13.
+IPC,326,,,Grievous hurt by dangerous weapons or means,0,life,false,true,false,118(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,78,BPR&D correspondence table PDF p. 14. The BNS determinate alternative has a one-year minimum.
+IPC,334,,,Voluntarily causing hurt on provocation,0,1m,false,false,false,122(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,80,BPR&D correspondence table PDF p. 14.
+IPC,335,,,Voluntarily causing grievous hurt on provocation,0,4,false,false,false,122(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,80,BPR&D correspondence table PDF p. 14.
+IPC,336,,,Act endangering life or personal safety,0,3m,false,false,false,125,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,80,BPR&D correspondence table PDF p. 15.
+IPC,337,,,Causing hurt by an act endangering life or safety,0,6m,false,false,false,125(a),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,80,BPR&D correspondence table PDF p. 15.
+IPC,338,,,Causing grievous hurt by an act endangering life or safety,0,2,false,false,false,125(b),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,80,BPR&D correspondence table PDF p. 15.
+IPC,341,,,Wrongful restraint,0,1m,false,false,false,126(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,81,BPR&D correspondence table PDF p. 15.
+IPC,342,,,Wrongful confinement,0,1,false,false,false,127(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,81,BPR&D correspondence table PDF p. 15.
+IPC,343,,,Wrongful confinement for three or more days,0,2,false,false,false,127(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,81,BPR&D correspondence table PDF p. 15.
+IPC,352,,,Assault or criminal force otherwise than on grave provocation,0,3m,false,false,false,131,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,83,BPR&D correspondence table PDF p. 16.
+IPC,353,,,Assault or force to deter a public servant,0,2,false,false,false,132,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,83,BPR&D correspondence table PDF p. 16.
+IPC,355,,,Assault or criminal force with intent to dishonour,0,2,false,false,false,133,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,86,BPR&D correspondence table PDF p. 16.
+IPC,356,,,Assault or criminal force in attempt to steal property carried by a person,0,2,false,false,false,134,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,86,BPR&D correspondence table PDF p. 16.
+IPC,357,,,Assault or force in attempt to wrongfully confine,0,1,false,false,false,135,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,86,BPR&D correspondence table PDF p. 16.
+IPC,358,,,Assault or force on grave provocation,0,1m,false,false,false,136,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,86,BPR&D correspondence table PDF p. 16.
+IPC,363,,,Kidnapping,0,7,false,false,false,137(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,86,BPR&D correspondence table PDF p. 16.
+IPC,364,,,Kidnapping or abduction in order to murder,0,life,false,true,false,140(1),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,87,BPR&D correspondence table PDF p. 16.
+IPC,364A,,,Kidnapping for ransom,0,life,true,true,false,140(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,87,BPR&D correspondence table PDF p. 16.
+IPC,365,,,Kidnapping or abduction for secret wrongful confinement,0,7,false,false,false,140(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,87,BPR&D correspondence table PDF p. 16.
+IPC,367,,,Kidnapping or abduction for grievous hurt or slavery,0,10,false,false,false,140(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,88,BPR&D correspondence table PDF p. 16.
+IPC,379,,,Theft,0,3,false,false,false,303(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,95,BPR&D correspondence table PDF p. 30. BNS second or subsequent conviction is a separate variant. The low-value first-theft proviso requires return or restoration.
+IPC,380,,,Theft in a dwelling or place used for custody of property,0,7,false,false,false,305(a),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,96,BPR&D correspondence table PDF p. 30. BNS also covers additional situations.
+IPC,381,,,Theft by clerk or servant,0,7,false,false,false,306,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,96,BPR&D correspondence table PDF p. 30.
+IPC,382,,,"Theft after preparation for death, hurt or restraint",0,10,false,false,false,307,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,96,BPR&D correspondence table PDF p. 30.
+IPC,384,,,Extortion,0,3,false,false,false,308(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,97,BPR&D correspondence table PDF p. 30.
+IPC,385,,,Putting in fear of injury in order to commit extortion,0,2,false,false,false,308(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,97,BPR&D correspondence table PDF p. 30.
+IPC,386,,,Extortion by fear of death or grievous hurt,0,10,false,false,false,308(5),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,97,BPR&D correspondence table PDF p. 30.
+IPC,387,,,Putting in fear of death or grievous hurt in order to commit extortion,0,7,false,false,false,308(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,97,BPR&D correspondence table PDF p. 30.
+IPC,392,,,Robbery,0,10,false,false,false,309(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,98,BPR&D correspondence table PDF p. 31. Highway robbery between sunset and sunrise has a separate 14-year maximum.
+IPC,392,,highway_night,Highway robbery between sunset and sunrise,0,14,false,false,false,309(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,98,BPR&D correspondence table PDF p. 31.
+IPC,393,,,Attempted robbery,0,7,false,false,false,309(5),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,98,BPR&D correspondence table PDF p. 31.
+IPC,394,,,Voluntarily causing hurt in committing robbery,0,life,false,true,false,309(6),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,98,BPR&D correspondence table PDF p. 31.
+IPC,395,,,Dacoity,0,life,false,true,false,310(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,98,BPR&D correspondence table PDF p. 31. BPRD summary describes a minimum but the Act says the determinate alternative may extend to ten years.
+IPC,396,,,Dacoity with murder,0,life,true,true,false,310(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,98,BPR&D correspondence table PDF p. 31. BNS specifies a ten-year minimum for the determinate alternative.
+IPC,399,,,Preparation to commit dacoity,0,10,false,false,false,310(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,99,BPR&D correspondence table PDF p. 31.
+IPC,400,,,Belonging to a gang of dacoits,0,life,false,true,false,310(6),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,99,BPR&D correspondence table PDF p. 31.
+IPC,401,,,Belonging to a gang of thieves or robbers,0,7,false,false,false,313,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,99,BPR&D correspondence table PDF p. 31.
+IPC,402,,,Assembling to commit dacoity,0,7,false,false,false,310(5),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,99,BPR&D correspondence table PDF p. 31.
+IPC,403,,,Dishonest misappropriation of property,0,2,false,false,false,314,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,99,BPR&D correspondence table PDF p. 31.
+IPC,406,,,Criminal breach of trust,0,3,false,false,false,316(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,101,BPR&D correspondence table PDF p. 31.
+IPC,407,,,Criminal breach of trust by carrier or warehouse keeper,0,7,false,false,false,316(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,101,BPR&D correspondence table PDF p. 31.
+IPC,408,,,Criminal breach of trust by clerk or servant,0,7,false,false,false,316(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,101,BPR&D correspondence table PDF p. 31.
+IPC,409,,,"Criminal breach of trust by public servant, banker or agent",0,life,false,true,false,316(5),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,101,BPR&D correspondence table PDF p. 32.
+IPC,411,,,Dishonestly receiving stolen property,0,3,false,false,false,317(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,101,BPR&D correspondence table PDF p. 32.
+IPC,412,,,Receiving property stolen in dacoity,0,life,false,true,false,317(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,101,BPR&D correspondence table PDF p. 32.
+IPC,413,,,Habitually dealing in stolen property,0,life,false,true,false,317(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,102,BPR&D correspondence table PDF p. 32.
+IPC,414,,,Assisting in concealment of stolen property,0,3,false,false,false,317(5),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,102,BPR&D correspondence table PDF p. 32.
+IPC,417,,,Cheating,0,1,false,false,false,318(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,103,BPR&D correspondence table PDF p. 32.
+IPC,418,,,Cheating where bound to protect another's interest,0,3,false,false,false,318(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,103,BPR&D correspondence table PDF p. 32.
+IPC,419,,,Cheating by personation,0,3,false,false,false,319(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,103,BPR&D correspondence table PDF p. 32.
+IPC,420,,,Cheating and dishonestly inducing delivery of property,0,7,false,false,false,318(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,103,BPR&D correspondence table PDF p. 32.
+IPC,426,,,"Mischief, basic offence",0,3m,false,false,false,324(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,104,BPR&D correspondence table PDF p. 32.
+IPC,447,,,Criminal trespass,0,3m,false,false,false,329(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 34.
+IPC,448,,,House-trespass,0,1,false,false,false,329(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 34.
+IPC,449,,,House-trespass to commit an offence punishable with death,0,life,false,true,false,332(a),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 35.
+IPC,450,,,House-trespass to commit an offence punishable with life imprisonment,0,10,false,false,false,332(b),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 35.
+IPC,451,,,House-trespass to commit an offence punishable with imprisonment,0,2,false,false,false,332(c),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 35. If theft is intended the maximum is seven years.
+IPC,451,,theft,House-trespass to commit theft,0,7,false,false,false,332(c),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 35.
+IPC,452,,,"House-trespass after preparation for hurt, assault or restraint",0,7,false,false,false,333,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,BPR&D correspondence table PDF p. 35.
+IPC,457,,,Lurking house-trespass or house-breaking by night to commit an offence punishable with imprisonment,0,5,false,false,false,331(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,107,If theft is intended the maximum is fourteen years.
+IPC,457,,theft,Lurking house-trespass or house-breaking by night to commit theft,0,14,false,false,false,331(4),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,108,The theft limb continues on this page.
+IPC,498A,,,Cruelty by husband or his relative,0,3,false,false,false,85,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,114,BPR&D correspondence table PDF p. 10.
+IPC,504,,,Intentional insult to provoke breach of peace,0,2,false,false,false,352,https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,117,BPR&D correspondence table PDF p. 37.
+IPC,506,,I,"Criminal intimidation, ordinary",0,2,false,false,false,351(2),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,118,BPR&D correspondence table PDF p. 37.
+IPC,506,,II,"Criminal intimidation, aggravated threat",0,7,false,false,false,351(3),https://www.indiacode.nic.in/repealedfileopen?rfilename=A1860-45.pdf,118,BPR&D correspondence table PDF p. 37.
 BNS,80,2,,Dowry death,7,life,false,true,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,28,BPR&D correspondence table PDF p. 9. Corresponding IPC s. 304B.
 BNS,85,,,Cruelty by husband or his relative,0,3,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,29,BPR&D correspondence table PDF p. 10. Corresponding IPC s. 498A.
 BNS,103,1,,Murder,0,life,true,true,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,34,BPR&D correspondence table PDF p. 11. Corresponding IPC s. 302.
@@ -161,6 +163,7 @@ BNS,302,,,Deliberately wounding religious feelings,0,1,false,false,false,,https:
 BNS,303,2,,Theft,0,3,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,78,BPR&D correspondence table PDF p. 30. BNS second or subsequent conviction is a separate variant. The low-value first-theft proviso requires return or restoration. Corresponding IPC s. 379.
 BNS,303,2,repeat,Theft on second or subsequent conviction,1,5,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,78,BNS s.303(2) first proviso.
 BNS,305,,,Theft in a dwelling or place used for custody of property,0,7,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,80,BPR&D correspondence table PDF p. 30. BNS also covers additional situations. Corresponding IPC s. 380.
+BNS,305,a,,Theft in a dwelling or place used for custody of property,0,7,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,89,Corresponding IPC s. 380.
 BNS,306,,,Theft by clerk or servant,0,7,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,80,BPR&D correspondence table PDF p. 30. Corresponding IPC s. 381.
 BNS,307,,,"Theft after preparation for death, hurt or restraint",0,10,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,80,BPR&D correspondence table PDF p. 30. Corresponding IPC s. 382.
 BNS,308,2,,Extortion,0,7,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,80,BPR&D correspondence table PDF p. 30. Corresponding IPC s. 384.
@@ -193,6 +196,13 @@ BNS,319,2,,Cheating by personation,0,5,false,false,false,,https://www.mha.gov.in
 BNS,324,2,,"Mischief, basic offence",0,6m,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,88,BPR&D correspondence table PDF p. 32. Corresponding IPC s. 426.
 BNS,329,3,,Criminal trespass,0,3m,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,90,BPR&D correspondence table PDF p. 34. Corresponding IPC s. 447.
 BNS,329,4,,House-trespass,0,1,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,90,BPR&D correspondence table PDF p. 34. Corresponding IPC s. 448.
+BNS,331,1,,Lurking house-trespass or house-breaking,0,2,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Corresponding IPC s. 453.
+BNS,331,2,,Lurking house-trespass or house-breaking by night,0,3,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Corresponding IPC s. 456.
+BNS,331,3,,Lurking house-trespass or house-breaking to commit an offence punishable with imprisonment,0,3,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Corresponding IPC s. 454. If theft is intended the maximum is ten years.
+BNS,331,3,theft,Lurking house-trespass or house-breaking to commit theft,0,10,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Theft limb corresponding to IPC s. 454.
+BNS,331,4,,Lurking house-trespass or house-breaking by night to commit an offence punishable with imprisonment,0,5,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Corresponding IPC s. 457. If theft is intended the maximum is fourteen years.
+BNS,331,4,theft,Lurking house-trespass or house-breaking by night to commit theft,0,14,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Theft limb corresponding to IPC s. 457.
+BNS,331,5,,"Lurking house-trespass or house-breaking after preparation for hurt, assault or restraint",0,10,false,false,false,,https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf,100,Corresponding IPC s. 455.
 BNS,332,a,,House-trespass to commit an offence punishable with death,0,life,false,true,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,92,BPR&D correspondence table PDF p. 35. Corresponding IPC s. 449.
 BNS,332,b,,House-trespass to commit an offence punishable with life imprisonment,0,10,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,92,BPR&D correspondence table PDF p. 35. Corresponding IPC s. 450.
 BNS,332,c,,House-trespass to commit an offence punishable with imprisonment,0,2,false,false,false,,https://www.mha.gov.in/files/documents/250883_english_01042024.pdf,92,BPR&D correspondence table PDF p. 35. If theft is intended the maximum is seven years. Corresponding IPC s. 451.
@@ -219,7 +229,7 @@ ARMS,25,1C,,Section 25(1B) in a disturbed area,3,7,false,false,false,,https://ww
 ARMS,27,1,,Use of arms in contravention of section 5,3,7,false,false,false,,https://www.indiacode.nic.in/bitstream/123456789/1398/1/A1959_54.pdf,21,
 ARMS,27,2,,Use of prohibited arms,7,life,false,true,false,,https://www.indiacode.nic.in/bitstream/123456789/1398/1/A1959_54.pdf,21,
 ARMS,27,3,,Use of prohibited arms resulting in death,0,life,true,true,false,,https://www.indiacode.nic.in/bitstream/123456789/1398/1/A1959_54.pdf,21,2019 amendment. State of Punjab v. Dalbir Singh struck down the earlier mandatory death penalty.
-EXCISE,34,1,first,"Chhattisgarh excise: unlawful manufacture, possession, transport or sale",0.5,2,false,false,false,,https://lawtrend.in/wp-content/uploads/bsk-pdf-manager/2022/07/Chhattisgarh-Excise-Act-1915.pdf,12,"Chhattisgarh only. 2011 amending Act s.2(1), printed p. 283."
-EXCISE,34,1,repeat,Chhattisgarh excise: subsequent ordinary conviction,1,5,false,false,false,,https://lawtrend.in/wp-content/uploads/bsk-pdf-manager/2022/07/Chhattisgarh-Excise-Act-1915.pdf,12,"Chhattisgarh only. 2011 amending Act s.2(2), printed p. 283."
-EXCISE,34,2,first,Chhattisgarh excise: over five bulk litres,1,3,false,false,false,,https://lawtrend.in/wp-content/uploads/bsk-pdf-manager/2022/07/Chhattisgarh-Excise-Act-1915.pdf,12,Chhattisgarh only. 2011 amending Act s.2(3) amended the quantity; principal Act sets penalty.
-EXCISE,34,2,repeat,Chhattisgarh excise: subsequent conviction over five bulk litres,2,5,false,false,false,,https://lawtrend.in/wp-content/uploads/bsk-pdf-manager/2022/07/Chhattisgarh-Excise-Act-1915.pdf,12,Chhattisgarh only. Proviso to principal Act s.34(2).
+EXCISE,34,1,first,"Chhattisgarh excise: unlawful manufacture, possession, transport or sale",0.5,2,false,false,false,,https://indiacode.gov.in/server/api/core/bitstreams/7b3b6499-dcf3-4ca7-986a-64e60196a784/content,59,"Chhattisgarh only. 2011 amending Act s.2(1), Gazette p. 312(2)."
+EXCISE,34,1,repeat,Chhattisgarh excise: subsequent ordinary conviction,1,5,false,false,false,,https://indiacode.gov.in/server/api/core/bitstreams/7b3b6499-dcf3-4ca7-986a-64e60196a784/content,59,"Chhattisgarh only. 2011 amending Act s.2(2), Gazette p. 312(2)."
+EXCISE,34,2,first,Chhattisgarh excise: over five bulk litres,1,3,false,false,false,,https://indiacode.gov.in/server/api/core/bitstreams/7b3b6499-dcf3-4ca7-986a-64e60196a784/content,59,Chhattisgarh only. 2011 amending Act s.2(3) amended the quantity; principal Act sets penalty.
+EXCISE,34,2,repeat,Chhattisgarh excise: subsequent conviction over five bulk litres,2,5,false,false,false,,https://indiacode.gov.in/server/api/core/bitstreams/7b3b6499-dcf3-4ca7-986a-64e60196a784/content,59,Chhattisgarh only. Proviso to s.34(2) sets the penalty. 2011 amending Act s.2(3) sets the quantity.

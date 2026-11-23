@@ -1,7 +1,7 @@
 import type { Alert, CaseRecord, PoliceCustodyCheckFn, TraceStep } from '@courtplus/contracts';
 import { ravindran, statute, tenYearCases, wadhawan } from './authority.js';
 import { BNSS_START, day, iso, length, union, visibleDate } from './dates.js';
-import { activeCharges, evidence, recordDate } from './facts.js';
+import { activeCharges, custody, evidence, recordDate } from './facts.js';
 import type { EngineCaseRecord } from './facts.js';
 import { resolveCharges, specialReviewActs } from './offences.js';
 import type { ResolvedCharges } from './offences.js';
@@ -37,6 +37,7 @@ export function defaultBailCheck(c: EngineCaseRecord, charges: ResolvedCharges, 
   const due = verifiedSpecialDue ?? (dates.length === 1 ? dates[0] : undefined);
   const authority = [old ? statute.crpc167_2 : statute.bnss187_3, wadhawan, ravindran, ...(limit === 'disputed' ? tenYearCases.filter((_, index) => asOf >= day(index ? '2025-02-10' : '2024-12-13')!) : [])];
   const review: string[] = [];
+  const sameDayFiling = applied !== undefined && applied === chargesheet;
   const timelyApplication = due !== undefined && applied !== undefined && applied >= due
     && (chargesheet === undefined || applied < chargesheet);
   const elapsedWithNoKnownReport = due !== undefined && asOf >= due
@@ -45,17 +46,21 @@ export function defaultBailCheck(c: EngineCaseRecord, charges: ResolvedCharges, 
   if (pending) {
     if (old) review.push(oldProcedureReview);
     if (special) review.push(specialProcedureReview);
-    if (limit === 'disputed') review.push(dispute);
+    if (limit === 'disputed') {
+      review.push(dispute + '.');
+      if (dates.length === 2) review.push('The 60-day period expires on ' + iso(dates[0])
+        + ' and the 90-day period expires on ' + iso(dates[1]) + '.');
+    }
     if (firstRemand === undefined) review.push('First remand date is unknown.');
     if (limit === 'unknown' && !special && !old) review.push('Verify the applicable offence and period.');
     if (due !== undefined && ordinaryCheck) {
       if (chargesheet === undefined) review.push('Verify whether a legally sufficient charge sheet was filed.');
-      else if (chargesheet === applied) review.push('Application and charge sheet share a date. Verify filing times and sequence.');
       else if (timelyApplication) review.push('Application was made after the period expired and before the later charge sheet.');
       else if (applied !== undefined && applied < due) review.push('The recorded application predates expiry. Verify whether a fresh application was made in time.');
       else if (applied !== undefined && applied > chargesheet) review.push('Late charge sheet preceded the recorded application. Review whether the right was availed of before filing.');
-      else review.push('Late charge sheet recorded. Verify whether the accused applied before filing.');
+      else if (!sameDayFiling) review.push('Late charge sheet recorded. Verify whether the accused applied before filing.');
     }
+    if (sameDayFiling) review.push('Application and charge sheet share a date. Verify filing times and sequence.');
     if (review.length) review.push('Readiness to furnish bail: ' + ready + '.');
   }
   const alert: Alert | undefined = review.length ? {
@@ -94,7 +99,7 @@ function lastRecordedDay(c: CaseRecord): number | undefined {
   return days.length ? Math.max(...days) : undefined;
 }
 
-export function policeCheck(c: EngineCaseRecord, asOf: number, limit: Limit) {
+export function policeCheck(c: EngineCaseRecord, asOf: number, limit: Limit, datedSnapshot = true) {
   const first = recordDate(c, 'firstRemandOn', 'remand', asOf);
   const old = usesCrPCProcedure(c, first, asOf);
   const authority = old ? [statute.crpc167_2] : [statute.bnss187_2, statute.bnss187_3];
@@ -105,7 +110,7 @@ export function policeCheck(c: EngineCaseRecord, asOf: number, limit: Limit) {
     if (spell.kind !== 'police') return [];
     const start = day(spell.start);
     if (start !== undefined && start > asOf) return [];
-    const end = spell.end === undefined && spell.ongoing ? asOf + 1 : day(spell.end);
+    const end = spell.end === undefined && spell.ongoing && datedSnapshot ? asOf + 1 : day(spell.end);
     if (start === undefined || end === undefined || end < start) {
       incomplete = true;
       return [];
@@ -113,7 +118,7 @@ export function policeCheck(c: EngineCaseRecord, asOf: number, limit: Limit) {
     return [{ start, end: Math.min(asOf + 1, end) }];
   }));
   const policeDays = length(intervals);
-  const beforeRemand = first !== undefined && intervals.some(interval => interval.start < first);
+  const beforeRemand = first !== undefined && intervals.some(interval => interval.start < first - 1);
   const beyond = (days: number) => first !== undefined && intervals.some(interval => interval.end > first + days);
   const outside = beforeRemand || beyond(Math.max(...possibleEnds));
   const ambiguous = !outside && beyond(Math.min(...possibleEnds));
@@ -136,7 +141,7 @@ export function policeCheck(c: EngineCaseRecord, asOf: number, limit: Limit) {
   const trace: TraceStep = {
     id: 'police-custody', label: 'Police-custody duration and window',
     inputs: { firstRemand: first === undefined ? null : iso(first), policeDays, possibleWindows: old ? [] : possibleEnds },
-    operation: 'Union police custody days. Compare against 15 days and the applicable half-open window from first remand.',
+    operation: 'Union police custody days. Compare against 15 days and the applicable half-open window, allowing the day before first remand.',
     result: alerts.map(alert => alert.message).join(' ') || (review ? 'The remand window requires review.' : 'No recorded police-custody breach.'),
     authority, warnings
   };
@@ -146,10 +151,13 @@ export function policeCheck(c: EngineCaseRecord, asOf: number, limit: Limit) {
 export const policeCustodyCheck: PoliceCustodyCheckFn = (c, maxTermDays) => {
   const asOf = lastRecordedDay(c);
   if (asOf === undefined) return { policeDays: 0, windowDays: maxTermDays >= 3650 ? 60 : 40, withinWindow: false, alerts: [] };
-  const recorded = resolveCharges(activeCharges(c, asOf).charges, asOf);
+  const released = recordDate(c, 'releasedOn', 'released', asOf);
+  const firstCustody = custody(c, asOf, released).raw[0]?.start;
+  const firstRemand = recordDate(c, 'firstRemandOn', 'remand', asOf);
+  const recorded = resolveCharges(activeCharges(c, asOf).charges, Math.min(firstCustody ?? asOf, firstRemand ?? asOf));
   const known = investigationLimit(recorded);
   const limit = known === 'unknown' && Number.isFinite(maxTermDays) && maxTermDays >= 0
     ? maxTermDays >= 3650 ? '90' : '60' : known;
-  const { policeDays, windowDays, withinWindow, alerts } = policeCheck(c, asOf, limit);
+  const { policeDays, windowDays, withinWindow, alerts } = policeCheck(c, asOf, limit, day(c.orderDate) !== undefined);
   return { policeDays, windowDays, withinWindow, alerts };
 };

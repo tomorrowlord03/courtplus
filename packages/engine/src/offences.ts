@@ -1,4 +1,4 @@
-import type { LookupOffenceFn } from '@courtplus/contracts';
+import type { ISODate, LookupOffenceFn, Tri } from '@courtplus/contracts';
 import { addMonths, BNSS_START, day } from './dates.js';
 import type { EngineCharge } from './facts.js';
 import { offences } from './generated/offences.js';
@@ -22,7 +22,7 @@ for (const row of offences) {
   bySection.set(key, rows);
 }
 
-export function findOffence(act: string, section: string, subsection?: string, variant?: string): Offence | undefined {
+function findOffence(act: string, section: string, subsection?: string, variant?: string): Offence | undefined {
   act = act.trim().toUpperCase();
   const match = /^(?:s(?:ection)?\.?\s*)?(\d+[a-z]?)(.*)$/i.exec(section.trim());
   if (!match) return undefined;
@@ -37,16 +37,36 @@ export function findOffence(act: string, section: string, subsection?: string, v
   return rows.find(row => part(row.subsection) === sub && part(row.variant) === choice)
     ?? rows.find(row => part(row.subsection + row.variant) === sub + choice)
     ?? rows.find(row => part(row.subsection) === sub && !row.variant
-      && (choice === '' || act === 'NDPS' && ['small', 'intermediate', 'commercial'].includes(choice)
+      && (choice === '' || choice === 'ordinary' || act === 'NDPS' && ['small', 'intermediate', 'commercial'].includes(choice)
         && row.notes.includes('Quantity: ' + choice + '.')))
     ?? rows.find(row => !choice && part(row.variant) === sub && !row.subsection);
 }
 
-export const lookupOffence: LookupOffenceFn = (act, section, subsection) => {
+function penaltyVariantIssue(row: Offence, variant: string | undefined, prior: Tri): string | undefined {
+  const maximum = row.maxMonths;
+  if (row.variant || maximum === null) return undefined;
+  const provision = row.act + ' s.' + row.section + (row.subsection ? '(' + row.subsection + ')' : '');
+  const higher = bySection.get(row.act + ':' + row.section)?.filter(candidate => candidate.subsection === row.subsection
+    && candidate.variant && (candidate.maxMonths === null || candidate.maxMonths > maximum)) ?? [];
+  if (prior !== 'no' && higher.some(candidate => candidate.variant === 'repeat')) {
+    return 'Verify whether the repeat-conviction penalty applies to ' + provision + '.';
+  }
+  if (part(variant) !== 'ordinary' && higher.some(candidate => candidate.variant !== 'repeat')) {
+    return 'Specify the penalty variant for ' + provision + '.';
+  }
+  return undefined;
+}
+
+const REFERENCE_TERM_START = '2025-01-01';
+
+export function lookupOffence(
+  act: string, section: string, subsection?: string, termStart: ISODate = REFERENCE_TERM_START
+): ReturnType<LookupOffenceFn> {
   const row = findOffence(act, section, subsection);
-  if (!row) return null;
+  if (!row || penaltyVariantIssue(row, undefined, 'unknown')) return null;
+  const start = day(termStart);
   return {
-    ...(row.maxMonths !== null && { maxDays: Math.round(row.maxMonths * 365 / 12) }),
+    ...(row.maxMonths !== null && start !== undefined && { maxDays: termDays(start, row.maxMonths) }),
     maxText: row.death ? row.life ? 'death or life imprisonment' : 'death'
       : row.life ? 'life imprisonment' : row.fineOnly ? 'fine only'
         : row.maxMonths! % 12 === 0 ? row.maxMonths! / 12 + (row.maxMonths === 12 ? ' year' : ' years')
@@ -65,25 +85,41 @@ const EXCISE_AMENDMENT = day('2011-04-30')!;
 const NDPS_AMENDMENT = day('2014-05-01')!;
 const ARMS_AMENDMENT = day('2019-12-14')!;
 
-export function resolveCharges(charges: EngineCharge[], asOf: number) {
+export function resolveCharges(charges: EngineCharge[], latestOffenceDay: number, prior: Tri = 'unknown') {
   return charges.map(charge => {
     const row = findOffence(charge.act, charge.section, charge.subsection, charge.variant);
-    const offenceOn = charge.offenceOn === undefined ? asOf : day(charge.offenceOn);
-    const editionApplies = row !== undefined && offenceOn !== undefined && offenceOn <= asOf
-      && (row.act !== 'BNS' || offenceOn >= BNSS_START)
-      && (row.act !== 'EXCISE' || offenceOn >= EXCISE_AMENDMENT)
-      && (row.act !== 'NDPS' || !row.notes.startsWith('Quantity: small.') || offenceOn >= NDPS_AMENDMENT)
-      && (row.act !== 'ARMS' || row.section === '27' && row.subsection !== '3' || offenceOn >= ARMS_AMENDMENT);
-    return { charge, row: editionApplies ? row : undefined };
+    const offenceOn = charge.offenceOn === undefined ? latestOffenceDay : day(charge.offenceOn);
+    let issue: string | undefined;
+    if (offenceOn === undefined || offenceOn > latestOffenceDay) {
+      issue = 'Offence date is invalid or later than first custody or the screening date.';
+    } else if (charge.act === 'IPC' && charge.offenceOn !== undefined && offenceOn >= BNSS_START) {
+      issue = 'IPC offence date is on or after 1 July 2024.';
+    } else if (charge.act === 'BNS' && offenceOn < BNSS_START) {
+      issue = 'BNS offence predates commencement based on the offence date or first custody.';
+    } else if (row) {
+      if (row.act === 'EXCISE' && offenceOn < EXCISE_AMENDMENT
+        || row.act === 'NDPS' && row.notes.startsWith('Quantity: small.') && offenceOn < NDPS_AMENDMENT
+        || row.act === 'ARMS' && (row.section !== '27' || row.subsection === '3') && offenceOn < ARMS_AMENDMENT) {
+        issue = 'Offence predates the sourced ' + row.act + ' penalty edition.';
+      } else {
+        issue = penaltyVariantIssue(row, charge.variant, prior);
+      }
+    }
+    return { charge, row: issue ? undefined : row, issue };
   });
 }
 
 export type ResolvedCharges = ReturnType<typeof resolveCharges>;
 
+function termDays(start: number, months: number): number {
+  return addMonths(start, months) - start;
+}
+
 export function maxDaysFrom(resolved: ResolvedCharges, first: number | undefined): number | undefined {
   const months = maxMonths(resolved);
+  if (months === 0) return 0;
   if (first === undefined || months === undefined) return undefined;
-  return addMonths(first, months) - first;
+  return termDays(first, months);
 }
 
 export function maxMonths(resolved: ResolvedCharges): number | undefined {
@@ -103,10 +139,10 @@ const bailableSections = new Set([
 const nonBailableSections = new Set([
   'IPC:302', 'IPC:304', 'IPC:304B', 'IPC:307', 'IPC:326', 'IPC:363A', 'IPC:364', 'IPC:364A',
   'IPC:365', 'IPC:379', 'IPC:380', 'IPC:392', 'IPC:393', 'IPC:394', 'IPC:395', 'IPC:396',
-  'IPC:406', 'IPC:409', 'IPC:420', 'IPC:452', 'IPC:498A',
+  'IPC:406', 'IPC:409', 'IPC:420', 'IPC:452', 'IPC:457', 'IPC:498A',
   'BNS:80:2', 'BNS:85', 'BNS:103:1', 'BNS:105', 'BNS:109:1', 'BNS:118:2', 'BNS:140:1',
   'BNS:140:2', 'BNS:140:3', 'BNS:303:2', 'BNS:305', 'BNS:309:4', 'BNS:309:5', 'BNS:309:6',
-  'BNS:310:2', 'BNS:310:3', 'BNS:316:2', 'BNS:316:5', 'BNS:318:4', 'BNS:333'
+  'BNS:310:2', 'BNS:310:3', 'BNS:316:2', 'BNS:316:5', 'BNS:318:4', 'BNS:331', 'BNS:333'
 ]);
 
 export function scheduleBailability(resolved: ResolvedCharges): 'yes' | 'no' | 'unknown' {

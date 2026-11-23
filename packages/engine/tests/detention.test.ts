@@ -20,7 +20,7 @@ describe('detention threshold golden cases', () => {
     const result = run('2025-05-02');
     expect(result).toMatchObject({ status: 'APPLY_NOW', countedCustodyDays: 122, thresholdFraction: '1/3', thresholdDate: '2025-05-02' });
     expect(result.trace.find(step => step.id === 'threshold')?.authority?.map(a => a.section)).toContain('479(3)');
-    expect(result.trace[0].operation).toBe(result.dayConvention);
+    expect(result.trace[0].operation).toContain('The arrest or first custody day counts.');
   });
 
   it('uses half for a prior conviction', () => {
@@ -35,7 +35,8 @@ describe('detention threshold golden cases', () => {
     const result = run('2024-09-01', {
       firstRemandOn: '2023-09-01', custody: [{ kind: 'judicial', start: '2023-09-01', ongoing: true }]
     });
-    expect(result).toMatchObject({ maxTermDays: 366, countedCustodyDays: 367, thresholdDate: '2023-12-31', ceilingUrgent: true });
+    expect(result).toMatchObject({ status: 'APPLY_NOW', maxTermDays: 366, countedCustodyDays: 367,
+      thresholdDate: '2023-12-31', ceilingUrgent: true });
   });
 
   it('clamps a leap-day anniversary', () => {
@@ -126,9 +127,11 @@ describe('detention threshold golden cases', () => {
     expect(run('2025-05-02', { charges: [fir('304 Part I')] })).toMatchObject({ status: 'OUTSIDE_SCREEN' });
   });
 
-  it('excludes the fine-only offence', () => {
+  it('routes custody for a fine-only offence to urgent review', () => {
     // IPC 283 has a fine and zero months of imprisonment.
-    expect(run('2025-05-02', { charges: [fir('283')] })).toMatchObject({ status: 'OUTSIDE_SCREEN', maxTermDays: 0 });
+    const result = run('2025-05-02', { charges: [fir('283')] });
+    expect(result).toMatchObject({ status: 'NEEDS_LAWYER_REVIEW', maxTermDays: 0, ceilingUrgent: true });
+    expect(result.reasons).toContain('Custody is recorded for an offence with no custodial maximum.');
   });
 
   it('excludes convict-appellants from detention thresholds', () => {
@@ -145,7 +148,9 @@ describe('detention threshold golden cases', () => {
 
   it('routes two pending offences in one case to review', () => {
     // IPC 323 and 342 are two offences despite each having a 365-day maximum.
-    expect(run('2025-05-02', { charges: [fir(), fir('342')] })).toMatchObject({ status: 'NEEDS_LAWYER_REVIEW', maxTermDays: 365 });
+    const result = run('2025-05-02', { charges: [fir(), fir('342')] });
+    expect(result).toMatchObject({ status: 'NEEDS_LAWYER_REVIEW', maxTermDays: 365 });
+    expect(result.reasons).toContain('Pending offences or cases require review under BNSS s.479(2).');
   });
 
   it('deduplicates identical charges', () => {
@@ -155,34 +160,44 @@ describe('detention threshold golden cases', () => {
 
   it('routes an unseen case ID to review', () => {
     // One of the two listed cases is missing and its status cannot be determined.
-    expect(run('2025-05-02', {}, { caseIds: ['fictional-case', 'fictional-unseen'] }).status).toBe('NEEDS_LAWYER_REVIEW');
+    const result = run('2025-05-02', {}, { caseIds: ['fictional-case', 'fictional-unseen'] });
+    expect(result.status).toBe('NEEDS_LAWYER_REVIEW');
+    expect(result.reasons).toContain('The record does not include every listed case.');
   });
 
   it('routes unknown conviction history to review', () => {
     // 122 days reaches a third, while the half-day threshold is 183.
     const result = run('2025-05-02', {}, { priorConviction: 'unknown' });
     expect(result.status).toBe('NEEDS_LAWYER_REVIEW');
+    expect(result.reasons).toContain('Prior conviction history is unknown.');
     expect(result.thresholdFraction).toBeUndefined();
   });
 
   it('routes unknown and affirmative holds to review', () => {
     // Neither values verifies that this is the only custodial hold.
-    expect(run('2025-05-02', {}, { otherHolds: 'unknown' }).status).toBe('NEEDS_LAWYER_REVIEW');
-    expect(run('2025-05-02', {}, { otherHolds: 'yes' }).status).toBe('NEEDS_LAWYER_REVIEW');
+    for (const [otherHolds, reason] of [
+      ['unknown', 'Other holds are unknown.'], ['yes', 'Another warrant or hold is recorded.']
+    ] as const) {
+      const result = run('2025-05-02', {}, { otherHolds });
+      expect(result.status).toBe('NEEDS_LAWYER_REVIEW');
+      expect(result.reasons).toContain(reason);
+    }
   });
 
   it('routes a continuation order to review', () => {
     // 183 days is half rounded up, but a continuation order is evidenced.
-    expect(run('2025-07-02', { evidence: { continuationOrder: fact('yes') } }, { priorConviction: 'yes' }).status)
-      .toBe('NEEDS_LAWYER_REVIEW');
+    const result = run('2025-07-02', { evidence: { continuationOrder: fact('yes') } }, { priorConviction: 'yes' });
+    expect(result.status).toBe('NEEDS_LAWYER_REVIEW');
+    expect(result.reasons).toContain('Verify the court’s continued-detention order and written reasons.');
   });
 
   it('does not apply an unverified framed charge over IPC 302', () => {
     // 10 years anchored on 2023-07-01 would give 1,218 days; the purported charge cannot establish that term yet.
-    expect(run('2026-11-22', { firstRemandOn: '2023-07-01', charges: [
+    const result = run('2026-11-22', { firstRemandOn: '2023-07-01', charges: [
       fir('302'), { ...fir('304'), variant: 'II', stage: 'FRAMED', verified: false }
-    ], custody: [{ kind: 'judicial', start: '2023-07-01', ongoing: true }] }))
-      .toMatchObject({ status: 'NEEDS_LAWYER_REVIEW', countedCustodyDays: 1241 });
+    ], custody: [{ kind: 'judicial', start: '2023-07-01', ongoing: true }] });
+    expect(result).toMatchObject({ status: 'NEEDS_LAWYER_REVIEW', countedCustodyDays: 1241 });
+    expect(result.reasons).toContain('Unverified framed charge requires lawyer review.');
   });
 
   it('uses verified IPC 304 Part II in place of IPC 302', () => {
@@ -210,8 +225,11 @@ describe('detention threshold golden cases', () => {
 
   it('applies BNSS to an earlier pending IPC case', () => {
     // Jan to June of 2024 includes 182 days. Jul 1 is day 183, past the 122-day BNSS third.
-    expect(run('2024-07-01', { firstRemandOn: '2024-01-01', custody: [{ kind: 'judicial', start: '2024-01-01', ongoing: true }] }))
-      .toMatchObject({ status: 'APPLY_NOW', maxTermDays: 366, countedCustodyDays: 183, thresholdFraction: '1/3' });
+    const result = run('2024-07-01', {
+      orderDate: '2024-07-01', firstRemandOn: '2024-01-01', custody: [{ kind: 'judicial', start: '2024-01-01', ongoing: true }]
+    });
+    expect(result).toMatchObject({ status: 'APPLY_NOW', maxTermDays: 366, countedCustodyDays: 183, thresholdFraction: '1/3' });
+    expect(result.trace.find(step => step.id === 'governing-law')?.warnings?.[0]).toContain('BNSS s.531 savings');
   });
 
   it('keeps IPC 406 and BNS 316(2) terms distinct', () => {
@@ -224,7 +242,9 @@ describe('detention threshold golden cases', () => {
   it('does not choose a culpable homicide part from a bare section', () => {
     // IPC 304 contains potentially life and ten-year terms. The section alone does not select either.
     expect(lookupOffence('IPC', '304')).toBeNull();
-    expect(run('2025-05-02', { charges: [fir('304')] }).status).toBe('NEEDS_LAWYER_REVIEW');
+    const result = run('2025-05-02', { charges: [fir('304')] });
+    expect(result.status).toBe('NEEDS_LAWYER_REVIEW');
+    expect(result.reasons).toContain('Applicable punishment is unresolved.');
   });
 
   it('reviews an Arms Act charge preceding the sourced 2019 amendment', () => {
@@ -232,6 +252,7 @@ describe('detention threshold golden cases', () => {
     const result = run('2025-05-02', { charges: [{ ...fir('25(1B)', 'ARMS'), offenceOn: '2019-12-13' }] });
     expect(result.status).toBe('NEEDS_LAWYER_REVIEW');
     expect(result.maxTermDays).toBeUndefined();
+    expect(result.reasons).toContain('Offence predates the sourced ARMS penalty edition.');
   });
 
   it('preserves known custody days when the current position is unresolved', () => {

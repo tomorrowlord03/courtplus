@@ -25,10 +25,13 @@ describe('review alerts golden cases', () => {
     const result = run('2025-03-04', { charges: [fir('306')] });
     expect(alert(result, 'DEFAULT_BAIL_CHECK')).toMatchObject({
       message: expect.stringContaining('60 or 90 days is disputed'), authority: expect.arrayContaining([
-        expect.objectContaining({ section: expect.stringContaining('Hyder Ali') }),
-        expect.objectContaining({ section: expect.stringContaining('Mohammed Sajjid') })
+        expect.objectContaining({ section: expect.stringContaining('33526/2024'), url: expect.stringContaining('stateNm=Karnataka') }),
+        expect.objectContaining({ section: expect.stringContaining('2025:KER:10727'), url: expect.stringContaining('stateNm=Kerala') })
       ])
     });
+    const disputedAlert = alert(result, 'DEFAULT_BAIL_CHECK');
+    expect(disputedAlert?.message).toContain('The 60-day period expires on 2025-03-02 and the 90-day period expires on 2025-04-01.');
+    expect(disputedAlert?.dueOn).toBeUndefined();
     expect(result.trace.find(step => step.id === 'default-bail')?.inputs.firstReviewDates).toEqual(['2025-03-02', '2025-04-01']);
   });
 
@@ -50,6 +53,15 @@ describe('review alerts golden cases', () => {
     // Both events are Mar 4; civil dates cannot establish which filing was first.
     expect(alert(run('2025-03-10', { chargesheetOn: '2025-03-04', defaultBailAppliedOn: '2025-03-04' }), 'DEFAULT_BAIL_CHECK')?.message)
       .toContain('share a date');
+  });
+
+  it('flags disputed same-day filings as a NALSA review', () => {
+    const result = run('2025-04-02', {
+      charges: [fir('306')], chargesheetOn: '2025-04-01', defaultBailAppliedOn: '2025-04-01', readyToFurnishBail: 'yes'
+    });
+    expect(alert(result, 'DEFAULT_BAIL_CHECK')?.message).toContain('Application and charge sheet share a date.');
+    expect(result.trace.find(step => step.id === 'default-bail')?.inputs.timelyApplication).toBe(false);
+    expect(result.nalsaCategories).toContain(8);
   });
 
   it('does not emit a 60-day alert for a timely charge sheet', () => {
@@ -208,7 +220,7 @@ describe('review alerts golden cases', () => {
     // Jan 31 to Feb 7, 2026 is seven days; verified unfurnished bonds are the sole known barrier.
     const result = run('2026-02-07', { bailGrantedOn: '2026-01-31',
       evidence: { bailBondsFurnished: fact('no', '2026-02-07'), financialBarrier: fact('yes', '2026-02-07') } });
-    expect(alert(result, 'POOR_PRISONERS_REFERRAL')).toBeDefined();
+    expect(alert(result, 'POOR_PRISONERS_REFERRAL')?.authority?.[0].text).toMatch(/^Summary of the SOP\./);
   });
 
   it('suppresses referral for the hard exclusion tier', () => {
