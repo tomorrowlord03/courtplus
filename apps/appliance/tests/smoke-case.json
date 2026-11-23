@@ -1,0 +1,18 @@
+[
+  {
+    "id": "p990002",
+    "alias": "Accused-990002",
+    "prisonerType": "undertrial",
+    "priorConviction": "unknown",
+    "otherHolds": "unknown",
+    "caseIds": ["c990002"]
+  },
+  {
+    "id": "c990002",
+    "personId": "p990002",
+    "pendingStatus": "trial",
+    "charges": [],
+    "custody": [],
+    "events": []
+  }
+]

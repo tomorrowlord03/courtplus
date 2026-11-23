@@ -1,0 +1,36 @@
+{
+  "name": "@courtplus/appliance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@courtplus/contracts": "0.0.0",
+    "@courtplus/engine": "0.0.0",
+    "@fastify/cookie": "^11.0.0",
+    "@fastify/cors": "^11.0.0",
+    "@fastify/helmet": "^13.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "@fastify/static": "^8.0.0",
+    "argon2": "^0.45.0",
+    "better-sqlite3-multiple-ciphers": "13.2.0",
+    "canonicalize": "2.1.0",
+    "fastify": "^5.0.0",
+    "qrcode": "1.5.4",
+    "zod": "^4.0.0"
+  },
+  "peerDependencies": {
+    "@courtplus/export": "0.0.0",
+    "@courtplus/intake": "0.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@courtplus/export": { "optional": true },
+    "@courtplus/intake": { "optional": true }
+  },
+  "devDependencies": { "@types/node": "^22.0.0", "@types/qrcode": "^1.5.5" }
+}

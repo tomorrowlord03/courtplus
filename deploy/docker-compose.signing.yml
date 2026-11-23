@@ -1,0 +1,13 @@
+services:
+  cloud:
+    environment:
+      COURTPLUS_ISSUING_OFFICE: "${COURTPLUS_ISSUING_OFFICE:?Set the issuing office label}"
+      COURTPLUS_SIGNING_KEY_FILE: /run/secrets/draft_signing_key
+      COURTPLUS_PRISON: "${COURTPLUS_PRISON:-}"
+      COURTPLUS_DISTRICT: "${COURTPLUS_DISTRICT:-}"
+    secrets:
+      - draft_signing_key
+
+secrets:
+  draft_signing_key:
+    file: "${COURTPLUS_SIGNING_KEY_SOURCE:-./secrets/draft_signing_key}"
