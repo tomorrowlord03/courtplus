@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -5,6 +6,8 @@ import { app, BrowserWindow, net, protocol, session, type Session } from 'electr
 
 export const appUrl = 'courtplus://app/';
 export const pdfUrl = 'courtplus://diagnostics/devanagari.html';
+const printUrl = 'courtplus://print/';
+const printDocuments = new Map<string, string>();
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'courtplus', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } },
@@ -51,18 +54,15 @@ export function diagnosticResources(): string {
 }
 
 function uiDirectory(): string {
-  const dir = app.isPackaged ? join(process.resourcesPath, 'ui') : join(app.getAppPath(), '..', 'ui', 'dist');
+  const dir = app.isPackaged ? join(process.resourcesPath, 'ui') : join(app.getAppPath(), 'resources', 'ui');
   return existsSync(join(dir, 'index.html')) ? dir : join(app.getAppPath(), 'resources', 'shell');
 }
 
-function contentPolicy(devUrl?: URL): string {
-  // Vite's React Fast Refresh preambles for the default root base.
+function contentPolicy(backend: string, devUrl?: URL): string {
   const scriptSources = devUrl
     ? "'self' 'sha256-Z2/iFzh9VMlVkEOar1f/oSHWwQk3ve1qk/C2WdsC4Xk=' 'sha256-8ZgGo/nOlaDknQkDUYiedLuFRSGJwIz6LAzsOrNxhmU='"
     : "'self'";
-  const connect = devUrl
-    ? "'self' " + (devUrl.protocol === 'https:' ? 'wss://' : 'ws://') + devUrl.host
-    : "'self'";
+  const devSocket = devUrl && (devUrl.protocol === 'https:' ? 'wss://' : 'ws://') + devUrl.host;
   return [
     "default-src 'none'",
     "script-src " + scriptSources,
@@ -71,7 +71,7 @@ function contentPolicy(devUrl?: URL): string {
     "font-src 'self' data:",
     "media-src 'self' blob:",
     "worker-src 'self' blob:",
-    "connect-src " + connect,
+    "connect-src " + ([backend, devSocket].filter(Boolean).join(' ') || "'none'"),
     "base-uri 'none'",
     "form-action 'none'",
     "frame-ancestors 'none'",
@@ -89,7 +89,7 @@ function assetPath(root: string, pathname: string): string | undefined {
   return file;
 }
 
-export async function makeRendererSession(devUrl?: URL): Promise<Session> {
+export async function makeRendererSession(devUrl?: URL, backend = () => ''): Promise<Session> {
   const isolated = session.fromPartition('courtplus');
   await isolated.setProxy({ mode: 'direct' });
   isolated.setPermissionCheckHandler(() => false);
@@ -98,11 +98,18 @@ export async function makeRendererSession(devUrl?: URL): Promise<Session> {
   isolated.setDisplayMediaRequestHandler((_request, respond) => respond({}));
   isolated.on('will-download', event => event.preventDefault());
 
-  const csp = contentPolicy();
   const root = uiDirectory();
   isolated.protocol.handle('courtplus', async request => {
     const url = new URL(request.url);
     if (request.method !== 'GET' || url.username || url.password) return new Response(null, { status: 403 });
+    if (url.host === 'print') {
+      const html = printDocuments.get(url.pathname);
+      return html === undefined ? new Response(null, { status: 404 }) : new Response(html, { headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; font-src data:; img-src data:; base-uri 'none'; frame-ancestors 'none'",
+        'Cache-Control': 'no-store',
+      } });
+    }
     const isDiagnosticFile = url.pathname === '/devanagari.html' || url.pathname === '/devanagari.css';
     const assets = url.host === 'app' ? root
       : url.host === 'diagnostics' && isDiagnosticFile ? diagnosticResources()
@@ -113,7 +120,7 @@ export async function makeRendererSession(devUrl?: URL): Promise<Session> {
       if (!path) return new Response(null, { status: 404 });
       const asset = await net.fetch(pathToFileURL(path).href);
       const headers = new Headers(asset.headers);
-      headers.set('Content-Security-Policy', csp);
+      headers.set('Content-Security-Policy', contentPolicy(url.host === 'app' ? backend() : ''));
       headers.set('X-Content-Type-Options', 'nosniff');
       headers.set('X-DNS-Prefetch-Control', 'off');
       return new Response(asset.body, { status: asset.status, headers });
@@ -124,22 +131,39 @@ export async function makeRendererSession(devUrl?: URL): Promise<Session> {
 
   const devSocket = devUrl && (devUrl.protocol === 'https:' ? 'wss://' : 'ws://') + devUrl.host;
   isolated.webRequest.onBeforeRequest(({ url }, callback) => {
-    const allowed = isSameOrigin(url, appUrl) || isSameOrigin(url, pdfUrl)
+    const origin = backend();
+    const allowed = isSameOrigin(url, appUrl) || isSameOrigin(url, pdfUrl) || isSameOrigin(url, printUrl)
       || url.startsWith('blob:') || url.startsWith('data:')
+      || Boolean(origin && isSameOrigin(url, origin))
       || Boolean(devUrl && isSameOrigin(url, devUrl.href))
       || Boolean(devSocket && isSameOrigin(url, devSocket));
     callback({ cancel: !allowed });
   });
   if (devUrl) {
-    const policy = contentPolicy(devUrl);
     isolated.webRequest.onHeadersReceived(({ url, responseHeaders }, callback) => {
       if (!isSameOrigin(url, devUrl.href)) return callback({});
       const headers = { ...responseHeaders };
       const key = Object.keys(headers).find(name => name.toLowerCase() === 'content-security-policy')
         ?? 'Content-Security-Policy';
-      headers[key] = [...(headers[key] ?? []), policy];
+      headers[key] = [...(headers[key] ?? []), contentPolicy(backend(), devUrl)];
       callback({ responseHeaders: headers });
     });
   }
   return isolated;
+}
+
+export async function printDocument(isolated: Session, html: string): Promise<Uint8Array> {
+  const id = randomUUID();
+  printDocuments.set('/' + id, html);
+  let window: BrowserWindow | undefined;
+  try {
+    window = new BrowserWindow({ show: false, webPreferences: { ...webPreferences, session: isolated } });
+    lockDownWindow(window);
+    await window.loadURL(printUrl + id);
+    await window.webContents.executeJavaScript('document.fonts.ready.then(() => true)');
+    return await window.webContents.printToPDF({ pageSize: 'A4', printBackground: true });
+  } finally {
+    printDocuments.delete('/' + id);
+    window?.destroy();
+  }
 }

@@ -2,28 +2,46 @@
   "name": "@courtplus/desktop",
   "version": "0.0.0",
   "private": true,
-  "description": "Offline CourtPlus desktop application",
+  "description": "CourtPlus desktop application",
   "author": "CourtPlus",
   "main": "dist/main.js",
   "scripts": {
-    "build": "npm run build -w @courtplus/contracts && tsc -p tsconfig.json",
+    "build": "npm run build -w @courtplus/contracts && npm run build -w @courtplus/engine && npm run build -w @courtplus/intake && npm run build -w @courtplus/export && tsc -p tsconfig.json && tsc -p tsconfig.ui.json && vite build && node scripts/prepare-resources.mjs",
+    "copy-model": "node scripts/copy-model.mjs",
     "test": "vitest run",
-    "dev": "npm run build && npm run rebuild && electron .",
+    "test:smoke": "node --test tests/smoke.electron.mjs",
+    "test:cloud": "node --test tests/cloud.integration.mjs",
+    "dev": "npm run build && npm run copy-model && npm run rebuild && electron .",
     "rebuild": "node scripts/rebuild.mjs",
-    "dist": "npm run build && npm run rebuild -- --arch=x64 && electron-builder --win --x64 --config electron-builder.yml"
+    "dist": "npm run build && npm run copy-model && npm run rebuild -- --arch=x64 && electron-builder --win --x64 --config electron-builder.yml --publish never"
   },
   "dependencies": {
+    "@courtplus/engine": "0.0.0",
+    "@courtplus/export": "0.0.0",
+    "@courtplus/intake": "0.0.0",
     "better-sqlite3-multiple-ciphers": "13.2.0",
     "canonicalize": "2.1.0",
     "onnxruntime-node": "1.31.1",
     "onnxruntime-web": "1.31.1",
+    "qrcode": "1.5.4",
     "zod": "4.6.7"
   },
   "devDependencies": {
     "@courtplus/contracts": "0.0.0",
     "@electron/rebuild": "4.2.1",
     "@types/node": "24.10.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.20",
     "electron": "45.4.1",
-    "electron-builder": "26.18.0"
+    "electron-builder": "26.18.0",
+    "playwright": "1.62.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.0"
   }
 }

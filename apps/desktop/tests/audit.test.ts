@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GENESIS_HASH, makeAuditEntry, verifyAuditChain } from '../src/audit';
+import { chainIncludesAnchor, GENESIS_HASH, makeAuditEntry, verifyAuditChain } from '../src/audit';
 
 const input = {
   ts: '2024-01-01T00:00:00.000Z',
@@ -36,5 +36,18 @@ describe('audit chain', () => {
     expect(verifyAuditChain([first, third])).toBe(false);
     expect(verifyAuditChain([second, first, third])).toBe(false);
     expect(verifyAuditChain([first, second], third.hash)).toBe(false);
+  });
+
+  it('accepts a printed anchor only while the verified chain still contains it', () => {
+    const [first, second, third] = chain();
+    expect(chainIncludesAnchor([first, second, third], second.hash)).toBe(true);
+    expect(chainIncludesAnchor([], GENESIS_HASH)).toBe(true);
+    // An insider who rewrites history and rehashes keeps a valid chain but loses the anchor.
+    const rewritten = makeAuditEntry(first, { ...input, payload: { a: 'rewritten' } });
+    const rehashed = makeAuditEntry(rewritten, { ...input, payload: { b: 3 } });
+    expect(verifyAuditChain([first, rewritten, rehashed])).toBe(true);
+    expect(chainIncludesAnchor([first, rewritten, rehashed], second.hash)).toBe(false);
+    expect(chainIncludesAnchor([first, { ...second, action: 'edited' }, third], first.hash)).toBe(false);
+    expect(chainIncludesAnchor([first, second, third], 'not-a-hash')).toBe(false);
   });
 });

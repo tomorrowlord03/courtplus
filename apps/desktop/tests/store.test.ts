@@ -64,6 +64,15 @@ it('reopens persisted cases, derives membership, and appends one audit entry per
   }
 });
 
+it('keeps SQLite temporary files in memory so no plaintext spills to disk', async () => {
+  const db = await openEncryptedDatabase(directory, testKeyStorage);
+  try {
+    expect(db.pragma('temp_store', { simple: true })).toBe(2);
+  } finally {
+    db.close();
+  }
+});
+
 it('rolls back a save when its audit entry cannot be written', async () => {
   const db = await openEncryptedDatabase(directory, testKeyStorage);
   try {

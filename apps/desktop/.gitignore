@@ -1,1 +1,5 @@
 !/resources/diag/identity.onnx
+/resources/ui/
+/resources/data/
+/resources/assets/
+/resources/templates/

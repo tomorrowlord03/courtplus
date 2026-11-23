@@ -64,3 +64,12 @@ export function verifyAuditChain(entries: Iterable<AuditEntry>, expectedHead?: s
   }
   return expectedHead === undefined || expectedHead === previous;
 }
+
+/**
+ * A printed anchor is an earlier chain head, so later entries are expected. The anchor proves the
+ * history up to it is unchanged only if the whole chain still verifies and still contains it.
+ */
+export function chainIncludesAnchor(entries: readonly AuditEntry[], anchor: string): boolean {
+  if (!/^[0-9a-f]{64}$/.test(anchor) || !verifyAuditChain(entries)) return false;
+  return anchor === GENESIS_HASH || entries.some(entry => entry.hash === anchor);
+}

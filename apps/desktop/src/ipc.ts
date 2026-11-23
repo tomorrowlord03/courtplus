@@ -1,50 +1,20 @@
 import type { CourtPlusApi } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import { ipcMain, type IpcMainInvokeEvent } from 'electron';
-import type { z } from 'zod';
-import type { Store } from './store';
+import type { createHandlers } from './handlers';
 import { argumentSchemas, validateArguments } from './validation';
 
-function route<Args extends unknown[], Result>(
-  schema: z.ZodType<Args>,
-  handler: (...args: NoInfer<Args>) => Result,
-) {
-  return (args: unknown[]): Result => handler(...validateArguments(schema, args));
-}
+type AppMethods = Awaited<ReturnType<typeof createHandlers>>['handlers'];
+type Trust = (event: IpcMainInvokeEvent, method: string) => boolean;
+type Methods = { [K in keyof CourtPlusApi]: (...args: Parameters<CourtPlusApi[K]>) => ReturnType<CourtPlusApi[K]> };
+const schemas: { [K in keyof CourtPlusApi]: import('zod').ZodType<Parameters<CourtPlusApi[K]>> } = argumentSchemas;
 
-function notImplemented(): never {
-  throw new Error('NOT_IMPLEMENTED');
-}
-
-export function registerHandlers(store: Store, isTrusted: (event: IpcMainInvokeEvent) => boolean): void {
-  const routes = {
-    listPersons: route(argumentSchemas.listPersons, store.listPersons),
-    listCases: route(argumentSchemas.listCases, store.listCases),
-    saveCase: route(argumentSchemas.saveCase, store.saveCase),
-    role: route(argumentSchemas.role, store.role),
-    importOrder: route(argumentSchemas.importOrder, notImplemented),
-    screen: route(argumentSchemas.screen, notImplemented),
-    board: route(argumentSchemas.board, notImplemented),
-    updateCard: route(argumentSchemas.updateCard, notImplemented),
-    exportDraft: route(argumentSchemas.exportDraft, notImplemented),
-    exportScReturn: route(argumentSchemas.exportScReturn, notImplemented),
-    verify: route(argumentSchemas.verify, notImplemented),
-    stats: route(argumentSchemas.stats, notImplemented),
-  } satisfies {
-    [K in keyof CourtPlusApi]: (args: unknown[]) => Awaited<ReturnType<CourtPlusApi[K]>>;
-  };
-
-  for (const [name, handle] of Object.entries(routes)) {
-    ipcMain.handle(`courtplus:${name}`, (event, ...args: unknown[]) => {
-      if (!isTrusted(event)) throw new Error('FORBIDDEN');
-      try {
-        return handle(args);
-      } catch (error) {
-        if (error instanceof Error
-          && (error.message.startsWith('INVALID_ARGUMENT') || error.message === 'NOT_IMPLEMENTED')) {
-          throw error;
-        }
-        throw new Error('INTERNAL_ERROR');
-      }
+export function registerHandlers(handlers: AppMethods, isTrusted: Trust): void {
+  const methods: Methods = handlers;
+  function register<K extends keyof CourtPlusApi>(method: K) {
+    ipcMain.handle('courtplus:' + method, async (event, ...args: unknown[]) => {
+      if (!isTrusted(event, method)) throw new Error('FORBIDDEN');
+      return methods[method](...validateArguments(schemas[method], args));
     });
   }
+  for (const method of Object.keys(schemas) as (keyof CourtPlusApi)[]) register(method);
 }

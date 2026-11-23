@@ -1,10 +1,11 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { CaseRecord, CourtPlusApi, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+import type { Card, CaseRecord, CourtPlusApi, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import Database from 'better-sqlite3-multiple-ciphers';
-import { appendAudit } from './audit';
+import { appendAudit, type AuditEntry } from './audit';
 import { roleSchema } from './validation';
+import type { CardPatch } from './handlers/board';
 
 const databaseFile = 'courtplus.sqlite3';
 const keyFile = 'database.key.dpapi';
@@ -87,6 +88,8 @@ export async function openEncryptedDatabase(
     db.pragma("cipher='sqlcipher'");
     db.pragma('legacy=4');
     db.pragma(`key = "x'${key}'"`);
+    // SQLite spill files (large sorts, temp indexes) are not covered by the page cipher.
+    db.pragma('temp_store = MEMORY');
     db.pragma('foreign_keys = ON');
     db.pragma('recursive_triggers = ON');
     db.transaction(() => {
@@ -141,7 +144,57 @@ export async function openStore(directory: string, keyStorage: KeyStorage) {
     appendAudit(db, role(), 'case.save', { person: { id: personId, ...profile }, case: record });
   });
 
+  const setting = db.prepare<[string], { value: string }>('SELECT value FROM settings WHERE key = ?');
+  const writeSetting = db.prepare<[string, string]>(
+    'INSERT INTO settings VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value',
+  );
+  const audit = (action: string, payload: unknown) => appendAudit(db, role(), action, payload);
+  const writeSettings = db.transaction((
+    changes: Record<string, string>, action: string, payload: unknown,
+  ) => {
+    const changed = Object.entries(changes).filter(([key, value]) => setting.get(key)?.value !== value);
+    if (!changed.length) return;
+    for (const [key, value] of changed) writeSetting.run(key, value);
+    audit(action, payload ?? Object.fromEntries(changed));
+  });
+  const readCards = db.prepare<[], { id: string; card_json: string }>('SELECT id, card_json FROM cards');
+  const readCard = db.prepare<[string], { card_json: string }>('SELECT card_json FROM cards WHERE id = ?');
+  const writeCard = db.prepare(
+    'INSERT INTO cards VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET ' +
+      'person_id = excluded.person_id, case_id = excluded.case_id, card_json = excluded.card_json',
+  );
+  const updateCard = db.transaction((card: Card, patch: CardPatch) => {
+    const previous = readCard.get(card.id);
+    const prior = previous ? JSON.parse(previous.card_json) as CardPatch : {};
+    if (Object.entries(patch).every(([key, value]) => card[key as keyof CardPatch] === value)) return card;
+    writeCard.run(card.id, card.personId, card.caseId, JSON.stringify({ ...prior, ...patch }));
+    audit('card.update', { id: card.id, patch });
+    return { ...card, ...patch };
+  });
+  const recordDocument = db.transaction((
+    doc: { docId: string; pages: number; ocr: boolean }, suggestedFields: string[],
+  ) => {
+    const insert = db.prepare('INSERT OR IGNORE INTO documents VALUES (?, NULL, ?, ?)');
+    if (insert.run(doc.docId, JSON.stringify({ pages: doc.pages, ocr: doc.ocr, suggestedFields }), doc.docId).changes) {
+      audit('order.import', { docId: doc.docId, pages: doc.pages, ocr: doc.ocr });
+    }
+  });
+  const document = db.prepare<[string], { metadata_json: string }>('SELECT metadata_json FROM documents WHERE id = ?');
+  const auditEntries = db.prepare<[], AuditEntry>('SELECT * FROM audit_log ORDER BY id');
+
   return {
+    readSetting: (key: string): string | undefined => setting.get(key)?.value,
+    writeSettings: (changes: Record<string, string>, action = 'settings.update', payload?: unknown) =>
+      writeSettings.immediate(changes, action, payload),
+    readCards: () => new Map(readCards.all().map(row => [row.id, JSON.parse(row.card_json) as CardPatch])),
+    updateCard: updateCard.immediate,
+    recordDocument: recordDocument.immediate,
+    document: (id: string): { suggestedFields: string[] } | undefined => {
+      const row = document.get(id);
+      return row ? JSON.parse(row.metadata_json) as { suggestedFields: string[] } : undefined;
+    },
+    audit,
+    auditEntries: (): AuditEntry[] => auditEntries.all(),
     listPersons: (): Person[] => persons.all().map(row => ({
       ...JSON.parse(row.profile_json) as Omit<Person, 'id' | 'caseIds'>,
       id: row.id,
