@@ -12,6 +12,19 @@ const laneTitles: Record<Lane, string> = {
 
 export type CardPatch = Pick<Partial<Card>, 'owner' | 'dueOn' | 'state'>;
 export const defaultDailyCap = 10;
+export const cardSteps: readonly Card['state'][] = [
+  'open', 'assigned', 'order_verified', 'jail_acknowledged', 'holds_checked', 'closed',
+];
+
+/** A card moves one step at a time; only the jail superintendent may record the jail's acknowledgement. */
+export function checkCardStep(card: Card, patch: CardPatch, role: string): void {
+  if (patch.state === undefined || patch.state === card.state) return;
+  const next = cardSteps[cardSteps.indexOf(card.state) + 1];
+  if (patch.state !== next) throw new Error('Cards move one step at a time. Choose the next step.');
+  if (next === 'jail_acknowledged' && role !== 'superintendent') {
+    throw new Error('Only the jail superintendent can record the jail’s acknowledgement.');
+  }
+}
 
 export function indiaDate(now = new Date()): ISODate {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(now);

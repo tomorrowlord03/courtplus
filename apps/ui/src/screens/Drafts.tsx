@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import type { CaseRecord, CourtPlusApi } from '@courtplus/contracts';
+import type { CaseRecord, CourtPlusApi, Status } from '@courtplus/contracts';
 import { DRAFT_LANGS, RIGHTS_CARD_LANGS, translations } from '../lib/i18n';
-import { useApp } from '../lib/context';
+import { todayIST, useApp } from '../lib/context';
 import { Empty, ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
 
 type Kind = Parameters<CourtPlusApi['exportDraft']>[0];
@@ -25,8 +25,30 @@ export function Drafts() {
   const [qr, setQr] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Engine status for the selected case; undefined while loading or if screening failed.
+  const [status, setStatus] = useState<{ caseId: string; asOf: string; status: Status }>();
 
   useEffect(() => { api.listCases().then((c) => { setCases(c); setCaseId(c[0]?.id ?? ''); }, (e) => setError(errMsg(e))); }, [api]);
+
+  const record = cases?.find((c) => c.id === caseId);
+  useEffect(() => {
+    if (!record) return;
+    let live = true;
+    // Same as-of date the desktop export uses, so the offer here matches what export will accept.
+    const asOf = record.orderDate ?? todayIST();
+    api.screen(record.id, asOf).then(
+      (r) => { if (live) setStatus({ caseId: record.id, asOf, status: r.status }); },
+      () => { if (live) setStatus(undefined); },
+    );
+    return () => { live = false; };
+  }, [api, record]);
+
+  // Fail closed: the s.479(3) application is offered only once the engine says APPLY_NOW.
+  const canApply = status?.caseId === caseId && status.status === 'APPLY_NOW';
+  const kinds = KINDS.filter(([k]) => k !== 'S479_3_APPLICATION' || canApply);
+  useEffect(() => {
+    if (!kinds.some(([k]) => k === kind)) { setKind(kinds[0][0]); setLang('en'); }
+  }, [canApply, kind]); // eslint-disable-line react-hooks/exhaustive-deps -- kinds derives from canApply
 
   const langs: [string, string][] = kind === 'RIGHTS_CARD' ? RIGHTS_CARD_LANGS : DRAFT_LANGS.map((l) => [l, l === 'en' ? 'English' : 'हिन्दी (Hindi)']);
 
@@ -60,9 +82,15 @@ export function Drafts() {
         </label>
         <label>Draft type
           <select className="mt-1 block w-full rounded border px-2 py-1.5" value={kind} onChange={(e) => { setKind(e.target.value as Kind); setLang('en'); }}>
-            {KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+            {kinds.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
           </select>
         </label>
+        {status?.caseId === caseId && !canApply && (
+          <p className="text-sm text-slate-700" data-testid="s479-hidden">
+            No s.479(3) application: the engine result as of {status.asOf} is {status.status.replace(/_/g, ' ')}, not Apply now.
+            {status.status === 'NEEDS_LAWYER_REVIEW' || status.status === 'OUTSIDE_SCREEN' ? ' Send this case for lawyer review.' : ''}
+          </p>
+        )}
         <label>Language
           <select className="mt-1 block w-full rounded border px-2 py-1.5" value={lang} onChange={(e) => setLang(e.target.value)}>
             {langs.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
@@ -84,8 +112,8 @@ export function Drafts() {
           <h2 className="font-semibold">Signed PDF ready</h2>
           <p className="text-sm">Receipt ID: <code data-testid="receipt-id">{baseName(out.receiptPath)}</code></p>
           {qr && <img src={qr} alt="QR code for the receipt ID" width={160} height={160} />}
-          <p className="break-all text-xs text-slate-600">{out.pdfPath}</p>
-          <iframe title="Draft preview" src={`file:///${out.pdfPath.replace(/\\/g, '/')}`} className="mt-2 h-96 w-full rounded border" />
+          {/* No file:// preview: the desktop CSP blocks local file loads by design. */}
+          <p className="break-all text-sm">Saved to <span className="text-slate-600">{out.pdfPath}</span></p>
         </section>
       )}
     </Page>

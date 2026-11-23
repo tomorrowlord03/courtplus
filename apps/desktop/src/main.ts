@@ -99,11 +99,17 @@ async function start(): Promise<void> {
     const { issuer } = readSettings(database);
     const path = await savePath('courtplus-issuer.pem');
     if (!path) return '';
-    const key = signer.key(issuer);
+    const key = signer.publicKey(issuer);
     await writeFile(path, key.publicKey);
     database.audit('signer.export', { keyId: key.keyId });
     return basename(path);
   });
+  const passphrase = z.string().min(1).max(256);
+  desktop('signerStatus', noArgs, signer.status);
+  desktop('unlockSigner', z.tuple([passphrase]), signer.unlock);
+  desktop('lockSigner', noArgs, signer.lock);
+  desktop('setSignerPassphrase', z.tuple([passphrase.optional(), passphrase]), signer.setPassphrase);
+  desktop('retireSigner', z.tuple([passphrase.optional()]), signer.retire);
   desktop('exportHandoff', z.tuple([z.enum(['en', 'hi'])]), anchor.exportHandoff);
   desktop('checkAnchor', z.tuple([z.string().regex(/^[0-9a-f]{64}$/)]), anchor.checkAnchor);
   desktop('trustSigner', noArgs, async () => {

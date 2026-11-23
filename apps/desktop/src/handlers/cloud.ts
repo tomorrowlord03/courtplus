@@ -12,8 +12,11 @@ const loginResponse = z.object({ token: z.string().regex(/^[\w-]{43}$/), role: r
 const handoffSchema = z.object({
   id: z.uuidv4(), caseId: z.string(), kind: z.enum(['release_order', 'bail_granted', 'acquitted']),
   orderOn: z.iso.date(), dueAt: z.number(), escalatedAt: z.number().nullable(), acknowledgedAt: z.number().nullable(),
+  // Older appliances send no version; mergeHandoff then falls back to the one-way timestamps.
+  version: z.number().int().positive().optional(),
 });
-type Handoff = z.infer<typeof handoffSchema>;
+export type Handoff = z.infer<typeof handoffSchema>;
+export type StreamEvent = { id?: number; type: string; data: unknown };
 type CloudRole = z.infer<typeof roles>;
 type Session = z.infer<typeof loginResponse> & { origin: string; stop: AbortController };
 type Pair = Parameters<CourtPlusApi['saveCase']>;
@@ -31,14 +34,40 @@ class CloudError extends Error {
   }
 }
 
+/** The appliance sends a heartbeat every 15 s; three missed beats mean a dead stream. */
+export const STREAM_IDLE_MS = 45_000;
+const RECONNECT_MIN_MS = 2_000;
+const RECONNECT_MAX_MS = 60_000;
+
+/** Exponential backoff with equal jitter, so many desktops do not reconnect in lockstep. */
+export function reconnectDelay(failures: number, random: () => number = Math.random): number {
+  const ceiling = Math.min(RECONNECT_MAX_MS, RECONNECT_MIN_MS * 2 ** Math.min(failures, 10));
+  return Math.round(ceiling / 2 + random() * ceiling / 2);
+}
+
+/**
+ * Keeps the newer of two copies of a handoff. Escalation and acknowledgement are one-way on the
+ * server, so a replayed or out-of-order event must never clear them.
+ */
+export function mergeHandoff(existing: Handoff | undefined, incoming: Handoff): Handoff {
+  if (!existing) return incoming;
+  if (existing.version !== undefined && incoming.version !== undefined) {
+    return incoming.version >= existing.version ? incoming : existing;
+  }
+  const regresses = (existing.acknowledgedAt !== null && incoming.acknowledgedAt === null)
+    || (existing.escalatedAt !== null && incoming.escalatedAt === null);
+  return regresses ? existing : incoming;
+}
+
 async function request(origin: string, path: string, options: {
-  token?: string; body?: unknown; signal: AbortSignal; method?: 'POST';
+  token?: string; body?: unknown; signal: AbortSignal; method?: 'POST'; lastEventId?: number;
 }): Promise<Response> {
   const response = await fetch(origin + path, {
     redirect: 'error', signal: options.signal,
     method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),
     headers: {
       ...(options.token && { authorization: 'Bearer ' + options.token }),
+      ...(options.lastEventId !== undefined && { 'last-event-id': String(options.lastEventId) }),
       ...(options.body !== undefined && { 'content-type': 'application/json' }),
     },
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
@@ -51,15 +80,21 @@ async function request(origin: string, path: string, options: {
   return response;
 }
 
-async function* streamEvents(response: Response) {
+export async function* streamEvents(response: Response, idleMs = STREAM_IDLE_MS): AsyncGenerator<StreamEvent> {
   if (!response.body || !response.headers.get('content-type')?.startsWith('text/event-stream')) {
     throw new Error('Cloud returned an invalid handoff stream.');
   }
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = '';
+  let idle: ReturnType<typeof setTimeout> | undefined;
+  // A half-open TCP connection never ends or errors, so silence itself must fail the stream.
+  const read = () => new Promise<ReadableStreamReadResult<string>>((resolve, reject) => {
+    idle = setTimeout(() => reject(new Error('Cloud handoff stream went quiet.')), idleMs);
+    reader.read().then(resolve, reject);
+  }).finally(() => clearTimeout(idle));
   try {
     for (;;) {
-      const { done, value } = await reader.read();
+      const { done, value } = await read();
       if (done) break;
       buffer += value;
       let boundary = buffer.indexOf('\n\n');
@@ -67,13 +102,15 @@ async function* streamEvents(response: Response) {
         const lines = buffer.slice(0, boundary).split('\n');
         buffer = buffer.slice(boundary + 2);
         const type = lines.find(line => line.startsWith('event: '))?.slice(7);
+        const id = lines.find(line => /^id: \d{1,15}$/.test(line))?.slice(4);
         const data = lines.filter(line => line.startsWith('data: ')).map(line => line.slice(6)).join('\n');
-        if (type && data) yield { type, data: JSON.parse(data) as unknown };
+        if (type && data) yield { id: id === undefined ? undefined : Number(id), type, data: JSON.parse(data) as unknown };
         boundary = buffer.indexOf('\n\n');
       }
       if (buffer.length > 4 * 1024 * 1024) throw new Error('Cloud handoff event is too large.');
     }
   } finally {
+    clearTimeout(idle);
     await reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
@@ -169,19 +206,25 @@ export function createCloud(store: Store, changed: () => void) {
   }
 
   async function watch(active: Session) {
+    let failures = 0;
+    let lastEventId: number | undefined;
     while (!active.stop.signal.aborted) {
       try {
         const response = await request(active.origin, '/api/handoff/stream', {
-          token: active.token, signal: active.stop.signal,
+          token: active.token, signal: active.stop.signal, lastEventId,
         });
-        for await (const { type, data } of streamEvents(response)) {
+        for await (const { id, type, data } of streamEvents(response)) {
           if (active !== session) return;
+          failures = 0;
+          // Server event ids only grow; anything at or below the last one seen is a replay.
+          if (type !== 'snapshot' && id !== undefined && lastEventId !== undefined && id <= lastEventId) continue;
+          if (id !== undefined) lastEventId = id;
           const next = type === 'snapshot'
-            ? new Map(z.array(handoffSchema).parse(data).map(handoff => [handoff.id, handoff]))
+            ? new Map(z.array(handoffSchema).parse(data).map(handoff => [handoff.id, mergeHandoff(handoffs.get(handoff.id), handoff)]))
             : new Map(handoffs);
           if (['posted', 'overdue', 'acknowledged'].includes(type)) {
             const handoff = handoffSchema.parse(data);
-            next.set(handoff.id, handoff);
+            next.set(handoff.id, mergeHandoff(next.get(handoff.id), handoff));
           }
           const linked = linkedCases();
           if ([...next.values()].some(handoff => !linked.has(handoff.caseId) && !remote.has(handoff.caseId))) {
@@ -204,7 +247,7 @@ export function createCloud(store: Store, changed: () => void) {
         syncError = 'Handoff connection interrupted. Reconnecting.';
         changed();
       }
-      await delay(2000, undefined, { signal: active.stop.signal }).catch(() => undefined);
+      await delay(reconnectDelay(failures++), undefined, { signal: active.stop.signal }).catch(() => undefined);
     }
   }
 

@@ -29,6 +29,15 @@ extraResources:
       - "data/**/*"
       - "assets/**/*"
       - "templates/**/*"
+# Stops a same-user process from running CourtPlus.exe as plain Node or attaching an inspector to
+# the main process, either of which could call safeStorage and unwrap the database key.
+# Asar integrity validation is left off: it needs the exe resources edited, which
+# signAndEditExecutable: false disables. Checked by tests/fuses.packaged.mjs after `npm run dist`.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  onlyLoadAppFromAsar: true
 win:
   signAndEditExecutable: false
   target:

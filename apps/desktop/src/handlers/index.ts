@@ -2,7 +2,7 @@ import type { CaseRecord, CourtPlusApi, ISODate, Person } from '@courtplus/contr
 import { join } from 'node:path';
 import type { Store } from '../store';
 import { createAnchor } from './anchor';
-import { buildBoard, indiaDate } from './board';
+import { buildBoard, checkCardStep, indiaDate } from './board';
 import { createCloud } from './cloud';
 import { loadFigures } from './documents';
 import { createExports } from './exports';
@@ -92,6 +92,7 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
         .find(item => item.id === id);
       if (!card) throw new Error('Card not found.');
       if (id.startsWith('handoff:')) return cloud.updateHandoff(card, patch);
+      checkCardStep(card, patch, await handlers.role());
       const updated = store.updateCard(card, patch);
       cloud.schedule();
       if (card.lane === 'NO_UPDATE_180' && updated.state === 'closed') ports.boardChanged();

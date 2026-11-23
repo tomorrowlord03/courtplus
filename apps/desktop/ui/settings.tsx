@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../../ui/src/components/ui';
-import { shell, type CloudStatus, type DesktopSettings } from './bridge';
+import { shell, type CloudStatus, type DesktopSettings, type SignerStatus } from './bridge';
 
 const field = 'block w-full rounded border border-slate-400 px-2 py-1';
 
@@ -116,14 +116,68 @@ export function Settings() {
         })}>Export office public key</button>
         <TrustSigner />
       </section>
+      <SigningKey busy={busy} run={run} setMessage={setMessage} />
       <AuditAnchor busy={busy} run={run} setMessage={setMessage} />
     </div>}
   </Page>;
 }
 
-function AuditAnchor({ busy, run, setMessage }: {
+type SectionProps = {
   busy: boolean; run: (task: () => Promise<void>) => Promise<void>; setMessage: (message: string) => void;
-}) {
+};
+
+function SigningKey({ busy, run, setMessage }: SectionProps) {
+  const [status, setStatus] = useState<SignerStatus>();
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  useEffect(() => {
+    let live = true;
+    void shell.signerStatus().then(value => { if (live) setStatus(value); }, () => undefined);
+    return () => { live = false; };
+  }, []);
+  const done = (value: SignerStatus, text: string) => {
+    setStatus(value); setCurrent(''); setNext(''); setMessage(text);
+  };
+  if (!status) return null;
+  return <section className="grid gap-3 rounded border bg-white p-4" aria-label="Signing key">
+    <h2 className="font-semibold">Signing key</h2>
+    <p className="text-sm text-slate-700">
+      {status.keyId ? 'Key ' + status.keyId.slice(0, 16) + '… ' : 'No key yet; one is made at the first export. '}
+      {status.protected ? (status.unlocked ? 'Unlocked for 15 minutes.' : 'Locked: unlock it to export signed drafts.')
+        : 'Not protected by a passphrase. Set one so a copied database cannot sign drafts.'}
+      {status.retired.length > 0 && ' ' + status.retired.length + ' retired key(s) still verify earlier drafts.'}
+    </p>
+    <label>{status.protected ? 'Current passphrase' : 'Passphrase (only needed to retire a protected key)'}
+      <input className={field} type="password" autoComplete="current-password" value={current}
+        onChange={event => setCurrent(event.target.value)} />
+    </label>
+    <div className="flex flex-wrap gap-2">
+      {status.protected && !status.unlocked && <button className={btnPrimary} disabled={busy || !current}
+        onClick={() => void run(async () => done(await shell.unlockSigner(current), 'Signing key unlocked.'))}>Unlock</button>}
+      {status.unlocked && <button className={btn} disabled={busy}
+        onClick={() => void run(async () => done(await shell.lockSigner(), 'Signing key locked.'))}>Lock now</button>}
+    </div>
+    <label>New passphrase (at least 12 characters)
+      <input className={field} type="password" autoComplete="new-password" value={next} minLength={12}
+        onChange={event => setNext(event.target.value)} />
+    </label>
+    <div className="flex flex-wrap gap-2">
+      <button className={btn} disabled={busy || next.length < 12 || (status.protected && !current)}
+        onClick={() => void run(async () => done(
+          await shell.setSignerPassphrase(status.protected ? current : undefined, next), 'Passphrase saved. The key is locked.'))}>
+        {status.protected ? 'Change passphrase' : 'Set passphrase'}
+      </button>
+      <button className={btn} disabled={busy || !status.keyId || (status.protected && !current)}
+        onClick={() => {
+          if (!window.confirm('Retire this signing key? It can never sign again. Earlier drafts still verify here; send the new public key to verifying offices.')) return;
+          void run(async () => done(await shell.retireSigner(status.protected ? current : undefined),
+            'Key retired. A new key will be made at the next export.'));
+        }}>Retire key</button>
+    </div>
+  </section>;
+}
+
+function AuditAnchor({ busy, run, setMessage }: SectionProps) {
   const [anchor, setAnchor] = useState('');
   const normalised = anchor.trim().toLowerCase();
   return <section className="grid gap-3 rounded border bg-white p-4" aria-label="Audit log anchor">

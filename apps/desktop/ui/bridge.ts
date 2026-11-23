@@ -3,6 +3,7 @@ import type { DesktopSettings } from '../src/handlers/settings';
 
 export type { DesktopSettings };
 export interface CloudStatus { role?: string; expires?: number; error: string }
+export interface SignerStatus { keyId?: string; protected: boolean; unlocked: boolean; retired: string[] }
 
 interface ShellBridge {
   verifier: boolean;
@@ -14,6 +15,11 @@ interface ShellBridge {
   sync(): Promise<void>;
   exportSigner(): Promise<string>;
   trustSigner(): Promise<string>;
+  signerStatus(): Promise<SignerStatus>;
+  unlockSigner(passphrase: string): Promise<SignerStatus>;
+  lockSigner(): Promise<SignerStatus>;
+  setSignerPassphrase(current: string | undefined, next: string): Promise<SignerStatus>;
+  retireSigner(passphrase?: string): Promise<SignerStatus>;
   exportHandoff(lang: 'en' | 'hi'): Promise<{ file: string; head: string } | undefined>;
   checkAnchor(anchor: string): Promise<{ chain: 'intact' | 'mismatch'; entries: number }>;
   onBoardChanged(callback: () => void): () => void;

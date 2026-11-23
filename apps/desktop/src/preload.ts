@@ -40,6 +40,12 @@ contextBridge.exposeInMainWorld('courtplusDesktop', {
   sync: () => ipcRenderer.invoke('desktop:sync'),
   exportSigner: () => ipcRenderer.invoke('desktop:exportSigner'),
   trustSigner: () => ipcRenderer.invoke('desktop:trustSigner'),
+  signerStatus: () => ipcRenderer.invoke('desktop:signerStatus'),
+  unlockSigner: (passphrase: string) => ipcRenderer.invoke('desktop:unlockSigner', passphrase),
+  lockSigner: () => ipcRenderer.invoke('desktop:lockSigner'),
+  setSignerPassphrase: (current: string | undefined, next: string) =>
+    ipcRenderer.invoke('desktop:setSignerPassphrase', current, next),
+  retireSigner: (passphrase?: string) => ipcRenderer.invoke('desktop:retireSigner', passphrase),
   exportHandoff: (lang: 'en' | 'hi') => ipcRenderer.invoke('desktop:exportHandoff', lang),
   checkAnchor: (anchor: string) => ipcRenderer.invoke('desktop:checkAnchor', anchor),
   onBoardChanged: (callback: () => void) => {

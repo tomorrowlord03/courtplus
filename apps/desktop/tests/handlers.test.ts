@@ -78,6 +78,29 @@ describe('desktop CourtPlus API', () => {
     });
   });
 
+  it('moves local cards one step at a time and keeps the jail acknowledgement for the superintendent', async () => {
+    await withHandlers(async ({ handlers, db }) => {
+      const owner = person('stepper');
+      await handlers.saveCase(owner, record(owner, '2024-01-02'));
+      const card = (await handlers.board(asOf)).find(row => row.lane === 'NO_UPDATE_180')!;
+      await expect(handlers.updateCard(card.id, { state: 'closed' })).rejects.toThrow(/one step at a time/);
+      await expect(handlers.updateCard(card.id, { state: 'order_verified' })).rejects.toThrow(/one step at a time/);
+      expect((await handlers.board(asOf)).find(row => row.id === card.id)?.state).toBe('open');
+      await handlers.updateCard(card.id, { state: 'assigned' });
+      // Repeating the current state and editing other fields stay allowed.
+      await expect(handlers.updateCard(card.id, { state: 'assigned', owner: 'dlsa' })).resolves.toMatchObject({ owner: 'dlsa' });
+      await handlers.updateCard(card.id, { state: 'order_verified' });
+      await expect(handlers.updateCard(card.id, { state: 'jail_acknowledged' })).rejects.toThrow(/superintendent/);
+      db.writeSettings({ role: 'superintendent' });
+      await handlers.updateCard(card.id, { state: 'jail_acknowledged' });
+      await expect(handlers.updateCard(card.id, { state: 'closed' })).rejects.toThrow(/one step/);
+      await handlers.updateCard(card.id, { state: 'holds_checked' });
+      expect((await handlers.updateCard(card.id, { state: 'closed' })).state).toBe('closed');
+      const steps = db.auditEntries().filter(entry => entry.action === 'card.update');
+      expect(steps).toHaveLength(6);
+    });
+  });
+
   it('refuses a s.479(3) application unless the engine says APPLY_NOW', async () => {
     await withHandlers(async ({ handlers, printed }) => {
       const review = person('review');
