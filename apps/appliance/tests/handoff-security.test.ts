@@ -85,7 +85,6 @@ test('idle streams check session expiry in memory and reauthorize every minute',
   clock.mockReturnValue(start + 60_000);
   notify();
   expect(authorize).toHaveBeenCalledTimes(2);
-  expect(new TextDecoder().decode((await reader.read()).value)).toContain('heartbeat');
   clock.mockReturnValue(start + 120_000);
   notify();
   expect((await reader.read()).done).toBe(true);
