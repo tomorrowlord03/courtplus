@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import type { CourtPlusApi } from '@courtplus/contracts';
-import { anonymise } from './anonymise.js';
+import { prepareRedaction } from './anonymise.js';
 import { extractText } from './extract.js';
 import { runNer } from './ner.js';
 import { normaliseOrderText } from './normalise.js';
-import { suggestFields } from './suggest.js';
+import { suggestFieldsWithRedaction } from './suggest.js';
 
 export { anonymise } from './anonymise.js';
 export type { AnonymisedOrder, AnonymiseOptions } from './anonymise.js';
@@ -24,22 +24,34 @@ function mimeType(bytes: Uint8Array): string {
   throw new Error('Unsupported order format. Use PDF, PNG or JPEG.');
 }
 
-export async function importOrder(file: OrderFile, modelDir: string): Promise<ImportedOrder> {
+export const AI_UNAVAILABLE = 'AI unavailable: manual entry';
+
+/** The contract result, plus a flag when the model could not run and only rule-based help is shown. */
+export type ImportedOrderResult = ImportedOrder & { aiUnavailable?: typeof AI_UNAVAILABLE };
+
+export async function importOrder(file: OrderFile, modelDir: string): Promise<ImportedOrderResult> {
   const { bytes } = file;
   const docId = createHash('sha256').update(bytes).digest('hex');
   const extracted = await extractText(bytes, mimeType(bytes));
   const text = normaliseOrderText(extracted.text);
-  const entities = await runNer(text, modelDir);
+  // A missing or broken model must not block the officer: fall back to patterns and rule-only masking.
+  let aiUnavailable = false;
+  const entities = await runNer(text, modelDir).catch(() => {
+    aiUnavailable = true;
+    return [];
+  });
   for (const entity of entities) {
     entity.page = text.slice(0, entity.start).split('\f').length;
   }
+  const { redactSpan } = prepareRedaction(text, entities);
   return {
     docId,
     text,
     pages: extracted.pages.length,
     ocr: extracted.ocr,
-    entities,
-    suggestions: suggestFields(text, entities),
-    redactedText: anonymise(text, entities, { maskIds: true }).text,
+    entities: entities.map(entity => ({ ...entity, text: redactSpan(entity.start, entity.end) })),
+    suggestions: suggestFieldsWithRedaction(text, entities, redactSpan),
+    redactedText: redactSpan(0, text.length),
+    ...(aiUnavailable ? { aiUnavailable: AI_UNAVAILABLE } : {}),
   };
 }

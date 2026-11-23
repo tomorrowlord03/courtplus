@@ -84,7 +84,47 @@ describe('suggestions for fictional orders', () => {
       ['cnr', 'XYZZ000000002026', 1], ['arrestedOn', '2025-02-03', 2], ['firstRemandOn', '2025-02-05', 2],
       ['chargesheetOn', '2025-03-06', 2], ['bailGrantedOn', '2025-03-14', 2], ['custodySince', '2025-02-03', 2], ['arrestedOn', '2025-03-15', 2],
     ]);
-    expect(result[0].sentence).toBe('CNR No. XYZZ000000002026.');
+    expect(result[0].sentence).toBe('CNR No. [CNR].');
+  });
+
+  it('uses the full-order masks in every suggestion while retaining case and CNR values', () => {
+    const text = 'Fiction Alpha appeared in MCRC No. 12/2025, C.R.A. No. 33/2025, Crime No. 4/2025, '
+      + 'FIR No. 9/2025 and CNR No. XYZZ000000002026; phone +91 60000-00000.\f'
+      + 'Fiction Alpha was charged under section 379 IPC in 12/2025. '
+      + 'The application in 9/2025 with phone 6000000000 is allowed.';
+    const start = text.indexOf('12/2025');
+    const entities: Entity[] = [
+      { label: 'PETITIONER', text: 'Fiction Alpha', start: 0, end: 'Fiction Alpha'.length, score: 0.99 },
+      { label: 'CASE_NUMBER', text: '12/2025', start, end: start + '12/2025'.length, score: 0.95 },
+    ];
+    const suggestions = suggestFields(text, entities);
+    expect(suggestions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'caseNo', value: '12/2025', entity: { ...entities[1], text: '[Case Number]' },
+        sentence: 'Accused-1 appeared in [Case Number], [Case Number], [Case Number], FIR No. [FIR] and CNR No. [CNR]; phone [Phone].', page: 1 }),
+      expect.objectContaining({ field: 'cnr', value: 'XYZZ000000002026' }),
+      expect.objectContaining({ field: 'section', value: 'IPC 379', page: 2,
+        sentence: 'Accused-1 was charged under section 379 IPC in [Case Number].' }),
+      expect.objectContaining({ field: 'bailOutcome', value: 'granted', page: 2,
+        sentence: 'application in [FIR] with phone [Phone] is allowed' }),
+    ]));
+    for (const { sentence } of suggestions) {
+      expect(sentence).not.toMatch(/Fiction Alpha|(?:12|33|4|9)\/2025|XYZZ000000002026|60000/u);
+    }
+  });
+
+  it('masks entity-only case numbers and overlapping court text in a fictional order', () => {
+    const text = 'High Court of Example lists 123/2026 and phone 6000000000.';
+    const start = text.indexOf('123/2026');
+    const entities: Entity[] = [
+      { label: 'COURT', text: text.slice(0, -1), start: 0, end: text.length - 1, score: 0.95 },
+      { label: 'CASE_NUMBER', text: '123/2026', start, end: start + '123/2026'.length, score: 0.95 },
+    ];
+    expect(suggestFields(text, entities)).toEqual([
+      expect.objectContaining({ field: 'court', value: 'High Court of Example lists [Case Number] and phone [Phone]',
+        entity: { ...entities[0], text: 'High Court of Example lists [Case Number] and phone [Phone]' } }),
+      expect.objectContaining({ field: 'caseNo', value: '123/2026',
+        entity: { ...entities[1], text: '[Case Number]' } }),
+    ]);
   });
 
   it('extracts case number, court and police station from a fictional header', () => {

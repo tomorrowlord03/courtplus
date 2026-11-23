@@ -1,4 +1,5 @@
 import type { Charge, Entity, FieldSuggestion } from '@courtplus/contracts';
+import { prepareRedaction } from './anonymise.js';
 import { cnrPattern, validSpan } from './patterns.js';
 
 type Sentence = { text: string; start: number; end: number; page: number };
@@ -52,7 +53,7 @@ function sentences(text: string): Sentence[] {
     for (const match of page.matchAll(boundaries)) {
       const end = match.index + match[0].length;
       const part = page.slice(start, end);
-      if (match[0] === '.' && /(?:\b(?:no|nos|sec|mr|mrs|ms|dr|shri|smt|vs|v|ps|p|s|i|r|n|b|c)|[०-९0-9]\s*\/\s*[sS])\.$/iu.test(part)) continue;
+      if (match[0] === '.' && /(?:\b(?:no|nos|sec|mr|mrs|ms|dr|shri|smt|vs|v|ps|p|s|i|r|n|b|c|m\.c\.r\.c|c\.r\.a)|[०-९0-9]\s*\/\s*[sS])\.$/iu.test(part)) continue;
       const trimmed = part.trim();
       if (trimmed) found.push({ text: trimmed, start: offset + start + part.indexOf(trimmed), end: offset + end, page: index + 1 });
       start = end;
@@ -206,7 +207,9 @@ function matchFields(sentence: Sentence, entities: Entity[]): Candidate[] {
   return suggestions;
 }
 
-function outcomeSuggestion(text: string): FieldSuggestion | undefined {
+type RedactSpan = ReturnType<typeof prepareRedaction>['redactSpan'];
+
+function outcomeSuggestion(text: string, redactSpan: RedactSpan): FieldSuggestion | undefined {
   const tailStart = Math.max(0, text.length - 1600);
   const tail = text.slice(tailStart);
   const patterns: [string, RegExp][] = [
@@ -222,11 +225,16 @@ function outcomeSuggestion(text: string): FieldSuggestion | undefined {
   const value = new Set(near.map(hit => hit.value)).size > 1
     && /\b(?:applicants?|accused)\s*(?:no\.?|nos\.?|numbers?)\s*\d|\b(?:one|other|another|first|second)\s+(?:bail\s+)?(?:application|applicant)\b/iu.test(tail.slice(Math.max(0, evidence.start - tailStart - 260)))
     ? 'mixed' : evidence.value;
-  return { field: 'bailOutcome', value, sentence: evidence.text, page: text.slice(0, evidence.start).split('\f').length, confidence: 0.78 };
+  return { field: 'bailOutcome', value, sentence: redactSpan(evidence.start, evidence.start + evidence.text.length),
+    page: text.slice(0, evidence.start).split('\f').length, confidence: 0.78 };
 }
 
 /** Values are proposals. Dates carry their inferred role in field, with date as a fallback. */
 export function suggestFields(text: string, entities: Entity[]): FieldSuggestion[] {
+  return suggestFieldsWithRedaction(text, entities, prepareRedaction(text, entities).redactSpan);
+}
+
+export function suggestFieldsWithRedaction(text: string, entities: Entity[], redactSpan: RedactSpan): FieldSuggestion[] {
   const ordered = entities.filter(e => validSpan(text, e.start, e.end)).sort((a, b) => a.start - b.start);
   let cursor = 0;
   const suggestions: FieldSuggestion[] = sentences(text).flatMap(sentence => {
@@ -235,18 +243,24 @@ export function suggestFields(text: string, entities: Entity[]): FieldSuggestion
       const entity = ordered[cursor++];
       if (entity.start >= sentence.start) related.push(entity);
     }
+    const candidates = matchFields(sentence, related).sort((a, b) => a.start - b.start);
+    if (!candidates.length) return [];
+    const displaySentence = redactSpan(sentence.start, sentence.start + sentence.text.length).trim();
     const emitted = new Set<string>();
-    return matchFields(sentence, related).sort((a, b) => a.start - b.start).flatMap(candidate => {
-      const key = JSON.stringify([candidate.field, candidate.value]);
+    return candidates.flatMap(({ field, value, start, end, entity, confidence }) => {
+      if (field !== 'caseNo' && field !== 'cnr' && text.slice(start, end).trim().replace(/\.$/u, '') === value) {
+        value = redactSpan(start, end).trim().replace(/\.$/u, '');
+      }
+      const key = JSON.stringify([field, value]);
       if (emitted.has(key)) return [];
       emitted.add(key);
       return [{
-        field: candidate.field, value: candidate.value, entity: candidate.entity,
-        sentence: sentence.text, page: sentence.page, confidence: candidate.confidence,
+        field, value, entity: entity && { ...entity, text: redactSpan(entity.start, entity.end) },
+        sentence: displaySentence, page: sentence.page, confidence,
       }];
     });
   });
-  const outcome = outcomeSuggestion(text);
+  const outcome = outcomeSuggestion(text, redactSpan);
   if (outcome) suggestions.push(outcome);
   return suggestions;
 }

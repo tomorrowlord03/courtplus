@@ -67,6 +67,16 @@ function nameKey(name: string): string {
   return name.normalize('NFC').replace(/\s+/gu, ' ').toLowerCase();
 }
 
+function repeatedIdMasks(text: string, ids: Map<string, string>): Mask[] {
+  // A bare number has too little context; repeat masking applies to number/year identifiers.
+  const masks: Mask[] = [];
+  for (const { 0: value, index: start } of text.matchAll(/(?<![\p{L}\p{N}/-])[A-Z]*[0-9०-९]+[ \t]*(?:\/|of|-)[ \t]*[0-9०-९]{2,4}(?![\p{L}\p{N}/-])/giu)) {
+    const replacement = ids.get(value.replace(/\s+/gu, '').toLowerCase());
+    if (replacement) masks.push({ start, end: start + value.length, replacement, priority: 0 });
+  }
+  return masks;
+}
+
 function discoverPartyAliases(text: string, keys: Map<string, string>): Entity[] {
   return [...text.matchAll(partyAliases)].flatMap(match => {
     const [start, end] = match.indices!.groups!.names;
@@ -104,7 +114,7 @@ function partySpellingMasks(text: string, name: string, replacement: string, rol
   });
 }
 
-export function anonymise(text: string, entities: Entity[], { maskIds = true }: AnonymiseOptions = {}): AnonymisedOrder {
+export function prepareRedaction(text: string, entities: Entity[], { maskIds = true }: AnonymiseOptions = {}) {
   const aliases = new Map<string, string>();
   const partyAliasKeys = new Map<string, string>();
   const mapping = new Map<string, string>();
@@ -115,9 +125,23 @@ export function anonymise(text: string, entities: Entity[], { maskIds = true }: 
     ...blockMasks(text, relativeStart, relativeEnd, '[Relative]'),
     ...blockMasks(text, joinedRelativeStart, relativeEnd, ' [Relative]'),
   ];
-  if (maskIds) masks.push(...ruleMasks(text, cnrPattern, '[CNR]'), ...ruleMasks(text, firPattern, '[FIR]'),
-    ...[...text.matchAll(caseIdPattern), ...text.matchAll(caseIdLoosePattern)].map(match => ({ start: match.index, end: match.index + match[0].length,
-      replacement: '[Case Number]', priority: 1 })));
+  if (maskIds) {
+    const ids = new Map<string, string>();
+    const cases = [...text.matchAll(caseIdPattern), ...text.matchAll(caseIdLoosePattern)];
+    for (const match of cases) ids.set(match[1].replace(/\s+/gu, '').toLowerCase(), '[Case Number]');
+    for (const match of text.matchAll(firPattern)) ids.set(match[1].replace(/\s+/gu, '').toLowerCase(), '[FIR]');
+    masks.push(...ruleMasks(text, cnrPattern, '[CNR]'), ...ruleMasks(text, firPattern, '[FIR]'),
+      ...cases.map(match => ({ start: match.index, end: match.index + match[0].length,
+        replacement: '[Case Number]', priority: 1 })));
+    for (const { label, start, end } of entities) {
+      if (label === 'CASE_NUMBER' && validSpan(text, start, end)) {
+        masks.push({ start, end, replacement: '[Case Number]', priority: 0 });
+        const value = text.slice(start, end).replace(/\s+/gu, '').toLowerCase();
+        if (!ids.has(value)) ids.set(value, '[Case Number]');
+      }
+    }
+    masks.push(...repeatedIdMasks(text, ids));
+  }
 
   const discovered: Entity[] = nameCues.flatMap(({ pattern, role }) => [...text.matchAll(pattern)].flatMap(match => {
     const span = match.indices?.groups?.name;
@@ -188,12 +212,24 @@ export function anonymise(text: string, entities: Entity[], { maskIds = true }: 
     }
   }
 
-  let cursor = 0;
-  const chunks = merged.map(({ start, end, replacement }) => {
-    const part = text.slice(cursor, start) + replacement;
-    cursor = end;
-    return part;
-  });
-  chunks.push(text.slice(cursor));
-  return { text: chunks.join(''), mapping };
+  function redactSpan(start: number, end: number): string {
+    if (start >= end) return '';
+    let cursor = start;
+    const chunks: string[] = [];
+    for (const mask of merged) {
+      if (mask.end <= start) continue;
+      if (mask.start >= end) break;
+      chunks.push(text.slice(cursor, Math.max(cursor, mask.start)), mask.replacement);
+      cursor = Math.min(end, mask.end);
+    }
+    chunks.push(text.slice(cursor, end));
+    return chunks.join('');
+  }
+
+  return { redactSpan, mapping };
+}
+
+export function anonymise(text: string, entities: Entity[], options?: AnonymiseOptions): AnonymisedOrder {
+  const { redactSpan, mapping } = prepareRedaction(text, entities, options);
+  return { text: redactSpan(0, text.length), mapping };
 }
