@@ -1,6 +1,8 @@
 import { createPublicKey, verify } from 'node:crypto';
 import type { CourtPlusApi } from '@courtplus/contracts';
-import { decodeTrustPem, encodeTrustPem, sha3_256, signedPayloadKind, verifyHybridDraft, type Verification } from '@courtplus/export/signing';
+import {
+  decodeTrustPem, encodeTrustPem, sha3_256, signedPayloadKind, verifyHybridDraft, type TrustEntry, type Verification,
+} from '@courtplus/export/signing';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { audit, canonical, sha256, type Db } from './db.js';
@@ -93,6 +95,7 @@ export function addIssuer(db: Db, office: string, pem: string): string {
 export function createReceipts(db: Db) {
   const lookup = db.prepare<[string], Stored>('SELECT receipt, manifest, withdrawn FROM receipts WHERE id = ?');
   const issuer = db.prepare<[string], Issuer>('SELECT public_key AS publicKey, office FROM issuers WHERE key_id = ?');
+  let localRotation: { keyId: string; office: string; keys: ReadonlyMap<string, TrustEntry> } | undefined;
 
   function check(packageData: { receipt: string; manifest: string }): Checked {
     if (signedPayloadKind(packageData.receipt) === 'courtplus-receipt-v2') {
@@ -103,11 +106,19 @@ export function createReceipts(db: Db) {
       const trusted = issuer.get(hybrid.payload.keyId);
       if (!trusted) return { signature: 'unknown_signer' };
       if (hybrid.payload.issuer !== trusted.office) return { signature: 'invalid' };
+      const entry = storedIssuerKey(trusted.publicKey);
+      const { keyId, publicKey, pqKeyId } = entry;
+      let matched = pqKeyId === hybrid.payload.pqKeyId ? entry : undefined;
+      // The configured rotation set extends trust only for a local issuer pinned to one of its keys.
+      if (localRotation?.keyId === keyId && localRotation.office === trusted.office
+        && pqKeyId && localRotation.keys.has(pqKeyId)) {
+        matched = localRotation.keys.get(hybrid.payload.pqKeyId);
+      }
       const result = verifyHybridDraft({
         ...packageData,
         pdfDigest: manifest.payload.pdfDigest,
         pdfSha3_256: manifest.payload.pdfSha3_256,
-        trustStore: [{ ...storedIssuerKey(trusted.publicKey), status: 'active', label: trusted.office }],
+        trustStore: [{ status: 'active', label: trusted.office, ...(matched ?? { keyId, publicKey }) }],
       });
       if (!result) return { signature: 'invalid' };
       if (result.signature !== 'valid') return { signature: result.signature, signatures: result.signatures };
@@ -182,7 +193,11 @@ export function createReceipts(db: Db) {
     return verifyDigest({ ...envelopes, pdfDigest: sha256(pdf), pdfSha3_256: sha3_256(pdf) });
   }
 
-  return { check, lookup: (id: string) => lookup.get(id), publish: publish.immediate, withdraw: withdraw.immediate, verifyBundle, verifyDigest };
+  return {
+    check, lookup: (id: string) => lookup.get(id), publish: publish.immediate, withdraw: withdraw.immediate,
+    verifyBundle, verifyDigest,
+    setLocalRotation(rotation: NonNullable<typeof localRotation>) { localRotation = rotation; },
+  };
 }
 export type Receipts = ReturnType<typeof createReceipts>;
 

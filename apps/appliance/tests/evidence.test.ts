@@ -1,13 +1,18 @@
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
-import { decodeTrustPem, verifyHybrid } from '@courtplus/export/signing';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import type { ScreeningResult } from '@courtplus/contracts';
+import {
+  createManifest, createReceipt, decodeTrustPem, encodeTrustPem, generateKeyPair, generatePqKeyPair,
+  keyBinding, sha256, sha3_256, signHybrid, verifyHybrid, type SigningKey,
+} from '@courtplus/export/signing';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { addAccount } from '../src/auth.js';
 import { openDb, verifyEvidenceLog, type Db } from '../src/db.js';
 import { detectMagicBytes, MAX_FILE_SIZE, resolveEvidenceKey, resolveSigningKey, validateFileBytes } from '../src/evidence.js';
+import { addIssuer } from '../src/receipts.js';
 
 describe('Evidence Vault and Citizen Bridge (w29)', () => {
   const origin = 'https://courtplus.example.test';
@@ -461,5 +466,160 @@ describe('Production key resolution fail-fast (w37)', () => {
       db.close();
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('Appliance PQ rotation', () => {
+  const origin = 'https://courtplus.example.test';
+  const office = 'Fictional Rotation Office';
+  const oldSeed = Buffer.alloc(32, 1);
+  const newSeed = Buffer.alloc(32, 2);
+  const pdf = Buffer.from('%PDF-1.4\nFictional rotation fixture\n%%EOF');
+  const result = { status: 'NEEDS_LAWYER_REVIEW', asOf: '2026-11-23', ruleVersion: 'rules-fictional', trace: [] } as ScreeningResult;
+  let directory: string;
+  let retiredDir: string;
+  let seedFile: string;
+  let options: Parameters<typeof buildApp>[0];
+  let db: Db;
+  let app: Awaited<ReturnType<typeof buildApp>> | undefined;
+  let headers: { authorization: string };
+  let oldKey: SigningKey;
+
+  beforeEach(async () => {
+    directory = mkdtempSync(join(tmpdir(), 'courtplus-pq-rotation-'));
+    const secret = join(directory, 'db.key');
+    writeFileSync(secret, randomBytes(32).toString('hex'), { mode: 0o600 });
+    db = openDb(join(directory, 'test.sqlite3'), secret);
+    await addAccount(db, 'fictional_operator', 'fictional rotation password', 'superintendent');
+    oldKey = { ...generateKeyPair(office), ...generatePqKeyPair(oldSeed) };
+    const signingKeyFile = join(directory, 'signing_key');
+    writeFileSync(signingKeyFile, oldKey.privateKey, { mode: 0o600 });
+    seedFile = join(directory, 'pq_signing_key');
+    writeFileSync(seedFile, oldSeed.toString('hex'), { mode: 0o600 });
+    retiredDir = join(directory, 'retired');
+    mkdirSync(retiredDir);
+    vi.stubEnv('COURTPLUS_PQ_SIGNING_KEY_FILE', seedFile);
+    vi.stubEnv('COURTPLUS_PQ_RETIRED_DIR', retiredDir);
+    vi.stubEnv('COURTPLUS_EVIDENCE_KEY', randomBytes(32).toString('hex'));
+    vi.stubEnv('COURTPLUS_EVIDENCE_KEY_FILE', undefined);
+    options = { db, office, origin, signingKeyFile, evidenceDir: join(directory, 'vault') };
+  });
+
+  afterEach(async () => {
+    await app?.close();
+    app = undefined;
+    db.close();
+    vi.unstubAllEnvs();
+    rmSync(directory, { recursive: true, force: true });
+  });
+
+  async function issueEvidence() {
+    const formData = new FormData();
+    formData.append('file', new Blob([pdf]), 'fictional.pdf');
+    formData.append('caseRef', 'CNR-DLCT01-000127-2026');
+    formData.append('description', 'Fictional rotation evidence');
+    formData.append('mode', 'anonymous');
+    const response = await app!.inject({ method: 'POST', url: '/evidence', headers: { origin }, body: formData });
+    expect(response.statusCode).toBe(201);
+    const { id, receipt } = response.json<{ id: string; receipt: string }>();
+    return { id, payload: JSON.parse(receipt).payload };
+  }
+
+  async function start() {
+    app = await buildApp(options);
+    const login = await app.inject({
+      method: 'POST', url: '/api/auth/login', headers: { origin },
+      payload: { username: 'fictional_operator', password: 'fictional rotation password', client: 'desktop' },
+    });
+    expect(login.statusCode).toBe(200);
+    headers = { authorization: 'Bearer ' + login.json().token };
+  }
+
+  async function verifyEvidence(id: string) {
+    const response = await app!.inject({ url: `/api/evidence/${id}/verify`, headers });
+    expect(response.statusCode).toBe(200);
+    return response.json();
+  }
+
+  function draft(key: SigningKey) {
+    const { receipt } = createReceipt({ issuer: office, inputs: {}, result }, key);
+    return { receipt, manifest: createManifest(pdf, receipt, key) };
+  }
+
+  async function verifyDraft(bundle: ReturnType<typeof draft>) {
+    const response = await app!.inject({
+      method: 'POST', url: '/api/verify-digest', headers,
+      payload: { ...bundle, pdfDigest: sha256(pdf), pdfSha3_256: sha3_256(pdf) },
+    });
+    expect(response.statusCode).toBe(200);
+    return response.json();
+  }
+
+  test.each(['public PEM', 'seed with binding'])('verifies receipts before and after rotation using a retired %s', async format => {
+    await start();
+    const first = await issueEvidence();
+    expect(first.payload).toMatchObject({ kind: 'courtplus-evidence-receipt-v2', pqKeyId: oldKey.pqKeyId });
+    const oldDraft = draft(oldKey);
+    const bindingPem = encodeTrustPem(oldKey);
+    addIssuer(db, office, bindingPem);
+    await app!.close();
+    app = undefined;
+
+    const retired = format === 'public PEM' ? bindingPem : oldSeed.toString('hex') + '\n' + bindingPem;
+    const extension = format === 'public PEM' ? 'pem' : 'seed';
+    writeFileSync(join(retiredDir, `previous-key.${extension}`), retired, { mode: 0o600 });
+    const newKey = { ...oldKey, ...generatePqKeyPair(newSeed) };
+    writeFileSync(seedFile, newSeed.toString('hex'), { mode: 0o600 });
+    await start();
+    const second = await issueEvidence();
+    expect(second.payload).toMatchObject({ kind: 'courtplus-evidence-receipt-v2', keyId: first.payload.keyId, pqKeyId: newKey.pqKeyId });
+    const exported = await app!.inject({ url: '/api/evidence/signing-key', headers });
+    expect(decodeTrustPem(exported.body).pqKeyId).toBe(newKey.pqKeyId);
+    const signatures = { ed25519: true, mldsa65: true };
+    for (const receipt of [first, second]) {
+      expect(await verifyEvidence(receipt.id)).toMatchObject({ valid: true, hashMatch: true, chainValid: true, signatures });
+    }
+    for (const bundle of [oldDraft, draft(newKey)]) {
+      expect(await verifyDraft(bundle)).toMatchObject({ signature: 'valid', pdf: 'unchanged', signatures });
+    }
+  });
+
+  test('reports unknown_signer for an unconfigured PQ key with the same Ed25519 signer', async () => {
+    await start();
+    const historical = await issueEvidence();
+    addIssuer(db, office, encodeTrustPem(oldKey));
+    await app!.close();
+    app = undefined;
+    writeFileSync(seedFile, newSeed.toString('hex'), { mode: 0o600 });
+    await start();
+    const signatures = { ed25519: true, mldsa65: false };
+    expect(await verifyEvidence(historical.id)).toMatchObject({ valid: false, signature: 'unknown_signer', signatures });
+    expect(await verifyDraft(draft({ ...oldKey, ...generatePqKeyPair(newSeed) })))
+      .toMatchObject({ signature: 'unknown_signer', signatures });
+  });
+
+  test('rejects a retired key with a broken binding at startup', async () => {
+    const binding = signHybrid(keyBinding(oldKey).payload, { ...oldKey, ...generatePqKeyPair(newSeed) });
+    writeFileSync(join(retiredDir, 'broken.pem'), encodeTrustPem({ ...oldKey, binding }));
+    await expect(buildApp(options)).rejects.toThrow(/Invalid retired PQ key.*broken\.pem/);
+  });
+
+  test('starts with a separate draft signing key and ignores foreign PEMs and unrelated entries', async () => {
+    const draftKey = { ...generateKeyPair(office), ...generatePqKeyPair(oldSeed) };
+    const draftKeyFile = join(directory, 'draft_signing_key');
+    writeFileSync(draftKeyFile, draftKey.privateKey, { mode: 0o600 });
+    options.signingKeyFile = draftKeyFile;
+    writeFileSync(join(retiredDir, 'evidence.pem'), encodeTrustPem(oldKey));
+    writeFileSync(join(retiredDir, '.gitkeep'), '');
+    mkdirSync(join(retiredDir, 'notes'));
+
+    await start();
+    const receipt = await issueEvidence();
+    expect(receipt.payload).toMatchObject({ keyId: draftKey.keyId, pqKeyId: draftKey.pqKeyId });
+  });
+
+  test.each([['missing', ''], ['mismatched', newSeed.toString('hex') + '\n']])('rejects a %s retired seed', async (_case, prefix) => {
+    writeFileSync(join(retiredDir, 'bad.seed'), prefix + encodeTrustPem(oldKey));
+    await expect(buildApp(options)).rejects.toThrow(/Invalid retired PQ key.*bad\.seed/);
   });
 });

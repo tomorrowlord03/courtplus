@@ -14,7 +14,7 @@ import type { Options } from './app.js';
 import type { Session } from './auth.js';
 import { indiaDate, type Cases } from './cases.js';
 import { audit, sha256 } from './db.js';
-import { loadPqSeed } from './evidence.js';
+import { loadPqSeed, loadRetiredPqKeys } from './evidence.js';
 import { HttpError, missingFeature, requireValue } from './http.js';
 import type { Receipts } from './receipts.js';
 
@@ -49,7 +49,7 @@ async function loadExport(): Promise<ExportModule | undefined> {
   return await import(pathToFileURL(path).href) as ExportModule;
 }
 
-async function loadKey(file: string, office: string): Promise<SigningKey> {
+async function loadKey(file: string, office: string) {
   const privateKey = await readFile(file, 'utf8');
   const key = createPublicKey(createPrivateKey(privateKey));
   if (key.asymmetricKeyType !== 'ed25519') throw new Error('The draft signing secret must be an Ed25519 private key');
@@ -57,7 +57,7 @@ async function loadKey(file: string, office: string): Promise<SigningKey> {
     privateKey, publicKey: key.export({ type: 'spki', format: 'pem' }).toString(),
     keyId: sha256(key.export({ type: 'spki', format: 'der' })), status: 'active', label: office,
     ...generatePqKeyPair(loadPqSeed(true)),
-  };
+  } satisfies SigningKey;
 }
 
 const run = promisify(execFile);
@@ -153,6 +153,14 @@ export async function exportRoutes(
     origin, now = Date.now } = options;
   const exporter = await loadExport();
   const signingKey = signingKeyFile && office ? await loadKey(signingKeyFile, office) : undefined;
+  if (signingKey) {
+    const { keyId, publicKey, pqKeyId, pqPublicKey, status, label } = signingKey;
+    const keys = loadRetiredPqKeys(keyId, label);
+    if (keys.size) {
+      keys.set(pqKeyId, { keyId, publicKey, pqKeyId, pqPublicKey, status, label });
+      receipts.setLocalRotation({ keyId, office: label, keys });
+    }
+  }
   const cache = createExportCache();
   let printing = false;
   const timer = setInterval(cache.expire, 60_000).unref();

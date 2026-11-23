@@ -54,6 +54,12 @@ export function readEvidenceReceipt(json: string) {
   return signing.parseHybrid(json, (value): value is z.infer<typeof hybridEvidence> => hybridEvidence.safeParse(value).success);
 }
 
+function findHybridSigner(trustStore: readonly Export.TrustEntry[], keyId: unknown, pqKeyId: unknown) {
+  const candidates = trustStore.filter(key => key.keyId === keyId);
+  return candidates.find(key => key.pqPublicKey && key.pqKeyId === pqKeyId)
+    ?? candidates.find(key => !key.pqPublicKey);
+}
+
 function verifyHybridEvidence(input: Bundle, trustStore: readonly Export.TrustEntry[], isCertificate: boolean): Result {
   const type = isCertificate ? 'Evidence s.63 certificate' : 'Evidence receipt';
   const receipt = isCertificate
@@ -62,7 +68,7 @@ function verifyHybridEvidence(input: Bundle, trustStore: readonly Export.TrustEn
   if (!receipt) return { ...invalid, details: { type } };
   const { payload } = receipt;
   const info = details(type, payload.keyId, 'receivedAt' in payload ? payload.receivedAt : payload.createdAt, payload.sha256);
-  const key = trustStore.find(entry => entry.keyId === payload.keyId);
+  const key = findHybridSigner(trustStore, payload.keyId, payload.pqKeyId);
   if (!key) {
     const complete = signing.hasHybridSignatures(receipt);
     return { ...invalid, signature: complete ? 'unknown_signer' : 'invalid', details: info };
@@ -89,13 +95,14 @@ export async function verifyBundle(
     return verifyHybridEvidence(input, trustStore, kind === signing.evidenceCertificateV2);
   }
   if (kind === 'courtplus-receipt-v2') {
-    let result = exports.verify({ ...input, trustStore });
+    const parsePayload = (value: unknown): value is Record<string, unknown> => envelope.shape.payload.safeParse(value).success;
+    const payload = signing.parseHybrid(input.receipt, parsePayload)?.payload;
+    const key = findHybridSigner(trustStore, payload?.keyId, payload?.pqKeyId);
+    let result = exports.verify({ ...input, trustStore: key ? [key] : [] });
     if (result.signature === 'unknown_signer') {
       const { pdf, ...envelopes } = input;
       result = await remote({ ...envelopes, pdfDigest: sha256(pdf), pdfSha3_256: signing.sha3_256(pdf) }) ?? result;
     }
-    const parsePayload = (value: unknown): value is Record<string, unknown> => envelope.shape.payload.safeParse(value).success;
-    const payload = signing.parseHybrid(input.receipt, parsePayload)?.payload;
     const type = payload?.ruleVersion === 'lawyer-tools-v1' ? 'Settlement / case analysis PDF' : 'Draft PDF';
     return { ...result, details: {
       ...details(type, payload?.keyId, payload?.createdAt, result.hashes?.sha256), sha3_256: result.hashes?.sha3_256,
@@ -126,5 +133,6 @@ export async function verifyBundle(
   const key = candidates.find(entry => verifiesSignature(receipt, entry));
   const info = details(type, key?.keyId ?? parsed.keyId, isCertificate ? payload.createdAt : payload.receivedAt, parsed.sha256);
   if (!key) return { ...invalid, signature: candidates.length > 0 && parsed.keyId ? 'invalid' : 'unknown_signer', details: info };
-  return { signature: 'valid', pdf: sha256(input.pdf) === parsed.sha256 ? 'unchanged' : 'changed', chain: 'not_checked', details: info };
+  return { signature: 'valid', pdf: sha256(input.pdf) === parsed.sha256 ? 'unchanged' : 'changed', chain: 'not_checked',
+    ...(key.pqPublicKey && { legacy: true, signatures: { ed25519: true, mldsa65: false } }), details: info };
 }

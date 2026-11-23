@@ -188,19 +188,16 @@ export function createSigner(store: Store, exports: typeof Export, now: () => nu
 
   function trust(pem: string, label: string): string {
     const entry = signing.decodeTrustPem(pem);
-    const { keyId, pqPublicKey } = entry;
-    const existing = trustStore().find(key => key.keyId === keyId);
-    if (existing?.pqPublicKey && pqPublicKey && existing.pqPublicKey !== pqPublicKey) {
-      throw new Error('The trusted ML-DSA-65 key does not match this file.');
-    }
+    const { keyId, pqKeyId } = entry;
     if (localEntries().some(local => local.keyId === keyId)) return keyId;
-    if (!existing || (pqPublicKey && !existing.pqPublicKey)) {
-      const peers = trustedPeers();
-      const updated = [...peers.filter(peer => peer.keyId !== keyId), {
-        ...entry, label: existing?.label ?? label, status: existing?.status ?? 'active',
-      }];
-      store.writeSettings({ 'trusted-signers': JSON.stringify(updated) }, 'signer.trust', { keyId });
-    }
+    const peers = trustedPeers();
+    const existing = peers.find(peer => peer.keyId === keyId);
+    if (existing && (!pqKeyId || peers.some(peer => peer.keyId === keyId && peer.binding && peer.pqKeyId === pqKeyId))) return keyId;
+
+    const updated = [...peers.filter(peer => peer.keyId !== keyId || peer.binding), {
+      ...entry, label: existing?.label ?? label, status: existing?.status ?? 'active',
+    }];
+    store.writeSettings({ 'trusted-signers': JSON.stringify(updated) }, 'signer.trust', { keyId });
     return keyId;
   }
 

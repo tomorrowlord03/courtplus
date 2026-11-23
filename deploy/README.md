@@ -23,6 +23,13 @@ This creates:
 
 If any of these secret files already exist, the script skips generation to preserve existing keys.
 
+With the repository dependencies installed and `npm run build -w @courtplus/export` complete, stop the appliance and run `sudo -u ubuntu bash deploy/make-secrets.sh rotate-pq` for the default secret paths.
+Run `rotate-pq` once per rotation. Re-running it rotates the key again.
+Keep the Ed25519 key in place. The command archives the old seed under `secrets/pq_retired/seeds` and its bound public PEM under `secrets/pq_retired/public`. Back up the public PEMs to keep old receipts verifiable.
+Recreate the appliance container to mount the new seed and the read-only public directory. For other deployments, set `COURTPLUS_PQ_RETIRED_DIR` to the directory of bound public PEMs.
+
+The draft signing overlay shares the evidence ML-DSA-65 seed and configures `draft_signing_key` as the Ed25519 key. The rotation command produces retired PEMs bound to `secrets/signing_key`. Verifying older receipts issued under `draft_signing_key` requires retired PEMs bound to that key.
+
 ## CRITICAL BACKUP WARNING
 
 > [!CAUTION]

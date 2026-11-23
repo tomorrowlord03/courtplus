@@ -21,6 +21,7 @@ services:
       COURTPLUS_EVIDENCE_KEY_FILE: /run/secrets/evidence_key
       COURTPLUS_SIGNING_KEY_FILE: /run/secrets/signing_key
       COURTPLUS_PQ_SIGNING_KEY_FILE: /run/secrets/pq_signing_key
+      COURTPLUS_PQ_RETIRED_DIR: /run/courtplus-pq-retired
     secrets:
       - db_key
       - evidence_key
@@ -29,6 +30,7 @@ services:
     volumes:
       - courtplus_db:/var/lib/courtplus
       - courtplus_evidence:/var/lib/courtplus/evidence
+      - "${COURTPLUS_PQ_RETIRED_SOURCE:-./secrets/pq_retired/public}:/run/courtplus-pq-retired:ro"
     tmpfs:
       - /tmp:size=256m,mode=1777
     networks: [backend]

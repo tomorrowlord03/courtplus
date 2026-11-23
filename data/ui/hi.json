@@ -982,6 +982,7 @@
   "Publish summary for parties": "पक्षों के लिए सार प्रकाशित करें",
   "Published by the court.": "अदालत द्वारा प्रकाशित।",
   "Check a signed PDF or an original evidence file. Include the manifest for draft, hearing and lawyer PDFs.": "हस्ताक्षरित PDF या मूल साक्ष्य फ़ाइल जाँचें। मसौदे, सुनवाई और वकील की PDF के लिए मैनिफ़ेस्ट शामिल करें।",
+  "Ed25519 only (older receipt, not quantum-safe)": "केवल Ed25519 (पुरानी रसीद, क्वांटम-सुरक्षित नहीं)",
   "No QR code found in this image": "इस छवि में QR कोड नहीं मिला",
   "Could not read this image": "यह छवि पढ़ी नहीं जा सकी",
   "Type": "प्रकार",

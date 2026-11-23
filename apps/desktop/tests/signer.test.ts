@@ -7,6 +7,7 @@ import { encodeTrustPem, generatePqKeyPair } from '@courtplus/export/signing';
 import type { ScreeningResult } from '@courtplus/contracts';
 import { describe, expect, it } from 'vitest';
 import { createSigner } from '../src/handlers/signer';
+import { verifyBundle } from '../src/handlers/verifier';
 import { openStore, type Store } from '../src/store';
 
 const keyStorage = {
@@ -63,6 +64,22 @@ describe('signing key custody', () => {
     const pem = encodeTrustPem(peer).split('-----BEGIN COURTPLUS KEY BINDING-----')[0];
     expect(() => signer.trust(pem, peer.label)).toThrow('The ML-DSA-65 key is not bound to this Ed25519 key');
     expect(signer.trustStore()).toEqual(before);
+  }));
+
+  it('keeps both peer PQ keys after importing a rotated binding', () => withSigner(async store => {
+    const signer = createSigner(store, exports);
+    const oldKey = exports.generateKeyPair('Fictional Office');
+    const newKey = { ...oldKey, ...generatePqKeyPair() };
+    signer.trust(encodeTrustPem(oldKey), oldKey.label);
+    expect(signer.trust(encodeTrustPem(newKey), 'Another label')).toBe(oldKey.keyId);
+    signer.trust(encodeTrustPem(oldKey), oldKey.label);
+
+    const trusted = createSigner(store, exports).trustStore();
+    expect(trusted).toEqual([exports.exportPublicKey(oldKey), exports.exportPublicKey(newKey)]);
+    for (const key of [oldKey, newKey]) {
+      const checked = await verifyBundle(signWith(key), exports, trusted, async () => undefined);
+      expect(checked).toMatchObject({ signature: 'valid', signatures: { ed25519: true, mldsa65: true } });
+    }
   }));
 
   it.each(['active', 'retired'] as const)('keeps a local %s key independent of an imported PQ key', status => withSigner(store => {

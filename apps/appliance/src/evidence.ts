@@ -2,7 +2,7 @@ import {
   createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey,
   generateKeyPairSync, randomBytes, randomUUID, verify, type KeyObject,
 } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
@@ -12,8 +12,8 @@ import type {
   EvidenceVerification, SubmitterInfo,
 } from '@courtplus/contracts';
 import {
-  encodeTrustPem, evidenceReceiptV2, generatePqKeyPair, parseHybrid, sha3_256, signedPayloadKind,
-  signHybrid, verifyHybrid, type SigningKey,
+  decodeTrustPem, encodeTrustPem, evidenceReceiptV2, generatePqKeyPair, parseHybrid, sha3_256, signedPayloadKind,
+  signHybrid, verifyHybrid, type SigningKey, type TrustEntry,
 } from '@courtplus/export/signing';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { toDataURL } from 'qrcode';
@@ -217,6 +217,35 @@ function evidenceSigner({ privateKey, keyId, publicKeyPem }: SigningKeyPair, edK
     keyId, publicKey: publicKeyPem, privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
     status: 'active', label: 'Evidence vault', ...generatePqKeyPair(loadPqSeed(edKeyConfigured)),
   } satisfies SigningKey;
+}
+
+export function loadRetiredPqKeys(keyId: string, label: string): Map<string, TrustEntry> {
+  const keys = new Map<string, TrustEntry>();
+  const dir = process.env.COURTPLUS_PQ_RETIRED_DIR;
+  if (!dir) return keys;
+  for (const file of readdirSync(dir, { withFileTypes: true })) {
+    const isSeed = file.name.endsWith('.seed');
+    if (!isSeed && !file.name.endsWith('.pem')) continue;
+    try {
+      if (!file.isFile()) throw new Error('Expected a regular file');
+      const contents = readFileSync(join(dir, file.name), 'utf8');
+      // Seed files carry a 32-byte hex seed on the first line and the bound trust PEM below it.
+      const seed = /^([a-f0-9]{64})\r?\n/i.exec(contents);
+      if (isSeed && !seed) throw new Error('Expected a 32-byte hex seed');
+      const key = decodeTrustPem(seed ? contents.slice(seed[0].length) : contents);
+      if (!key.pqKeyId || (seed && generatePqKeyPair(Buffer.from(seed[1], 'hex')).pqKeyId !== key.pqKeyId)) {
+        throw new Error('Expected a bound ML-DSA-65 key');
+      }
+      if (key.keyId !== keyId) {
+        if (!isSeed) continue;
+        throw new Error('Expected a seed for the configured Ed25519 signer');
+      }
+      keys.set(key.pqKeyId, { ...key, label, status: 'retired' });
+    } catch (cause) {
+      throw new Error(`Invalid retired PQ key in COURTPLUS_PQ_RETIRED_DIR: ${file.name}`, { cause });
+    }
+  }
+  return keys;
 }
 
 const hashDigest = z.string().regex(/^[a-f0-9]{64}$/);
@@ -726,6 +755,9 @@ export function registerEvidenceRoutes(
   const edSigner = resolveSigningKey(options);
   const signer = evidenceSigner(edSigner, Boolean(options.signingKeyFile ?? process.env.COURTPLUS_SIGNING_KEY_FILE));
   const signerPem = encodeTrustPem(signer);
+  const verificationKeys = loadRetiredPqKeys(signer.keyId, signer.label);
+  const edTrust = { keyId: signer.keyId, publicKey: signer.publicKey, status: signer.status, label: signer.label };
+  verificationKeys.set(signer.pqKeyId, { ...edTrust, pqKeyId: signer.pqKeyId, pqPublicKey: signer.pqPublicKey });
 
   app.get('/api/evidence/signing-key', async (request, reply) => {
     authorize(request, EVIDENCE_ROLES);
@@ -1088,13 +1120,17 @@ export function registerEvidenceRoutes(
     // 2. Verify the signatures and their link to the recorded upload.
     let signatureValid = false;
     let signatures: EvidenceVerification['signatures'];
+    let unknownSigner = false;
     let payloadHash: string | undefined;
     try {
       if (isHybrid) {
-        signatures = hybrid ? verifyHybrid(hybrid, signer) : { ed25519: false, mldsa65: false };
+        signatures = { ed25519: false, mldsa65: false };
         if (hybrid) {
           const { payload } = hybrid;
-          signatureValid = signatures.ed25519 && signatures.mldsa65 && payload.keyId === signer.keyId
+          const key = payload.keyId === signer.keyId ? verificationKeys.get(payload.pqKeyId) : undefined;
+          unknownSigner = !key;
+          signatures = verifyHybrid(hybrid, key ?? edTrust);
+          signatureValid = signatures.ed25519 && signatures.mldsa65
             && hybrid.signatures.ed25519 === row.receipt_signature
             && payload.id === row.id && payload.receivedAt === row.received_at && payload.sha256 === row.sha256
             && payload.caseRef === row.case_ref && payload.mode === row.mode && payload.mime === row.mime && payload.size === row.size;
@@ -1128,12 +1164,13 @@ export function registerEvidenceRoutes(
     }
     if (!foundEntry) chainValid = false;
 
-    const res: EvidenceVerification = {
+    const res: EvidenceVerification & { signature?: 'unknown_signer' } = {
       valid: hashMatch && signatureValid && chainValid,
       sha256: row.sha256,
       ...(sha3 && { sha3_256: sha3 }),
       hashMatch,
       signatureValid,
+      ...(unknownSigner && { signature: 'unknown_signer' as const }),
       ...(signatures && { signatures }),
       chainValid,
       entryHash: row.entry_hash,
