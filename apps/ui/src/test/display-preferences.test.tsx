@@ -29,7 +29,6 @@ afterEach(() => {
   localStorage.clear();
   setRoleOverride(undefined);
   document.documentElement.lang = 'en';
-  delete document.documentElement.dataset.theme;
 });
 
 describe('Display preferences', () => {
@@ -49,23 +48,16 @@ describe('Display preferences', () => {
     expect(caseStatus).toHaveTextContent('विचारण');
   });
 
-  it('restores Hindi and night mode on another screen and can switch back to English and day mode', async () => {
+  it('restores Hindi on another screen and can switch back to English', async () => {
     const user = userEvent.setup();
     const tracking = portal('/track');
-    const toggle = screen.getByRole('button', { name: 'Night mode' });
-    expect(toggle).toHaveAttribute('aria-pressed', 'false');
-    await user.click(toggle);
-    expect(document.documentElement).toHaveAttribute('data-theme', 'night');
     await user.selectOptions(screen.getByRole('combobox', { name: 'App language' }), 'hi');
+    expect(document.documentElement.lang).toBe('hi');
     tracking.unmount();
 
     portal('/profile');
     expect(screen.getByRole('heading', { name: 'मेरी प्रोफ़ाइल' })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe('hi');
-    const night = screen.getByRole('button', { name: 'रात्रि मोड' });
-    expect(night).toHaveAttribute('aria-pressed', 'true');
-    await user.click(night);
-    expect(document.documentElement).toHaveAttribute('data-theme', 'day');
     await user.selectOptions(screen.getByRole('combobox', { name: 'ऐप की भाषा' }), 'en');
     expect(screen.getByRole('heading', { name: 'My profile' })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe('en');

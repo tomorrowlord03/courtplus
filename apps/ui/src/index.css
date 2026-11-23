@@ -15,8 +15,6 @@
   --mid-grey: #9e9e9e;
   --soft-grey: #c9c9c9;
   --canvas: #e9e9eb;
-  --glow-top: #fafafa;
-  --glow-bottom: #d6d6d9;
   --toolbar: rgba(248, 248, 249, .96);
   --surface: rgba(255, 255, 255, .72);
   --glass: rgba(255, 255, 255, .45);
@@ -37,41 +35,10 @@
   --shadow: 0 8px 24px rgba(0, 0, 0, .06);
 }
 
-:root[data-theme="night"] {
-  color-scheme: dark;
-  --ink: #f1f3f8;
-  --white: #222730;
-  --muted: #b6bfce;
-  --brand-grey: #abb5c6;
-  --chart-secondary: #b0bad0;
-  --mid-grey: #8b96ac;
-  --soft-grey: #778399;
-  --canvas: #11151d;
-  --glow-top: #222d42;
-  --glow-bottom: #192235;
-  --toolbar: #222833f5;
-  --surface: #232936;
-  --glass: #191f2bcf;
-  --glass-edge: #354052;
-  --tile-dark: #cad4e9;
-  --tile: #303949;
-  --track: #3c4658;
-  --border: #465268;
-  --control-border: #78859b;
-  --accent: #b3b2ff;
-  --urgent: #ffd1c1;
-  --urgent-bg: #492823;
-  --review: #ffdc9a;
-  --review-bg: #46351e;
-  --apply: #a2f2c4;
-  --apply-bg: #1c4038;
-  --shadow: 0 8px 24px #0005;
-}
-
 body {
   margin: 0;
-  background: radial-gradient(ellipse at 10% 7%, var(--glow-top) 0, transparent 55%),
-    radial-gradient(ellipse at 85% 85%, var(--glow-bottom) 0, transparent 52%), var(--canvas);
+  background: radial-gradient(ellipse at 10% 7%, #fafafa 0, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, #d6d6d9 0, transparent 52%), var(--canvas);
   background-attachment: fixed;
   color: var(--ink);
   font-size: 14px;
@@ -152,25 +119,7 @@ main:focus { outline-offset: -3px; }
 .topbar-actions { display: flex; align-items: center; gap: 7px; margin-inline-start: auto; }
 .display-controls { display: inline-flex; align-items: center; gap: 7px; }
 .interface-language select { min-width: 73px; }
-.theme-toggle[aria-pressed="true"] { background: var(--tile); }
 
-/* Legacy utility classes share the same night surfaces and status colors as the application shell. */
-[data-theme="night"] :is(.bg-white, .bg-gray-50, .bg-gray-100) { background-color: var(--white); }
-[data-theme="night"] :is(.bg-slate-50, .bg-slate-100, .bg-slate-200, .bg-gray-200) { background-color: var(--tile); }
-[data-theme="night"] :is(.text-black, .text-slate-800, .text-slate-900, .text-gray-800, .text-gray-900) { color: var(--ink); }
-[data-theme="night"] :is(.text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700, .text-gray-500, .text-gray-600, .text-gray-700) { color: var(--muted); }
-[data-theme="night"] :is(.bg-blue-50, .bg-blue-100, .bg-indigo-200, .bg-violet-200) { background-color: #303756; color: #e1e6ff; }
-[data-theme="night"] :is(.text-blue-700, .text-blue-800, .text-blue-900, .text-indigo-700) { color: #cbd9ff; }
-[data-theme="night"] :is(.bg-amber-50, .bg-amber-100, .bg-amber-200, .bg-orange-200, .bg-yellow-200) { background-color: var(--review-bg); color: var(--review); }
-[data-theme="night"] :is(.text-amber-700, .text-amber-800, .text-amber-900, .text-amber-950) { color: var(--review); }
-[data-theme="night"] :is(.bg-green-50, .bg-green-100, .bg-emerald-50, .bg-emerald-100, .bg-emerald-200) { background-color: var(--apply-bg); color: var(--apply); }
-[data-theme="night"] :is(.text-green-700, .text-green-800, .text-green-900, .text-emerald-700, .text-emerald-800, .text-emerald-900) { color: var(--apply); }
-[data-theme="night"] :is(.bg-red-50, .bg-red-100, .bg-red-200, .bg-rose-200) { background-color: var(--urgent-bg); color: var(--urgent); }
-[data-theme="night"] :is(.text-red-700, .text-red-800, .text-red-900) { color: var(--urgent); }
-[data-theme="night"] :is(.border, .border-slate-200, .border-slate-300, .border-slate-400) { border-color: var(--border); }
-[data-theme="night"] .app-shell :where(.bg-blue-700, .bg-blue-800).text-white { color: var(--white); }
-[data-theme="night"] .recharts-cartesian-axis-tick-value { fill: var(--muted); }
-[data-theme="night"] .recharts-default-tooltip { color: var(--ink); background: var(--white) !important; }
 html[lang="hi"] body { font-family: "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif; }
 html[lang="hi"] .nav-item { white-space: normal; line-height: 1.35; }
 .alias-search { position: relative; display: flex; align-items: center; gap: 7px; padding: 0 11px; border: 1px solid var(--border); border-radius: 999px; background: var(--white); color: var(--muted); }

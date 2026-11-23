@@ -45,7 +45,7 @@ One platform with three doors. Judges get hints, triage and a tamper-proof recor
 
 ### Display preferences
 
-Use the language selector and appearance button in the header to switch between English and Hindi and between day and night mode. The current browser or desktop installation remembers both selections. Case notes, evidence, orders and transcript excerpts keep their source text. Draft and rights-card exports have their own language controls.
+Use the language selector in the header to switch between English and Hindi. The current browser or desktop installation remembers the selection. Case notes, evidence, orders and transcript excerpts keep their source text. Draft and rights-card exports have their own language controls.
 
 ## The AI - trained on old Indian cases
 

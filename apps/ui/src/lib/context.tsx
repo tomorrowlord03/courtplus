@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Profile } from '@courtplus/contracts';
 import type { WorkspaceApi } from './api';
 import { useLang } from './i18n';
-import { applyTheme, languageKey, readPreference, readTheme, type Theme } from './preferences';
+import { languageKey, readPreference } from './preferences';
 
 export type View = 'legal_aid' | 'utrc';
 
@@ -12,8 +12,6 @@ interface Ctx {
   setView: (v: View) => void;
   language: string;
   setLanguage: (language: string) => void;
-  theme: Theme;
-  toggleTheme: () => void;
   profile: Profile | null | undefined;
   profileError: string | null;
   profileAvailable: boolean;
@@ -25,8 +23,6 @@ const AppCtx = createContext<Ctx | null>(null);
 export function AppProvider({ api, children }: { api: WorkspaceApi; children: ReactNode }) {
   const [view, setView] = useState<View>('legal_aid');
   const [language, setLanguage] = useLang();
-  const [theme, setTheme] = useState(readTheme);
-  useLayoutEffect(() => applyTheme(theme), [theme]);
   const [profile, setProfile] = useState<Profile | null>();
   const [profileError, setProfileError] = useState<string | null>(null);
   const { getProfile, role } = api;
@@ -72,13 +68,7 @@ export function AppProvider({ api, children }: { api: WorkspaceApi; children: Re
     clearLegacyConfirmer();
   }
 
-  function toggleTheme() {
-    const next = theme === 'day' ? 'night' : 'day';
-    applyTheme(next, true);
-    setTheme(next);
-  }
-
-  const value = { api, view, setView, language, setLanguage, theme, toggleTheme, profile, profileError, profileAvailable, saveProfile, clearProfile };
+  const value = { api, view, setView, language, setLanguage, profile, profileError, profileAvailable, saveProfile, clearProfile };
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
 }
 

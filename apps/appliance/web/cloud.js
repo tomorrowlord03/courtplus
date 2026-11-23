@@ -15,7 +15,6 @@
   }
 
   const languageKey = 'courtplus.uiLanguage';
-  const themeKey = 'courtplus.theme';
   function display(text) {
     return root.lang === 'hi' && Object.hasOwn(hindi, text) ? hindi[text] : text;
   }
@@ -49,9 +48,7 @@
     languages.add(new Option('English', 'en'));
     languages.add(new Option('हिन्दी', 'hi'));
     label.append(labelText, languages);
-    const theme = document.createElement('button');
-    theme.type = 'button';
-    controls.append(label, theme);
+    controls.append(label);
     main.prepend(controls);
 
     function render() {
@@ -61,25 +58,16 @@
       }
       labelText.textContent = display('App language');
       languages.value = root.lang;
-      const night = root.dataset.theme === 'night';
-      theme.textContent = display(night ? 'Switch to day mode' : 'Switch to night mode');
-      theme.setAttribute('aria-pressed', String(night));
       document.dispatchEvent(new Event('courtplus:language'));
     }
     languages.addEventListener('change', () => {
       preference(languageKey, languages.value);
       applyLanguage(languages.value, render);
     });
-    theme.addEventListener('click', () => {
-      root.dataset.theme = root.dataset.theme === 'night' ? 'day' : 'night';
-      preference(themeKey, root.dataset.theme);
-      render();
-    });
     render();
     applyLanguage(preference(languageKey), render);
   }
 
-  root.dataset.theme = preference(themeKey) === 'night' ? 'night' : 'day';
   if (mode === 'login' || mode === 'home' || mode === 'handoffs') standalonePreferences();
   const methods = [
     'listPersons', 'listCases', 'importOrder', 'saveCase', 'screen', 'board', 'updateCard',
