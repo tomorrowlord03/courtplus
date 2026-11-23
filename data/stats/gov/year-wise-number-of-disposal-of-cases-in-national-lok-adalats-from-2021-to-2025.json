@@ -1,0 +1,72 @@
+{
+ "title": "Year-wise Number of Disposal of Cases in National Lok Adalats from 2021 to 2025",
+ "desc": "Year-wise Number of Disposal of Cases in National Lok Adalats from 2021 to 2025",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-14T18:16:23Z",
+ "updated_date": "2026-10-14T18:16:23Z",
+ "field": [
+  {
+   "id": "_years",
+   "name": "Years",
+   "type": "double"
+  },
+  {
+   "id": "pre_litigation",
+   "name": "Pre-litigation",
+   "type": "double"
+  },
+  {
+   "id": "pending_cases",
+   "name": "Pending Cases",
+   "type": "double"
+  },
+  {
+   "id": "_total",
+   "name": "Total",
+   "type": "double"
+  }
+ ],
+ "total": 5,
+ "index_name": "a7c60209-4062-4f3b-a431-ea9a0bbc8157",
+ "url": "https://www.data.gov.in/resource/a7c60209-4062-4f3b-a431-ea9a0bbc8157",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "_years": 2021,
+   "pre_litigation": 7206294,
+   "pending_cases": 5581743,
+   "_total": 12788037
+  },
+  {
+   "_years": 2022,
+   "pre_litigation": 31015215,
+   "pending_cases": 10910795,
+   "_total": 41926010
+  },
+  {
+   "_years": 2023,
+   "pre_litigation": 71032980,
+   "pending_cases": 14309237,
+   "_total": 85342217
+  },
+  {
+   "_years": 2024,
+   "pre_litigation": 87019059,
+   "pending_cases": 17507060,
+   "_total": 104526119
+  },
+  {
+   "_years": 2025,
+   "pre_litigation": 126589535,
+   "pending_cases": 21835515,
+   "_total": 148425050
+  }
+ ]
+}

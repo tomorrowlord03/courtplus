@@ -1,0 +1,167 @@
+{
+ "title": "High Court-wise Number of Pending Cases in High Courts as per National Judicial Data Grid (NJDG) as on 25-03-2026",
+ "desc": "High Court-wise Number of Pending Cases in High Courts as per National Judicial Data Grid (NJDG) as on 25-03-2026",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-17T05:53:59Z",
+ "updated_date": "2026-10-17T05:53:59Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "name_of_high_court",
+   "name": "Name of High Court",
+   "type": "keyword"
+  },
+  {
+   "id": "no__of_pending_cases",
+   "name": "No. of pending cases",
+   "type": "double"
+  }
+ ],
+ "total": 26,
+ "index_name": "d608d06a-2191-4a00-927c-693a42d66b37",
+ "url": "https://www.data.gov.in/resource/d608d06a-2191-4a00-927c-693a42d66b37",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "name_of_high_court": "Allahabad High Court",
+   "no__of_pending_cases": 1226425
+  },
+  {
+   "sl__no_": "2",
+   "name_of_high_court": "Bombay High Court",
+   "no__of_pending_cases": 661062
+  },
+  {
+   "sl__no_": "3",
+   "name_of_high_court": "Calcutta High Court",
+   "no__of_pending_cases": 203784
+  },
+  {
+   "sl__no_": "4",
+   "name_of_high_court": "Gauhati High Court",
+   "no__of_pending_cases": 64575
+  },
+  {
+   "sl__no_": "5",
+   "name_of_high_court": "High Court for State of Telangana",
+   "no__of_pending_cases": 236783
+  },
+  {
+   "sl__no_": "6",
+   "name_of_high_court": "High Court of Chhattisgarh",
+   "no__of_pending_cases": 75525
+  },
+  {
+   "sl__no_": "7",
+   "name_of_high_court": "High Court of Rajasthan",
+   "no__of_pending_cases": 676609
+  },
+  {
+   "sl__no_": "8",
+   "name_of_high_court": "High Court of Andhra Pradesh",
+   "no__of_pending_cases": 248733
+  },
+  {
+   "sl__no_": "9",
+   "name_of_high_court": "High Court of Delhi",
+   "no__of_pending_cases": 126647
+  },
+  {
+   "sl__no_": "10",
+   "name_of_high_court": "High Court of Gujarat",
+   "no__of_pending_cases": 173459
+  },
+  {
+   "sl__no_": "11",
+   "name_of_high_court": "High Court of Himachal Pradesh",
+   "no__of_pending_cases": 104070
+  },
+  {
+   "sl__no_": "12",
+   "name_of_high_court": "High Court of Jammu and Kashmir",
+   "no__of_pending_cases": 43472
+  },
+  {
+   "sl__no_": "13",
+   "name_of_high_court": "High Court of Jharkhand",
+   "no__of_pending_cases": 72532
+  },
+  {
+   "sl__no_": "14",
+   "name_of_high_court": "High Court of Karnataka",
+   "no__of_pending_cases": 331494
+  },
+  {
+   "sl__no_": "15",
+   "name_of_high_court": "High Court of Kerala",
+   "no__of_pending_cases": 247553
+  },
+  {
+   "sl__no_": "16",
+   "name_of_high_court": "High Court of Madhya Pradesh",
+   "no__of_pending_cases": 476074
+  },
+  {
+   "sl__no_": "17",
+   "name_of_high_court": "High Court of Manipur",
+   "no__of_pending_cases": 6060
+  },
+  {
+   "sl__no_": "18",
+   "name_of_high_court": "High Court of Meghalaya",
+   "no__of_pending_cases": 1791
+  },
+  {
+   "sl__no_": "19",
+   "name_of_high_court": "High Court of Punjab and Haryana",
+   "no__of_pending_cases": 418735
+  },
+  {
+   "sl__no_": "20",
+   "name_of_high_court": "High Court of Sikkim",
+   "no__of_pending_cases": 302
+  },
+  {
+   "sl__no_": "21",
+   "name_of_high_court": "High Court of Tripura",
+   "no__of_pending_cases": 1389
+  },
+  {
+   "sl__no_": "22",
+   "name_of_high_court": "High Court of Uttarakhand",
+   "no__of_pending_cases": 61083
+  },
+  {
+   "sl__no_": "23",
+   "name_of_high_court": "Madras High Court",
+   "no__of_pending_cases": 555758
+  },
+  {
+   "sl__no_": "24",
+   "name_of_high_court": "Orissa High Court",
+   "no__of_pending_cases": 163859
+  },
+  {
+   "sl__no_": "25",
+   "name_of_high_court": "Patna High Court",
+   "no__of_pending_cases": 218963
+  },
+  {
+   "sl__no_": "Total",
+   "name_of_high_court": "Total",
+   "no__of_pending_cases": 6396737
+  }
+ ]
+}

@@ -1,0 +1,251 @@
+{
+ "title": " Number of Functional Fast Track Special Courts (FTSCs) from 2020 to 2022",
+ "desc": " Number of Functional Fast Track Special Courts (FTSCs) from 2020 to 2022",
+ "org": [
+  "Ministry of Law and Justice",
+  "Department of Justice"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "Judiciary"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2023-04-28T11:39:26Z",
+ "updated_date": "2023-04-28T11:39:26Z",
+ "field": [
+  {
+   "id": "s_no_",
+   "name": "S No. ",
+   "type": "double"
+  },
+  {
+   "id": "state_ut",
+   "name": "State/UT",
+   "type": "keyword"
+  },
+  {
+   "id": "no_of_functional_ftscs_31_12_2020_",
+   "name": "No. of functional  FTSCs (31.12.2020) ",
+   "type": "double"
+  },
+  {
+   "id": "no_of_functional_ftscs_31_12_2021_",
+   "name": "No. of functional  FTSCs (31.12.2021) ",
+   "type": "double"
+  },
+  {
+   "id": "no_of_functional_ftscs_31_12_2022_",
+   "name": "No. of functional  FTSCs (31.12.2022) ",
+   "type": "double"
+  }
+ ],
+ "total": 29,
+ "index_name": "54ed318e-83a7-4763-82dc-be5aaaa466da",
+ "url": "https://www.data.gov.in/resource/54ed318e-83a7-4763-82dc-be5aaaa466da",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "s_no_": 1,
+   "state_ut": "Andhra Pradesh ",
+   "no_of_functional_ftscs_31_12_2020_": 8,
+   "no_of_functional_ftscs_31_12_2021_": 10,
+   "no_of_functional_ftscs_31_12_2022_": 14
+  },
+  {
+   "s_no_": 2,
+   "state_ut": "Assam",
+   "no_of_functional_ftscs_31_12_2020_": 7,
+   "no_of_functional_ftscs_31_12_2021_": 15,
+   "no_of_functional_ftscs_31_12_2022_": 17
+  },
+  {
+   "s_no_": 3,
+   "state_ut": "Bihar",
+   "no_of_functional_ftscs_31_12_2020_": 45,
+   "no_of_functional_ftscs_31_12_2021_": 45,
+   "no_of_functional_ftscs_31_12_2022_": 45
+  },
+  {
+   "s_no_": 4,
+   "state_ut": "Chandigarh",
+   "no_of_functional_ftscs_31_12_2020_": 1,
+   "no_of_functional_ftscs_31_12_2021_": 1,
+   "no_of_functional_ftscs_31_12_2022_": 48
+  },
+  {
+   "s_no_": 5,
+   "state_ut": "Chhattisgarh",
+   "no_of_functional_ftscs_31_12_2020_": 15,
+   "no_of_functional_ftscs_31_12_2021_": 15,
+   "no_of_functional_ftscs_31_12_2022_": 15
+  },
+  {
+   "s_no_": 6,
+   "state_ut": "Delhi",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 16,
+   "no_of_functional_ftscs_31_12_2022_": 16
+  },
+  {
+   "s_no_": 7,
+   "state_ut": "Gujarat",
+   "no_of_functional_ftscs_31_12_2020_": 35,
+   "no_of_functional_ftscs_31_12_2021_": 35,
+   "no_of_functional_ftscs_31_12_2022_": 35
+  },
+  {
+   "s_no_": 8,
+   "state_ut": "Goa",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 0,
+   "no_of_functional_ftscs_31_12_2022_": 1
+  },
+  {
+   "s_no_": 9,
+   "state_ut": "Haryana",
+   "no_of_functional_ftscs_31_12_2020_": 16,
+   "no_of_functional_ftscs_31_12_2021_": 16,
+   "no_of_functional_ftscs_31_12_2022_": 16
+  },
+  {
+   "s_no_": 10,
+   "state_ut": "Himachal",
+   "no_of_functional_ftscs_31_12_2020_": 3,
+   "no_of_functional_ftscs_31_12_2021_": 6,
+   "no_of_functional_ftscs_31_12_2022_": 6
+  },
+  {
+   "s_no_": 11,
+   "state_ut": "J&K",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 4,
+   "no_of_functional_ftscs_31_12_2022_": 4
+  },
+  {
+   "s_no_": 12,
+   "state_ut": "Jharkhand",
+   "no_of_functional_ftscs_31_12_2020_": 20,
+   "no_of_functional_ftscs_31_12_2021_": 22,
+   "no_of_functional_ftscs_31_12_2022_": 22
+  },
+  {
+   "s_no_": 13,
+   "state_ut": "Karnataka",
+   "no_of_functional_ftscs_31_12_2020_": 14,
+   "no_of_functional_ftscs_31_12_2021_": 18,
+   "no_of_functional_ftscs_31_12_2022_": 30
+  },
+  {
+   "s_no_": 14,
+   "state_ut": "Kerala",
+   "no_of_functional_ftscs_31_12_2020_": 23,
+   "no_of_functional_ftscs_31_12_2021_": 28,
+   "no_of_functional_ftscs_31_12_2022_": 52
+  },
+  {
+   "s_no_": 15,
+   "state_ut": "Madhya Pradesh  ",
+   "no_of_functional_ftscs_31_12_2020_": 66,
+   "no_of_functional_ftscs_31_12_2021_": 67,
+   "no_of_functional_ftscs_31_12_2022_": 67
+  },
+  {
+   "s_no_": 16,
+   "state_ut": "Maharashtra",
+   "no_of_functional_ftscs_31_12_2020_": 25,
+   "no_of_functional_ftscs_31_12_2021_": 34,
+   "no_of_functional_ftscs_31_12_2022_": 39
+  },
+  {
+   "s_no_": 17,
+   "state_ut": "Manipur",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 2,
+   "no_of_functional_ftscs_31_12_2022_": 2
+  },
+  {
+   "s_no_": 18,
+   "state_ut": "Meghalaya",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 5,
+   "no_of_functional_ftscs_31_12_2022_": 5
+  },
+  {
+   "s_no_": 19,
+   "state_ut": "Mizoram",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 3,
+   "no_of_functional_ftscs_31_12_2022_": 3
+  },
+  {
+   "s_no_": 20,
+   "state_ut": "Nagaland",
+   "no_of_functional_ftscs_31_12_2020_": 0,
+   "no_of_functional_ftscs_31_12_2021_": 1,
+   "no_of_functional_ftscs_31_12_2022_": 1
+  },
+  {
+   "s_no_": 21,
+   "state_ut": "Odisha ",
+   "no_of_functional_ftscs_31_12_2020_": 15,
+   "no_of_functional_ftscs_31_12_2021_": 36,
+   "no_of_functional_ftscs_31_12_2022_": 44
+  },
+  {
+   "s_no_": 22,
+   "state_ut": "Punjab",
+   "no_of_functional_ftscs_31_12_2020_": 3,
+   "no_of_functional_ftscs_31_12_2021_": 12,
+   "no_of_functional_ftscs_31_12_2022_": 12
+  },
+  {
+   "s_no_": 23,
+   "state_ut": "Rajasthan",
+   "no_of_functional_ftscs_31_12_2020_": 45,
+   "no_of_functional_ftscs_31_12_2021_": 45,
+   "no_of_functional_ftscs_31_12_2022_": 45
+  },
+  {
+   "s_no_": 24,
+   "state_ut": "Tamil Nadu",
+   "no_of_functional_ftscs_31_12_2020_": 14,
+   "no_of_functional_ftscs_31_12_2021_": 14,
+   "no_of_functional_ftscs_31_12_2022_": 14
+  },
+  {
+   "s_no_": 25,
+   "state_ut": "Telangana",
+   "no_of_functional_ftscs_31_12_2020_": 19,
+   "no_of_functional_ftscs_31_12_2021_": 25,
+   "no_of_functional_ftscs_31_12_2022_": 34
+  },
+  {
+   "s_no_": 26,
+   "state_ut": "Tripura",
+   "no_of_functional_ftscs_31_12_2020_": 3,
+   "no_of_functional_ftscs_31_12_2021_": 3,
+   "no_of_functional_ftscs_31_12_2022_": 3
+  },
+  {
+   "s_no_": 27,
+   "state_ut": "Uttar Pradesh",
+   "no_of_functional_ftscs_31_12_2020_": 218,
+   "no_of_functional_ftscs_31_12_2021_": 218,
+   "no_of_functional_ftscs_31_12_2022_": 218
+  },
+  {
+   "s_no_": 28,
+   "state_ut": "Uttarakhand",
+   "no_of_functional_ftscs_31_12_2020_": 4,
+   "no_of_functional_ftscs_31_12_2021_": 4,
+   "no_of_functional_ftscs_31_12_2022_": 4
+  },
+  {
+   "s_no_": "NA",
+   "state_ut": "Total",
+   "no_of_functional_ftscs_31_12_2020_": 599,
+   "no_of_functional_ftscs_31_12_2021_": 700,
+   "no_of_functional_ftscs_31_12_2022_": 768
+  }
+ ]
+}

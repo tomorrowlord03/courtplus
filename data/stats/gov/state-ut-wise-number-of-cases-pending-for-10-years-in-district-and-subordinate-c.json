@@ -1,0 +1,222 @@
+{
+ "title": "State/UT-wise Number of Cases Pending for 10 years in District and Subordinate Courts as on 27-03-2026",
+ "desc": "State/UT-wise Number of Cases Pending for 10 years in District and Subordinate Courts as on 27-03-2026",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-17T05:49:46Z",
+ "updated_date": "2026-10-17T05:49:46Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "state_ut",
+   "name": "State/UT",
+   "type": "keyword"
+  },
+  {
+   "id": "no__of_cases_pending_for_more_than_10_years",
+   "name": "No. of cases pending for more than 10 years",
+   "type": "double"
+  }
+ ],
+ "total": 37,
+ "index_name": "268fa0b9-3474-4309-afab-7b00c81a56a4",
+ "url": "https://www.data.gov.in/resource/268fa0b9-3474-4309-afab-7b00c81a56a4",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "state_ut": "Andaman and Nicobar Islands",
+   "no__of_cases_pending_for_more_than_10_years": 1732
+  },
+  {
+   "sl__no_": "2",
+   "state_ut": "Andhra Pradesh",
+   "no__of_cases_pending_for_more_than_10_years": 17135
+  },
+  {
+   "sl__no_": "3",
+   "state_ut": "Arunachal Pradesh",
+   "no__of_cases_pending_for_more_than_10_years": 1630
+  },
+  {
+   "sl__no_": "4",
+   "state_ut": "Assam",
+   "no__of_cases_pending_for_more_than_10_years": 10331
+  },
+  {
+   "sl__no_": "5",
+   "state_ut": "Bihar",
+   "no__of_cases_pending_for_more_than_10_years": 862219
+  },
+  {
+   "sl__no_": "6",
+   "state_ut": "Chandigarh",
+   "no__of_cases_pending_for_more_than_10_years": 412
+  },
+  {
+   "sl__no_": "7",
+   "state_ut": "Chhattisgarh",
+   "no__of_cases_pending_for_more_than_10_years": 1166
+  },
+  {
+   "sl__no_": "8",
+   "state_ut": "Delhi",
+   "no__of_cases_pending_for_more_than_10_years": 40972
+  },
+  {
+   "sl__no_": "9",
+   "state_ut": "Goa",
+   "no__of_cases_pending_for_more_than_10_years": 4254
+  },
+  {
+   "sl__no_": "10",
+   "state_ut": "Gujarat",
+   "no__of_cases_pending_for_more_than_10_years": 60529
+  },
+  {
+   "sl__no_": "11",
+   "state_ut": "Haryana",
+   "no__of_cases_pending_for_more_than_10_years": 4704
+  },
+  {
+   "sl__no_": "12",
+   "state_ut": "Himachal Pradesh",
+   "no__of_cases_pending_for_more_than_10_years": 10024
+  },
+  {
+   "sl__no_": "13",
+   "state_ut": "Jammu and Kashmir",
+   "no__of_cases_pending_for_more_than_10_years": 20137
+  },
+  {
+   "sl__no_": "14",
+   "state_ut": "Jharkhand",
+   "no__of_cases_pending_for_more_than_10_years": 43436
+  },
+  {
+   "sl__no_": "15",
+   "state_ut": "Karnataka",
+   "no__of_cases_pending_for_more_than_10_years": 95504
+  },
+  {
+   "sl__no_": "16",
+   "state_ut": "Kerala",
+   "no__of_cases_pending_for_more_than_10_years": 43589
+  },
+  {
+   "sl__no_": "17",
+   "state_ut": "Ladakh",
+   "no__of_cases_pending_for_more_than_10_years": 10
+  },
+  {
+   "sl__no_": "18",
+   "state_ut": "Lakshadweep",
+   "no__of_cases_pending_for_more_than_10_years": 26
+  },
+  {
+   "sl__no_": "19",
+   "state_ut": "Madhya Pradesh",
+   "no__of_cases_pending_for_more_than_10_years": 31796
+  },
+  {
+   "sl__no_": "20",
+   "state_ut": "Maharashtra",
+   "no__of_cases_pending_for_more_than_10_years": 529517
+  },
+  {
+   "sl__no_": "21",
+   "state_ut": "Manipur",
+   "no__of_cases_pending_for_more_than_10_years": 764
+  },
+  {
+   "sl__no_": "22",
+   "state_ut": "Meghalaya",
+   "no__of_cases_pending_for_more_than_10_years": 2372
+  },
+  {
+   "sl__no_": "23",
+   "state_ut": "Mizoram",
+   "no__of_cases_pending_for_more_than_10_years": 30
+  },
+  {
+   "sl__no_": "24",
+   "state_ut": "Nagaland",
+   "no__of_cases_pending_for_more_than_10_years": 277
+  },
+  {
+   "sl__no_": "25",
+   "state_ut": "Odisha",
+   "no__of_cases_pending_for_more_than_10_years": 295382
+  },
+  {
+   "sl__no_": "26",
+   "state_ut": "Puducherry",
+   "no__of_cases_pending_for_more_than_10_years": 2479
+  },
+  {
+   "sl__no_": "27",
+   "state_ut": "Punjab",
+   "no__of_cases_pending_for_more_than_10_years": 3677
+  },
+  {
+   "sl__no_": "28",
+   "state_ut": "Rajasthan",
+   "no__of_cases_pending_for_more_than_10_years": 75966
+  },
+  {
+   "sl__no_": "29",
+   "state_ut": "Sikkim",
+   "no__of_cases_pending_for_more_than_10_years": 3
+  },
+  {
+   "sl__no_": "30",
+   "state_ut": "Tamil Nadu",
+   "no__of_cases_pending_for_more_than_10_years": 65026
+  },
+  {
+   "sl__no_": "31",
+   "state_ut": "Telangana",
+   "no__of_cases_pending_for_more_than_10_years": 19148
+  },
+  {
+   "sl__no_": "32",
+   "state_ut": "Dadra and Nagar Haveli and Daman and Diu",
+   "no__of_cases_pending_for_more_than_10_years": 373
+  },
+  {
+   "sl__no_": "33",
+   "state_ut": "Tripura",
+   "no__of_cases_pending_for_more_than_10_years": 711
+  },
+  {
+   "sl__no_": "34",
+   "state_ut": "Uttar Pradesh",
+   "no__of_cases_pending_for_more_than_10_years": 2237931
+  },
+  {
+   "sl__no_": "35",
+   "state_ut": "Uttarakhand",
+   "no__of_cases_pending_for_more_than_10_years": 6882
+  },
+  {
+   "sl__no_": "36",
+   "state_ut": "West Bengal",
+   "no__of_cases_pending_for_more_than_10_years": 766149
+  },
+  {
+   "sl__no_": "Total",
+   "state_ut": "Total",
+   "no__of_cases_pending_for_more_than_10_years": 5256293
+  }
+ ]
+}

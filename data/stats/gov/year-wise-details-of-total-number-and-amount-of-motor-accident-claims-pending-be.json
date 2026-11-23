@@ -1,0 +1,62 @@
+{
+ "title": "Year-wise Details of Total Number and Amount of Motor Accident Claims Pending Before Claims Tribunals from 2020-21 to 2024-25",
+ "desc": "Year-wise Details of Total Number and Amount of Motor Accident Claims Pending Before Claims Tribunals from 2020-21 to 2024-25",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-17T18:30:11Z",
+ "updated_date": "2026-10-17T18:30:11Z",
+ "field": [
+  {
+   "id": "_year",
+   "name": "Year",
+   "type": "keyword"
+  },
+  {
+   "id": "number",
+   "name": "Number",
+   "type": "double"
+  },
+  {
+   "id": "_amount__rs_in_lakhs_",
+   "name": "Amount (Rs in Lakhs)",
+   "type": "double"
+  }
+ ],
+ "total": 5,
+ "index_name": "ef2d014a-3e29-4575-9e46-43717ceb93d2",
+ "url": "https://www.data.gov.in/resource/ef2d014a-3e29-4575-9e46-43717ceb93d2",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "_year": "2024-25",
+   "number": 1073020,
+   "_amount__rs_in_lakhs_": 9625712
+  },
+  {
+   "_year": "2023-24",
+   "number": 1056904,
+   "_amount__rs_in_lakhs_": 8779253
+  },
+  {
+   "_year": "2022-23",
+   "number": 1046163,
+   "_amount__rs_in_lakhs_": 8045480
+  },
+  {
+   "_year": "2021-22",
+   "number": 1039360,
+   "_amount__rs_in_lakhs_": 7472182
+  },
+  {
+   "_year": "2020-21",
+   "number": 1008332,
+   "_amount__rs_in_lakhs_": 7042215
+  }
+ ]
+}

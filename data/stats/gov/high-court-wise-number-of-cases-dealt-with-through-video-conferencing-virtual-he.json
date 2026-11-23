@@ -1,0 +1,250 @@
+{
+ "title": "High Court?wise Number of Cases Dealt with through Video Conferencing (Virtual Hearings) in High Courts and District Courts as on 31?12?2025",
+ "desc": "High Court?wise Number of Cases Dealt with through Video Conferencing (Virtual Hearings) in High Courts and District Courts as on 31?12?2025",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-18T06:30:35Z",
+ "updated_date": "2026-10-18T06:30:35Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "high_court_",
+   "name": "High Court",
+   "type": "keyword"
+  },
+  {
+   "id": "high_courts_",
+   "name": "High Courts",
+   "type": "double"
+  },
+  {
+   "id": "district_courts",
+   "name": "District Courts",
+   "type": "double"
+  },
+  {
+   "id": "grand_total",
+   "name": "Grand Total",
+   "type": "double"
+  }
+ ],
+ "total": 29,
+ "index_name": "9dacc64c-80a8-4d90-820b-f6d5343b94ce",
+ "url": "https://www.data.gov.in/resource/9dacc64c-80a8-4d90-820b-f6d5343b94ce",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "high_court_": "Allahabad",
+   "high_courts_": 249060,
+   "district_courts": 6673818,
+   "grand_total": 6922878
+  },
+  {
+   "sl__no_": "2",
+   "high_court_": "Andhra Pradesh",
+   "high_courts_": 421307,
+   "district_courts": 1457401,
+   "grand_total": 1878708
+  },
+  {
+   "sl__no_": "3",
+   "high_court_": "Bombay",
+   "high_courts_": 94493,
+   "district_courts": 310408,
+   "grand_total": 404901
+  },
+  {
+   "sl__no_": "4",
+   "high_court_": "Calcutta",
+   "high_courts_": 181591,
+   "district_courts": 185189,
+   "grand_total": 366780
+  },
+  {
+   "sl__no_": "5",
+   "high_court_": "Chhattisgarh",
+   "high_courts_": 105175,
+   "district_courts": 459698,
+   "grand_total": 564873
+  },
+  {
+   "sl__no_": "6",
+   "high_court_": "Delhi",
+   "high_courts_": 322201,
+   "district_courts": 7503131,
+   "grand_total": 7825332
+  },
+  {
+   "sl__no_": "7",
+   "high_court_": "Gauhati - Arunachal Pradesh",
+   "high_courts_": 3574,
+   "district_courts": 8779,
+   "grand_total": 12353
+  },
+  {
+   "sl__no_": "8",
+   "high_court_": "Gauhati - Assam",
+   "high_courts_": 267767,
+   "district_courts": 547962,
+   "grand_total": 815729
+  },
+  {
+   "sl__no_": "9",
+   "high_court_": "Gauhati - Mizoram",
+   "high_courts_": 4294,
+   "district_courts": 13268,
+   "grand_total": 17562
+  },
+  {
+   "sl__no_": "10",
+   "high_court_": "Gauhati - Nagaland",
+   "high_courts_": 1477,
+   "district_courts": 1278,
+   "grand_total": 2755
+  },
+  {
+   "sl__no_": "11",
+   "high_court_": "Gujarat",
+   "high_courts_": 420087,
+   "district_courts": 234667,
+   "grand_total": 654754
+  },
+  {
+   "sl__no_": "12",
+   "high_court_": "Himachal Pradesh",
+   "high_courts_": 186350,
+   "district_courts": 202660,
+   "grand_total": 389010
+  },
+  {
+   "sl__no_": "13",
+   "high_court_": "Jammu and Kashmir and Ladakh",
+   "high_courts_": 265337,
+   "district_courts": 598259,
+   "grand_total": 863596
+  },
+  {
+   "sl__no_": "14",
+   "high_court_": "Jharkhand",
+   "high_courts_": 225235,
+   "district_courts": 745304,
+   "grand_total": 970539
+  },
+  {
+   "sl__no_": "15",
+   "high_court_": "Karnataka",
+   "high_courts_": 1278460,
+   "district_courts": 192285,
+   "grand_total": 1470745
+  },
+  {
+   "sl__no_": "16",
+   "high_court_": "Kerala",
+   "high_courts_": 280384,
+   "district_courts": 693555,
+   "grand_total": 973939
+  },
+  {
+   "sl__no_": "17",
+   "high_court_": "Madhya Pradesh",
+   "high_courts_": 697374,
+   "district_courts": 1172912,
+   "grand_total": 1870286
+  },
+  {
+   "sl__no_": "18",
+   "high_court_": "Madras",
+   "high_courts_": 1531620,
+   "district_courts": 479195,
+   "grand_total": 2010815
+  },
+  {
+   "sl__no_": "19",
+   "high_court_": "Manipur",
+   "high_courts_": 55160,
+   "district_courts": 18811,
+   "grand_total": 73971
+  },
+  {
+   "sl__no_": "20",
+   "high_court_": "Meghalaya",
+   "high_courts_": 6930,
+   "district_courts": 77483,
+   "grand_total": 84413
+  },
+  {
+   "sl__no_": "21",
+   "high_court_": "Orissa",
+   "high_courts_": 359593,
+   "district_courts": 366450,
+   "grand_total": 726043
+  },
+  {
+   "sl__no_": "22",
+   "high_court_": "Patna",
+   "high_courts_": 278212,
+   "district_courts": 3275264,
+   "grand_total": 3553476
+  },
+  {
+   "sl__no_": "23",
+   "high_court_": "Punjab and Haryana",
+   "high_courts_": 653089,
+   "district_courts": 3734523,
+   "grand_total": 4387612
+  },
+  {
+   "sl__no_": "24",
+   "high_court_": "Rajasthan",
+   "high_courts_": 254597,
+   "district_courts": 266506,
+   "grand_total": 521103
+  },
+  {
+   "sl__no_": "25",
+   "high_court_": "Sikkim",
+   "high_courts_": 926,
+   "district_courts": 17890,
+   "grand_total": 18816
+  },
+  {
+   "sl__no_": "26",
+   "high_court_": "Telangana",
+   "high_courts_": 1531472,
+   "district_courts": 201818,
+   "grand_total": 1733290
+  },
+  {
+   "sl__no_": "27",
+   "high_court_": "Tripura",
+   "high_courts_": 22535,
+   "district_courts": 42737,
+   "grand_total": 65272
+  },
+  {
+   "sl__no_": "28",
+   "high_court_": "Uttarakhand",
+   "high_courts_": 91252,
+   "district_courts": 51892,
+   "grand_total": 143144
+  },
+  {
+   "sl__no_": "Total",
+   "high_court_": "Total",
+   "high_courts_": 9789552,
+   "district_courts": 29533143,
+   "grand_total": 39322695
+  }
+ ]
+}

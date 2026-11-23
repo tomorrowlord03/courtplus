@@ -1,0 +1,229 @@
+{
+ "title": "High Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the High Courts as on 30-01-2026",
+ "desc": "High Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the High Courts as on 30-01-2026",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-17T06:02:31Z",
+ "updated_date": "2026-10-17T06:02:31Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "high_court__s_",
+   "name": "High Court (s)",
+   "type": "keyword"
+  },
+  {
+   "id": "sanctioned_strength",
+   "name": "Sanctioned Strength",
+   "type": "double"
+  },
+  {
+   "id": "working_strength",
+   "name": "Working Strength",
+   "type": "double"
+  },
+  {
+   "id": "vacancies",
+   "name": "Vacancies",
+   "type": "double"
+  }
+ ],
+ "total": 26,
+ "index_name": "17dcef58-26ce-43f5-9770-b33794ee9eb4",
+ "url": "https://www.data.gov.in/resource/17dcef58-26ce-43f5-9770-b33794ee9eb4",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "high_court__s_": "Allahabad",
+   "sanctioned_strength": 160,
+   "working_strength": 110,
+   "vacancies": 50
+  },
+  {
+   "sl__no_": "2",
+   "high_court__s_": "Andhra Pradesh",
+   "sanctioned_strength": 37,
+   "working_strength": 32,
+   "vacancies": 5
+  },
+  {
+   "sl__no_": "3",
+   "high_court__s_": "Bombay",
+   "sanctioned_strength": 94,
+   "working_strength": 80,
+   "vacancies": 14
+  },
+  {
+   "sl__no_": "4",
+   "high_court__s_": "Calcutta",
+   "sanctioned_strength": 72,
+   "working_strength": 43,
+   "vacancies": 29
+  },
+  {
+   "sl__no_": "5",
+   "high_court__s_": "Chhattisgarh",
+   "sanctioned_strength": 22,
+   "working_strength": 15,
+   "vacancies": 7
+  },
+  {
+   "sl__no_": "6",
+   "high_court__s_": "Delhi",
+   "sanctioned_strength": 60,
+   "working_strength": 44,
+   "vacancies": 16
+  },
+  {
+   "sl__no_": "7",
+   "high_court__s_": "Gauhati",
+   "sanctioned_strength": 30,
+   "working_strength": 25,
+   "vacancies": 5
+  },
+  {
+   "sl__no_": "8",
+   "high_court__s_": "Gujarat",
+   "sanctioned_strength": 52,
+   "working_strength": 35,
+   "vacancies": 17
+  },
+  {
+   "sl__no_": "9",
+   "high_court__s_": "Himachal Pradesh",
+   "sanctioned_strength": 17,
+   "working_strength": 12,
+   "vacancies": 5
+  },
+  {
+   "sl__no_": "10",
+   "high_court__s_": "Jammu and Kashmir and Ladakh",
+   "sanctioned_strength": 25,
+   "working_strength": 14,
+   "vacancies": 11
+  },
+  {
+   "sl__no_": "11",
+   "high_court__s_": "Jharkhand",
+   "sanctioned_strength": 25,
+   "working_strength": 14,
+   "vacancies": 11
+  },
+  {
+   "sl__no_": "12",
+   "high_court__s_": "Karnataka",
+   "sanctioned_strength": 62,
+   "working_strength": 46,
+   "vacancies": 16
+  },
+  {
+   "sl__no_": "13",
+   "high_court__s_": "Kerala",
+   "sanctioned_strength": 47,
+   "working_strength": 40,
+   "vacancies": 7
+  },
+  {
+   "sl__no_": "14",
+   "high_court__s_": "Madhya Pradesh",
+   "sanctioned_strength": 53,
+   "working_strength": 42,
+   "vacancies": 11
+  },
+  {
+   "sl__no_": "15",
+   "high_court__s_": "Madras",
+   "sanctioned_strength": 75,
+   "working_strength": 53,
+   "vacancies": 22
+  },
+  {
+   "sl__no_": "16",
+   "high_court__s_": "Manipur",
+   "sanctioned_strength": 5,
+   "working_strength": 3,
+   "vacancies": 2
+  },
+  {
+   "sl__no_": "17",
+   "high_court__s_": "Meghalaya",
+   "sanctioned_strength": 4,
+   "working_strength": 4,
+   "vacancies": "0"
+  },
+  {
+   "sl__no_": "18",
+   "high_court__s_": "Orissa",
+   "sanctioned_strength": 33,
+   "working_strength": 19,
+   "vacancies": 14
+  },
+  {
+   "sl__no_": "19",
+   "high_court__s_": "Patna",
+   "sanctioned_strength": 53,
+   "working_strength": 38,
+   "vacancies": 15
+  },
+  {
+   "sl__no_": "20",
+   "high_court__s_": "Punjab and Haryana",
+   "sanctioned_strength": 85,
+   "working_strength": 61,
+   "vacancies": 24
+  },
+  {
+   "sl__no_": "21",
+   "high_court__s_": "Rajasthan",
+   "sanctioned_strength": 50,
+   "working_strength": 39,
+   "vacancies": 11
+  },
+  {
+   "sl__no_": "22",
+   "high_court__s_": "Sikkim",
+   "sanctioned_strength": 3,
+   "working_strength": 3,
+   "vacancies": "0"
+  },
+  {
+   "sl__no_": "23",
+   "high_court__s_": "Telangana",
+   "sanctioned_strength": 42,
+   "working_strength": 28,
+   "vacancies": 14
+  },
+  {
+   "sl__no_": "24",
+   "high_court__s_": "Tripura",
+   "sanctioned_strength": 5,
+   "working_strength": 4,
+   "vacancies": 1
+  },
+  {
+   "sl__no_": "25",
+   "high_court__s_": "Uttarakhand",
+   "sanctioned_strength": 11,
+   "working_strength": 10,
+   "vacancies": 1
+  },
+  {
+   "sl__no_": "Total",
+   "high_court__s_": "Total",
+   "sanctioned_strength": 1122,
+   "working_strength": 814,
+   "vacancies": 308
+  }
+ ]
+}

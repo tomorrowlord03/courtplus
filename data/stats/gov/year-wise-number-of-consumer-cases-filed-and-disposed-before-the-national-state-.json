@@ -1,0 +1,62 @@
+{
+ "title": "Year-wise Number of Consumer Cases Filed and Disposed Before the National, State and District Consumer Disputes Redressal Commissions from 2021 to 2025",
+ "desc": "Year-wise Number of Consumer Cases Filed and Disposed Before the National, State and District Consumer Disputes Redressal Commissions from 2021 to 2025",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-16T19:11:47Z",
+ "updated_date": "2026-10-16T19:11:47Z",
+ "field": [
+  {
+   "id": "year",
+   "name": "Year",
+   "type": "double"
+  },
+  {
+   "id": "number_of_cases___filed",
+   "name": "Number of Cases - Filed",
+   "type": "double"
+  },
+  {
+   "id": "number_of_cases___disposed__also_includes_the_cases_disposed_which_were_filed_in_the_previous_years_",
+   "name": "Number of Cases - Disposed (also includes the cases disposed which were filed in the previous years)",
+   "type": "double"
+  }
+ ],
+ "total": 5,
+ "index_name": "60fc1393-9fde-4dd5-900c-852b62279fe7",
+ "url": "https://www.data.gov.in/resource/60fc1393-9fde-4dd5-900c-852b62279fe7",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "year": 2021,
+   "number_of_cases___filed": 149412,
+   "number_of_cases___disposed__also_includes_the_cases_disposed_which_were_filed_in_the_previous_years_": 101739
+  },
+  {
+   "year": 2022,
+   "number_of_cases___filed": 175680,
+   "number_of_cases___disposed__also_includes_the_cases_disposed_which_were_filed_in_the_previous_years_": 182868
+  },
+  {
+   "year": 2023,
+   "number_of_cases___filed": 174284,
+   "number_of_cases___disposed__also_includes_the_cases_disposed_which_were_filed_in_the_previous_years_": 185779
+  },
+  {
+   "year": 2024,
+   "number_of_cases___filed": 173181,
+   "number_of_cases___disposed__also_includes_the_cases_disposed_which_were_filed_in_the_previous_years_": 158321
+  },
+  {
+   "year": 2025,
+   "number_of_cases___filed": 162896,
+   "number_of_cases___disposed__also_includes_the_cases_disposed_which_were_filed_in_the_previous_years_": 150581
+  }
+ ]
+}

@@ -1,0 +1,306 @@
+{
+ "title": "State/UT-wise Number of Undertrial Prisoners with Duration of Confinement as on 31-12-2023",
+ "desc": "State/UT-wise Number of Undertrial Prisoners with Duration of Confinement as on 31-12-2023",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-16T19:48:18Z",
+ "updated_date": "2026-10-16T19:48:18Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "state_ut",
+   "name": "State/UT",
+   "type": "keyword"
+  },
+  {
+   "id": "_1_to_2_years",
+   "name": "1 to 2 Years",
+   "type": "double"
+  },
+  {
+   "id": "_2_to_5_years",
+   "name": "2 to 5 Years",
+   "type": "double"
+  },
+  {
+   "id": "above_5_years",
+   "name": "Above 5 Years",
+   "type": "double"
+  }
+ ],
+ "total": 37,
+ "index_name": "7040732f-6d7f-43fe-8e49-cfe977740f89",
+ "url": "https://www.data.gov.in/resource/7040732f-6d7f-43fe-8e49-cfe977740f89",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "state_ut": "Andman and Nicobar Islands",
+   "_1_to_2_years": 6,
+   "_2_to_5_years": 25,
+   "above_5_years": 2
+  },
+  {
+   "sl__no_": "2",
+   "state_ut": "Andhra Pradesh",
+   "_1_to_2_years": 208,
+   "_2_to_5_years": 146,
+   "above_5_years": 3
+  },
+  {
+   "sl__no_": "3",
+   "state_ut": "Arunachal Pradesh",
+   "_1_to_2_years": 25,
+   "_2_to_5_years": 20,
+   "above_5_years": 3
+  },
+  {
+   "sl__no_": "4",
+   "state_ut": "Assam",
+   "_1_to_2_years": 682,
+   "_2_to_5_years": 561,
+   "above_5_years": 147
+  },
+  {
+   "sl__no_": "5",
+   "state_ut": "Bihar",
+   "_1_to_2_years": 4446,
+   "_2_to_5_years": 3549,
+   "above_5_years": 296
+  },
+  {
+   "sl__no_": "6",
+   "state_ut": "Chandigarh",
+   "_1_to_2_years": 112,
+   "_2_to_5_years": 70,
+   "above_5_years": 9
+  },
+  {
+   "sl__no_": "7",
+   "state_ut": "Chhattisgarh",
+   "_1_to_2_years": 2265,
+   "_2_to_5_years": 1354,
+   "above_5_years": 44
+  },
+  {
+   "sl__no_": "8",
+   "state_ut": "Delhi",
+   "_1_to_2_years": 2503,
+   "_2_to_5_years": 2442,
+   "above_5_years": 497
+  },
+  {
+   "sl__no_": "9",
+   "state_ut": "Dadra and Nagar Haveli and Daman and Diu",
+   "_1_to_2_years": 23,
+   "_2_to_5_years": 40,
+   "above_5_years": 10
+  },
+  {
+   "sl__no_": "10",
+   "state_ut": "Goa",
+   "_1_to_2_years": 99,
+   "_2_to_5_years": 172,
+   "above_5_years": 22
+  },
+  {
+   "sl__no_": "11",
+   "state_ut": "Gujarat",
+   "_1_to_2_years": 1712,
+   "_2_to_5_years": 1870,
+   "above_5_years": 464
+  },
+  {
+   "sl__no_": "12",
+   "state_ut": "Haryana",
+   "_1_to_2_years": 2742,
+   "_2_to_5_years": 2264,
+   "above_5_years": 416
+  },
+  {
+   "sl__no_": "13",
+   "state_ut": "Himachal Pradesh",
+   "_1_to_2_years": 291,
+   "_2_to_5_years": 364,
+   "above_5_years": 57
+  },
+  {
+   "sl__no_": "14",
+   "state_ut": "Jammu and Kashmir",
+   "_1_to_2_years": 827,
+   "_2_to_5_years": 1388,
+   "above_5_years": 275
+  },
+  {
+   "sl__no_": "15",
+   "state_ut": "Jharkhand",
+   "_1_to_2_years": 1944,
+   "_2_to_5_years": 2002,
+   "above_5_years": 481
+  },
+  {
+   "sl__no_": "16",
+   "state_ut": "Karnataka",
+   "_1_to_2_years": 1834,
+   "_2_to_5_years": 1674,
+   "above_5_years": 226
+  },
+  {
+   "sl__no_": "17",
+   "state_ut": "Kerala",
+   "_1_to_2_years": 248,
+   "_2_to_5_years": 100,
+   "above_5_years": 8
+  },
+  {
+   "sl__no_": "18",
+   "state_ut": "Ladakh",
+   "_1_to_2_years": 12,
+   "_2_to_5_years": 7,
+   "above_5_years": 2
+  },
+  {
+   "sl__no_": "19",
+   "state_ut": "Lakshadweep",
+   "_1_to_2_years": "0",
+   "_2_to_5_years": "0",
+   "above_5_years": "0"
+  },
+  {
+   "sl__no_": "20",
+   "state_ut": "Madhya Pradesh",
+   "_1_to_2_years": 3573,
+   "_2_to_5_years": 2735,
+   "above_5_years": 115
+  },
+  {
+   "sl__no_": "21",
+   "state_ut": "Maharashtra",
+   "_1_to_2_years": 4978,
+   "_2_to_5_years": 7436,
+   "above_5_years": 2213
+  },
+  {
+   "sl__no_": "22",
+   "state_ut": "Manipur",
+   "_1_to_2_years": 107,
+   "_2_to_5_years": 37,
+   "above_5_years": 18
+  },
+  {
+   "sl__no_": "23",
+   "state_ut": "Meghalaya",
+   "_1_to_2_years": 110,
+   "_2_to_5_years": 131,
+   "above_5_years": 24
+  },
+  {
+   "sl__no_": "24",
+   "state_ut": "Mizoram",
+   "_1_to_2_years": 200,
+   "_2_to_5_years": 42,
+   "above_5_years": "0"
+  },
+  {
+   "sl__no_": "25",
+   "state_ut": "Nagaland",
+   "_1_to_2_years": 43,
+   "_2_to_5_years": 24,
+   "above_5_years": 12
+  },
+  {
+   "sl__no_": "26",
+   "state_ut": "Odisha",
+   "_1_to_2_years": 1963,
+   "_2_to_5_years": 1961,
+   "above_5_years": 414
+  },
+  {
+   "sl__no_": "27",
+   "state_ut": "Puducherry",
+   "_1_to_2_years": 43,
+   "_2_to_5_years": 21,
+   "above_5_years": "0"
+  },
+  {
+   "sl__no_": "28",
+   "state_ut": "Punjab",
+   "_1_to_2_years": 5076,
+   "_2_to_5_years": 3518,
+   "above_5_years": 183
+  },
+  {
+   "sl__no_": "29",
+   "state_ut": "Rajasthan",
+   "_1_to_2_years": 2520,
+   "_2_to_5_years": 3025,
+   "above_5_years": 464
+  },
+  {
+   "sl__no_": "30",
+   "state_ut": "Sikkim",
+   "_1_to_2_years": 35,
+   "_2_to_5_years": 21,
+   "above_5_years": "0"
+  },
+  {
+   "sl__no_": "31",
+   "state_ut": "Tamil Nadu",
+   "_1_to_2_years": 999,
+   "_2_to_5_years": 392,
+   "above_5_years": 46
+  },
+  {
+   "sl__no_": "32",
+   "state_ut": "Telangana",
+   "_1_to_2_years": 141,
+   "_2_to_5_years": 82,
+   "above_5_years": 9
+  },
+  {
+   "sl__no_": "33",
+   "state_ut": "Tripura",
+   "_1_to_2_years": 39,
+   "_2_to_5_years": 5,
+   "above_5_years": "0"
+  },
+  {
+   "sl__no_": "34",
+   "state_ut": "Uttar Pradesh",
+   "_1_to_2_years": 10283,
+   "_2_to_5_years": 12003,
+   "above_5_years": 2639
+  },
+  {
+   "sl__no_": "35",
+   "state_ut": "Uttarakhand",
+   "_1_to_2_years": 672,
+   "_2_to_5_years": 763,
+   "above_5_years": 48
+  },
+  {
+   "sl__no_": "36",
+   "state_ut": "West Bengal",
+   "_1_to_2_years": 3894,
+   "_2_to_5_years": 4363,
+   "above_5_years": 1245
+  },
+  {
+   "sl__no_": "Total",
+   "state_ut": "Total",
+   "_1_to_2_years": 54655,
+   "_2_to_5_years": 54607,
+   "above_5_years": 10392
+  }
+ ]
+}

@@ -1,0 +1,312 @@
+{
+ "title": "High Court-wise Number of Cases Pending in High Courts for more than 40, 30 and 20 years during 2024-25",
+ "desc": "High Court-wise Number of Cases Pending in High Courts for more than 40, 30 and 20 years during 2024-25",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2025-03-05T12:28:18Z",
+ "updated_date": "2025-03-05T12:28:18Z",
+ "field": [
+  {
+   "id": "_sl__no_",
+   "name": "Sl. No.",
+   "type": "double"
+  },
+  {
+   "id": "name_of_high_court",
+   "name": "Name of High Court",
+   "type": "keyword"
+  },
+  {
+   "id": "cases_pending_for_more_than_40_years___civil_cases",
+   "name": "Cases Pending for more than 40 years - Civil Cases",
+   "type": "double"
+  },
+  {
+   "id": "cases_pending_for_more_than_40_years___criminal_cases",
+   "name": "Cases Pending for more than 40 years - Criminal Cases",
+   "type": "double"
+  },
+  {
+   "id": "cases_pending_for_more_than_30_years___civil_cases",
+   "name": "Cases pending for more than 30 years - Civil Cases",
+   "type": "double"
+  },
+  {
+   "id": "cases_pending_for_more_than_30_years___criminal_cases",
+   "name": "Cases pending for more than 30 years - Criminal Cases",
+   "type": "double"
+  },
+  {
+   "id": "cases_pending_for_more_than_20_years___civil_cases",
+   "name": "Cases pending for more than 20 years - Civil Cases",
+   "type": "double"
+  },
+  {
+   "id": "cases_pending_for_more_than_20_years___criminal_cases",
+   "name": "Cases pending for more than 20 years - Criminal Cases",
+   "type": "double"
+  }
+ ],
+ "total": 25,
+ "index_name": "0a5bee52-a099-44a3-826b-3caf687d55ec",
+ "url": "https://www.data.gov.in/resource/0a5bee52-a099-44a3-826b-3caf687d55ec",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "_sl__no_": 1,
+   "name_of_high_court": "Allahabad High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": 8610,
+   "cases_pending_for_more_than_40_years___criminal_cases": 442,
+   "cases_pending_for_more_than_30_years___civil_cases": 30843,
+   "cases_pending_for_more_than_30_years___criminal_cases": 4489,
+   "cases_pending_for_more_than_20_years___civil_cases": 71092,
+   "cases_pending_for_more_than_20_years___criminal_cases": 22057
+  },
+  {
+   "_sl__no_": 2,
+   "name_of_high_court": "Bombay High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": 6,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 1034,
+   "cases_pending_for_more_than_30_years___criminal_cases": 9,
+   "cases_pending_for_more_than_20_years___civil_cases": 38179,
+   "cases_pending_for_more_than_20_years___criminal_cases": 2215
+  },
+  {
+   "_sl__no_": 3,
+   "name_of_high_court": "Calcutta High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": 5541,
+   "cases_pending_for_more_than_40_years___criminal_cases": 31,
+   "cases_pending_for_more_than_30_years___civil_cases": 12785,
+   "cases_pending_for_more_than_30_years___criminal_cases": 940,
+   "cases_pending_for_more_than_20_years___civil_cases": 31124,
+   "cases_pending_for_more_than_20_years___criminal_cases": 2828
+  },
+  {
+   "_sl__no_": 4,
+   "name_of_high_court": "Gauhati High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": 18,
+   "cases_pending_for_more_than_20_years___criminal_cases": 2
+  },
+  {
+   "_sl__no_": 5,
+   "name_of_high_court": "High Court for State of Telangana",
+   "cases_pending_for_more_than_40_years___civil_cases": 131,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 1593,
+   "cases_pending_for_more_than_30_years___criminal_cases": 594,
+   "cases_pending_for_more_than_20_years___civil_cases": 4294,
+   "cases_pending_for_more_than_20_years___criminal_cases": 767
+  },
+  {
+   "_sl__no_": 6,
+   "name_of_high_court": "High Court of Andhra Pradesh",
+   "cases_pending_for_more_than_40_years___civil_cases": 106,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 976,
+   "cases_pending_for_more_than_30_years___criminal_cases": 388,
+   "cases_pending_for_more_than_20_years___civil_cases": 5103,
+   "cases_pending_for_more_than_20_years___criminal_cases": 478
+  },
+  {
+   "_sl__no_": 7,
+   "name_of_high_court": "High Court Of Chhattisgarh",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": 2,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 62,
+   "cases_pending_for_more_than_20_years___criminal_cases": 116
+  },
+  {
+   "_sl__no_": 8,
+   "name_of_high_court": "High Court of Delhi",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": 269,
+   "cases_pending_for_more_than_20_years___criminal_cases": 351
+  },
+  {
+   "_sl__no_": 9,
+   "name_of_high_court": "High Court of Gujarat",
+   "cases_pending_for_more_than_40_years___civil_cases": 3,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 32,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 406,
+   "cases_pending_for_more_than_20_years___criminal_cases": 826
+  },
+  {
+   "_sl__no_": 10,
+   "name_of_high_court": "High Court of Himachal Pradesh",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": 1,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 46,
+   "cases_pending_for_more_than_20_years___criminal_cases": "0"
+  },
+  {
+   "_sl__no_": 11,
+   "name_of_high_court": "High Court of Jammu and Kashmir and Ladakh",
+   "cases_pending_for_more_than_40_years___civil_cases": 1,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 3,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 232,
+   "cases_pending_for_more_than_20_years___criminal_cases": 17
+  },
+  {
+   "_sl__no_": 12,
+   "name_of_high_court": "High Court of Jharkhand",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": 44,
+   "cases_pending_for_more_than_30_years___criminal_cases": 6,
+   "cases_pending_for_more_than_20_years___civil_cases": 482,
+   "cases_pending_for_more_than_20_years___criminal_cases": 1431
+  },
+  {
+   "_sl__no_": 13,
+   "name_of_high_court": "High Court of Karnataka",
+   "cases_pending_for_more_than_40_years___civil_cases": 1,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 21,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 242,
+   "cases_pending_for_more_than_20_years___criminal_cases": 4
+  },
+  {
+   "_sl__no_": 14,
+   "name_of_high_court": "High Court of Kerala",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": 9,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 1127,
+   "cases_pending_for_more_than_20_years___criminal_cases": 148
+  },
+  {
+   "_sl__no_": 15,
+   "name_of_high_court": "High Court of Madhya Pradesh",
+   "cases_pending_for_more_than_40_years___civil_cases": 6,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 9,
+   "cases_pending_for_more_than_30_years___criminal_cases": "0",
+   "cases_pending_for_more_than_20_years___civil_cases": 3157,
+   "cases_pending_for_more_than_20_years___criminal_cases": 8877
+  },
+  {
+   "_sl__no_": 16,
+   "name_of_high_court": "High Court of Manipur",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": "NA",
+   "cases_pending_for_more_than_20_years___criminal_cases": "NA"
+  },
+  {
+   "_sl__no_": 17,
+   "name_of_high_court": "High Court of Meghalaya",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": "NA",
+   "cases_pending_for_more_than_20_years___criminal_cases": "NA"
+  },
+  {
+   "_sl__no_": 18,
+   "name_of_high_court": "Orissa High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": 36,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 261,
+   "cases_pending_for_more_than_30_years___criminal_cases": 45,
+   "cases_pending_for_more_than_20_years___civil_cases": 2659,
+   "cases_pending_for_more_than_20_years___criminal_cases": 2039
+  },
+  {
+   "_sl__no_": 19,
+   "name_of_high_court": "High Court of Punjab and Haryana",
+   "cases_pending_for_more_than_40_years___civil_cases": 27,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 483,
+   "cases_pending_for_more_than_30_years___criminal_cases": 8,
+   "cases_pending_for_more_than_20_years___civil_cases": 16818,
+   "cases_pending_for_more_than_20_years___criminal_cases": 1018
+  },
+  {
+   "_sl__no_": 20,
+   "name_of_high_court": "High Court Of Rajasthan",
+   "cases_pending_for_more_than_40_years___civil_cases": 8,
+   "cases_pending_for_more_than_40_years___criminal_cases": 2,
+   "cases_pending_for_more_than_30_years___civil_cases": 259,
+   "cases_pending_for_more_than_30_years___criminal_cases": 649,
+   "cases_pending_for_more_than_20_years___civil_cases": 9452,
+   "cases_pending_for_more_than_20_years___criminal_cases": 11380
+  },
+  {
+   "_sl__no_": 21,
+   "name_of_high_court": "High Court of Sikkim",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": "NA",
+   "cases_pending_for_more_than_20_years___criminal_cases": "NA"
+  },
+  {
+   "_sl__no_": 22,
+   "name_of_high_court": "High Court of Tripura",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": "NA",
+   "cases_pending_for_more_than_20_years___criminal_cases": "NA"
+  },
+  {
+   "_sl__no_": 23,
+   "name_of_high_court": "High Court of Uttarakhand",
+   "cases_pending_for_more_than_40_years___civil_cases": "NA",
+   "cases_pending_for_more_than_40_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_30_years___civil_cases": "NA",
+   "cases_pending_for_more_than_30_years___criminal_cases": "NA",
+   "cases_pending_for_more_than_20_years___civil_cases": 539,
+   "cases_pending_for_more_than_20_years___criminal_cases": 116
+  },
+  {
+   "_sl__no_": 24,
+   "name_of_high_court": "Madras High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": 142,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 1197,
+   "cases_pending_for_more_than_30_years___criminal_cases": 2,
+   "cases_pending_for_more_than_20_years___civil_cases": 39517,
+   "cases_pending_for_more_than_20_years___criminal_cases": 1013
+  },
+  {
+   "_sl__no_": 25,
+   "name_of_high_court": "Patna High Court",
+   "cases_pending_for_more_than_40_years___civil_cases": 867,
+   "cases_pending_for_more_than_40_years___criminal_cases": "0",
+   "cases_pending_for_more_than_30_years___civil_cases": 2986,
+   "cases_pending_for_more_than_30_years___criminal_cases": 14,
+   "cases_pending_for_more_than_20_years___civil_cases": 5335,
+   "cases_pending_for_more_than_20_years___criminal_cases": 3247
+  }
+ ]
+}

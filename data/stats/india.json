@@ -1,17 +1,112 @@
 {
-  "figures": [
-    {"id":"in-inmates","label":"Total prison inmates","value":509012,"unit":"people","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Table 1.2","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=58","note":"Taken from research note R2 only; not independently re-checked against the primary source.","verified":false},
-    {"id":"in-capacity","label":"Authorised prison capacity","value":453769,"unit":"places","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Table 1.2","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=58","note":"Taken from research note R2 only; not independently re-checked against the primary source.","verified":false},
-    {"id":"in-occupancy","label":"Occupancy rate","value":112.2,"unit":"% (inmates / capacity)","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Table 1.2","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=58","note":"The earlier Feb 2026 revision showed 112.7%; this is the September revision. Taken from research note R2 only; not independently re-checked.","verified":false},
-    {"id":"in-undertrials","label":"Undertrial prisoners","value":368883,"unit":"people","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Tables 1.2 and 6.4","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=212","note":"Taken from research note R2 only; not independently re-checked against the primary source.","verified":false},
-    {"id":"in-undertrial-share","label":"Undertrials as share of all inmates","value":72.5,"unit":"%","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Tables 1.2 and 6.4","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=212","note":"Undertrials divided by inmates. Taken from research note R2 only; not independently re-checked.","verified":false},
-    {"id":"in-ut-1y","label":"Undertrials held 1 year or more","value":109400,"unit":"people","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Table 6.4","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=211","note":"Sum of published bands (50,447+29,571+20,496+8,886). Taken from research note R2 only; not independently re-checked.","verified":false},
-    {"id":"in-ut-3y","label":"Undertrials held 3 years or more","value":29382,"unit":"people","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Table 6.4","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=211","note":"Sum of bands from 3 years (20,496+8,886). Taken from research note R2 only; not independently re-checked.","verified":false},
-    {"id":"in-ut-5y","label":"Undertrials held over 5 years","value":8886,"unit":"people","date":"31 Dec 2024","geography":"India","source":"NCRB, Prison Statistics India 2024 (revised 15 Sep 2026), Table 6.4","url":"https://www.ncrb.mha.gov.in/uploads/files/PSI-2024Ason15092026.pdf#page=211","note":"Taken from research note R2 only; not independently re-checked against the primary source.","verified":false},
-    {"id":"in-constitution-day-identified","label":"Constitution Day s.479 campaign: identified","value":951,"unit":"people","date":"to 26 Nov 2024 (reported 2 Apr 2025)","geography":"India","source":"MHA reply, Rajya Sabha answer 3597 (annexure), via PIB","url":"https://mha.gov.in/MHA1/Par2017/pdfs/par2025-pdfs/RS02042025/3597.pdf#page=3","note":"Campaign count only. Matches R2, R6 and C3; not re-fetched in this session.","verified":true},
-    {"id":"in-constitution-day-bail","label":"Constitution Day s.479 campaign: granted bail","value":334,"unit":"people","date":"to 26 Nov 2024 (reported 2 Apr 2025)","geography":"India","source":"MHA reply, Rajya Sabha answer 3597 (annexure), via PIB","url":"https://www.pib.gov.in/PressReleasePage.aspx?PRID=2117796","note":"35.1% of those identified. Bail grants, not confirmed physical releases. Matches R2, R6 and C3; not re-fetched in this session.","verified":true},
-    {"id":"in-utrc-identified","label":"UTRC (all categories): identified","value":14387,"unit":"people","date":"Oct-Dec 2025","geography":"India","source":"NALSA UTRC quarterly report, Oct-Dec 2025, Tables D, E, H","url":"https://cdnbbsr.s3waas.gov.in/s32e45f93088c7db59767efef516b306aa/uploads/2026/02/20260209543755368.pdf","note":"Taken from research note R2 only (its file name differs from the one R6/C3 cite for the same report; reconcile). Not independently re-checked.","verified":false},
-    {"id":"in-utrc-recommended","label":"UTRC (all categories): recommended","value":10754,"unit":"people","date":"Oct-Dec 2025","geography":"India","source":"NALSA UTRC quarterly report, Oct-Dec 2025, Tables D, E, H","url":"https://cdnbbsr.s3waas.gov.in/s32e45f93088c7db59767efef516b306aa/uploads/2026/02/20260209543755368.pdf","note":"Taken from research note R2 only; not independently re-checked.","verified":false},
-    {"id":"in-utrc-released","label":"UTRC (all categories): released","value":5864,"unit":"people","date":"Oct-Dec 2025","geography":"India","source":"NALSA UTRC quarterly report, Oct-Dec 2025, Tables D, E, H","url":"https://cdnbbsr.s3waas.gov.in/s32e45f93088c7db59767efef516b306aa/uploads/2026/02/20260209543755368.pdf","note":"Taken from research note R2 only; not independently re-checked.","verified":false}
-  ]
+ "figures": [
+  {
+   "id": "hc-pending-india",
+   "label": "Cases pending in all High Courts (NJDG)",
+   "value": 6396737,
+   "unit": "cases",
+   "date": "2026-03-25",
+   "geography": "India",
+   "source": "High Court-wise Number of Pending Cases in High Courts as per National Judicial Data Grid (NJDG) as on 25-03-2026 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/d608d06a-2191-4a00-927c-693a42d66b37",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026.",
+   "verified": true
+  },
+  {
+   "id": "hc-pending-cg",
+   "label": "Cases pending in the Chhattisgarh High Court (NJDG)",
+   "value": 75525,
+   "unit": "cases",
+   "date": "2026-03-25",
+   "geography": "Chhattisgarh",
+   "source": "High Court-wise Number of Pending Cases in High Courts as per National Judicial Data Grid (NJDG) as on 25-03-2026 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/d608d06a-2191-4a00-927c-693a42d66b37",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026.",
+   "verified": true
+  },
+  {
+   "id": "district-10y-india",
+   "label": "District court cases pending more than 10 years (India)",
+   "value": 5256293,
+   "unit": "cases",
+   "date": "2026-03-27",
+   "geography": "India",
+   "source": "State/UT-wise Number of Cases Pending for 10 years in District and Subordinate Courts as on 27-03-2026 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/268fa0b9-3474-4309-afab-7b00c81a56a4",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026.",
+   "verified": true
+  },
+  {
+   "id": "district-10y-cg",
+   "label": "District court cases pending more than 10 years (Chhattisgarh)",
+   "value": 1166,
+   "unit": "cases",
+   "date": "2026-03-27",
+   "geography": "Chhattisgarh",
+   "source": "State/UT-wise Number of Cases Pending for 10 years in District and Subordinate Courts as on 27-03-2026 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/268fa0b9-3474-4309-afab-7b00c81a56a4",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026.",
+   "verified": true
+  },
+  {
+   "id": "hc-judge-vacancy-india",
+   "label": "High Court judge posts vacant (India)",
+   "value": 308,
+   "unit": "posts",
+   "date": "2026-01-30",
+   "geography": "India",
+   "source": "High Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the High Courts as on 30-01-2026 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/17dcef58-26ce-43f5-9770-b33794ee9eb4",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026. Sanctioned strength 1122.",
+   "verified": true
+  },
+  {
+   "id": "hc-judge-vacancy-cg",
+   "label": "Chhattisgarh High Court judge posts vacant",
+   "value": 7,
+   "unit": "posts",
+   "date": "2026-01-30",
+   "geography": "Chhattisgarh",
+   "source": "High Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the High Courts as on 30-01-2026 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/17dcef58-26ce-43f5-9770-b33794ee9eb4",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026. Sanctioned strength 22.",
+   "verified": true
+  },
+  {
+   "id": "national-lok-adalat-2025",
+   "label": "Cases disposed in National Lok Adalats, 2025",
+   "value": 148425050,
+   "unit": "cases",
+   "date": "2025",
+   "geography": "India",
+   "source": "Year-wise Number of Disposal of Cases in National Lok Adalats from 2021 to 2025 (Open Government Data Platform India (data.gov.in), updated 2026-10-14)",
+   "url": "https://www.data.gov.in/resource/a7c60209-4062-4f3b-a431-ea9a0bbc8157",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026.",
+   "verified": true
+  },
+  {
+   "id": "mact-pending-2024-25",
+   "label": "Motor accident claims pending before tribunals, 2024-25",
+   "value": 1073020,
+   "unit": "cases",
+   "date": "2024-25",
+   "geography": "India",
+   "source": "Year-wise Details of Total Number and Amount of Motor Accident Claims Pending Before Claims Tribunals from 2020-21 to 2024-25 (Open Government Data Platform India (data.gov.in), updated 2026-10-17)",
+   "url": "https://www.data.gov.in/resource/ef2d014a-3e29-4575-9e46-43717ceb93d2",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026. Amount Rs 9625712 lakh.",
+   "verified": true
+  },
+  {
+   "id": "utp-over1y-cg",
+   "label": "Undertrial prisoners in Chhattisgarh held more than 1 year",
+   "value": 3663,
+   "unit": "people",
+   "date": "2023-12-31",
+   "geography": "Chhattisgarh",
+   "source": "State/UT-wise Number of Undertrial Prisoners with Duration of Confinement as on 31-12-2023 (Open Government Data Platform India (data.gov.in), updated 2026-10-16)",
+   "url": "https://www.data.gov.in/resource/7040732f-6d7f-43fe-8e49-cfe977740f89",
+   "note": "Official data.gov.in table, fetched by API on 23 Nov 2026.",
+   "verified": true
+  }
+ ]
 }

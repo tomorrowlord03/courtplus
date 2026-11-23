@@ -1,0 +1,268 @@
+{
+ "title": "Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the Supreme Court of India and the High Courts as on 27-01-2026",
+ "desc": "Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the Supreme Court of India and the High Courts as on 27-01-2026",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-14T18:14:58Z",
+ "updated_date": "2026-10-14T18:14:58Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "court",
+   "name": "Court",
+   "type": "keyword"
+  },
+  {
+   "id": "category",
+   "name": "Category",
+   "type": "keyword"
+  },
+  {
+   "id": "sanctioned_strength",
+   "name": "Sanctioned Strength",
+   "type": "double"
+  },
+  {
+   "id": "working_strength",
+   "name": "Working Strength",
+   "type": "double"
+  },
+  {
+   "id": "vacancy",
+   "name": "Vacancy",
+   "type": "double"
+  }
+ ],
+ "total": 27,
+ "index_name": "25fd0c1b-9875-4ee0-add0-26b0c92f6f63",
+ "url": "https://www.data.gov.in/resource/25fd0c1b-9875-4ee0-add0-26b0c92f6f63",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "court": "Supreme Court",
+   "category": "Supreme Court",
+   "sanctioned_strength": 34,
+   "working_strength": 33,
+   "vacancy": 1
+  },
+  {
+   "sl__no_": "2",
+   "court": "Allahabad",
+   "category": "High Court",
+   "sanctioned_strength": 160,
+   "working_strength": 110,
+   "vacancy": 50
+  },
+  {
+   "sl__no_": "3",
+   "court": "Andhra Pradesh",
+   "category": "High Court",
+   "sanctioned_strength": 37,
+   "working_strength": 32,
+   "vacancy": 5
+  },
+  {
+   "sl__no_": "4",
+   "court": "Bombay",
+   "category": "High Court",
+   "sanctioned_strength": 94,
+   "working_strength": 80,
+   "vacancy": 14
+  },
+  {
+   "sl__no_": "5",
+   "court": "Calcutta",
+   "category": "High Court",
+   "sanctioned_strength": 72,
+   "working_strength": 43,
+   "vacancy": 29
+  },
+  {
+   "sl__no_": "6",
+   "court": "Chhattisgarh",
+   "category": "High Court",
+   "sanctioned_strength": 22,
+   "working_strength": 15,
+   "vacancy": 7
+  },
+  {
+   "sl__no_": "7",
+   "court": "Delhi",
+   "category": "High Court",
+   "sanctioned_strength": 60,
+   "working_strength": 44,
+   "vacancy": 16
+  },
+  {
+   "sl__no_": "8",
+   "court": "Gauhati",
+   "category": "High Court",
+   "sanctioned_strength": 30,
+   "working_strength": 25,
+   "vacancy": 5
+  },
+  {
+   "sl__no_": "9",
+   "court": "Gujarat",
+   "category": "High Court",
+   "sanctioned_strength": 52,
+   "working_strength": 35,
+   "vacancy": 17
+  },
+  {
+   "sl__no_": "10",
+   "court": "Himachal Pradesh",
+   "category": "High Court",
+   "sanctioned_strength": 17,
+   "working_strength": 12,
+   "vacancy": 5
+  },
+  {
+   "sl__no_": "11",
+   "court": "Jammu and Kashmir and Ladakh",
+   "category": "High Court",
+   "sanctioned_strength": 25,
+   "working_strength": 14,
+   "vacancy": 11
+  },
+  {
+   "sl__no_": "12",
+   "court": "Jharkhand",
+   "category": "High Court",
+   "sanctioned_strength": 25,
+   "working_strength": 14,
+   "vacancy": 11
+  },
+  {
+   "sl__no_": "13",
+   "court": "Karnataka",
+   "category": "High Court",
+   "sanctioned_strength": 62,
+   "working_strength": 46,
+   "vacancy": 16
+  },
+  {
+   "sl__no_": "14",
+   "court": "Kerala",
+   "category": "High Court",
+   "sanctioned_strength": 47,
+   "working_strength": 40,
+   "vacancy": 7
+  },
+  {
+   "sl__no_": "15",
+   "court": "Madhya Pradesh",
+   "category": "High Court",
+   "sanctioned_strength": 53,
+   "working_strength": 42,
+   "vacancy": 11
+  },
+  {
+   "sl__no_": "16",
+   "court": "Madras",
+   "category": "High Court",
+   "sanctioned_strength": 75,
+   "working_strength": 53,
+   "vacancy": 22
+  },
+  {
+   "sl__no_": "17",
+   "court": "Manipur",
+   "category": "High Court",
+   "sanctioned_strength": 5,
+   "working_strength": 3,
+   "vacancy": 2
+  },
+  {
+   "sl__no_": "18",
+   "court": "Meghalaya",
+   "category": "High Court",
+   "sanctioned_strength": 4,
+   "working_strength": 4,
+   "vacancy": "0"
+  },
+  {
+   "sl__no_": "19",
+   "court": "Orissa",
+   "category": "High Court",
+   "sanctioned_strength": 33,
+   "working_strength": 19,
+   "vacancy": 14
+  },
+  {
+   "sl__no_": "20",
+   "court": "Patna",
+   "category": "High Court",
+   "sanctioned_strength": 53,
+   "working_strength": 38,
+   "vacancy": 15
+  },
+  {
+   "sl__no_": "21",
+   "court": "Punjab and Haryana",
+   "category": "High Court",
+   "sanctioned_strength": 85,
+   "working_strength": 61,
+   "vacancy": 24
+  },
+  {
+   "sl__no_": "22",
+   "court": "Rajasthan",
+   "category": "High Court",
+   "sanctioned_strength": 50,
+   "working_strength": 39,
+   "vacancy": 11
+  },
+  {
+   "sl__no_": "23",
+   "court": "Sikkim",
+   "category": "High Court",
+   "sanctioned_strength": 3,
+   "working_strength": 3,
+   "vacancy": "0"
+  },
+  {
+   "sl__no_": "24",
+   "court": "Telangana",
+   "category": "High Court",
+   "sanctioned_strength": 42,
+   "working_strength": 28,
+   "vacancy": 14
+  },
+  {
+   "sl__no_": "25",
+   "court": "Tripura",
+   "category": "High Court",
+   "sanctioned_strength": 5,
+   "working_strength": 4,
+   "vacancy": 1
+  },
+  {
+   "sl__no_": "26",
+   "court": "Uttarakhand",
+   "category": "High Court",
+   "sanctioned_strength": 11,
+   "working_strength": 10,
+   "vacancy": 1
+  },
+  {
+   "sl__no_": "Total",
+   "court": "Total",
+   "category": "Total",
+   "sanctioned_strength": 1122,
+   "working_strength": 814,
+   "vacancy": 308
+  }
+ ]
+}

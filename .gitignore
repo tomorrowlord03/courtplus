@@ -13,3 +13,6 @@ ml/**/artifacts/
 .venv/
 scripts/cohort/out/
 apps/desktop/resources/model/
+video/node_modules/
+video/out/
+video/public/clips/

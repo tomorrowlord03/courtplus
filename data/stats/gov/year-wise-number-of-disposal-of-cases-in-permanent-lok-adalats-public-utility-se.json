@@ -1,0 +1,52 @@
+{
+ "title": "Year-wise Number of Disposal of Cases in Permanent Lok Adalats (Public Utility Services) from 2021-22 to 2025-26",
+ "desc": "Year-wise Number of Disposal of Cases in Permanent Lok Adalats (Public Utility Services) from 2021-22 to 2025-26",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-14T18:17:03Z",
+ "updated_date": "2026-10-14T18:17:03Z",
+ "field": [
+  {
+   "id": "years",
+   "name": "Years",
+   "type": "keyword"
+  },
+  {
+   "id": "disposal_of_plas",
+   "name": "Disposal of PLAs",
+   "type": "double"
+  }
+ ],
+ "total": 5,
+ "index_name": "01e20266-f38d-4762-b7ab-464b5e4227f6",
+ "url": "https://www.data.gov.in/resource/01e20266-f38d-4762-b7ab-464b5e4227f6",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "years": "2021-22",
+   "disposal_of_plas": 118136
+  },
+  {
+   "years": "2022-23",
+   "disposal_of_plas": 171138
+  },
+  {
+   "years": "2023-24",
+   "disposal_of_plas": 232763
+  },
+  {
+   "years": "2024-25",
+   "disposal_of_plas": 237980
+  },
+  {
+   "years": "2025-26 (up to November 2025)",
+   "disposal_of_plas": 168808
+  }
+ ]
+}

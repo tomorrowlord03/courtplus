@@ -1,0 +1,40 @@
+{
+ "title": "Court-wise Details of the Number of Cases Pending as per Supreme Court website and the National Judicial Data Grid (NJDG) Portal as on 01-11-2022 and 02-12-2022",
+ "desc": "Court-wise Details of the Number of Cases Pending as per Supreme Court website and the National Judicial Data Grid (NJDG) Portal as on 01-11-2022 and 02-12-2022",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2023-11-19T07:55:24Z",
+ "updated_date": "2023-11-19T18:28:21Z",
+ "field": [
+  {
+   "id": "name_of_courts",
+   "name": "Name of Courts",
+   "type": "keyword"
+  },
+  {
+   "id": "pendency",
+   "name": "Pendency",
+   "type": "double"
+  }
+ ],
+ "total": 2,
+ "index_name": "f02d7d95-0b8d-4b05-abae-c6531d44aafa",
+ "url": "https://www.data.gov.in/resource/f02d7d95-0b8d-4b05-abae-c6531d44aafa",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "name_of_courts": "Supreme Court (as on 01.11.2022)",
+   "pendency": 69781
+  },
+  {
+   "name_of_courts": "High Courts (02.12.2022)",
+   "pendency": 5808413
+  }
+ ]
+}

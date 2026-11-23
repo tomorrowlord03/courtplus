@@ -1,0 +1,542 @@
+{
+ "title": "State/UT-wise Status of Undertrial Inmates under Section 436A of Cr.P.C. during the year 2023",
+ "desc": "State/UT-wise Status of Undertrial Inmates under Section 436A of Cr.P.C. during the year 2023",
+ "org": [
+  "Ministry of Home Affairs",
+  "Department of States",
+  "National Crime Records Bureau (NCRB)"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "Police"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-04-01T10:26:50Z",
+ "updated_date": "2026-04-01T10:26:50Z",
+ "field": [
+  {
+   "id": "sl__no_",
+   "name": "Sl. No.",
+   "type": "keyword"
+  },
+  {
+   "id": "state_ut",
+   "name": "State/UT",
+   "type": "keyword"
+  },
+  {
+   "id": "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male",
+   "name": "Number of inmates eligible for pre- mature release under Section 436A - Male",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female",
+   "name": "Number of inmates eligible for pre- mature release under Section 436A - Female",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender",
+   "name": "Number of inmates eligible for pre- mature release under Section 436A - Transgender",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total",
+   "name": "Number of inmates eligible for pre- mature release under Section 436A - Total",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_released_under_section_436a_of_cr_p_c____male",
+   "name": "Number of inmates released under Section 436A of Cr.P.C. - Male",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_released_under_section_436a_of_cr_p_c____female",
+   "name": "Number of inmates released under Section 436A of Cr.P.C. - Female",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender",
+   "name": "Number of inmates released under Section 436A of Cr.P.C. - Transgender",
+   "type": "double"
+  },
+  {
+   "id": "number_of_inmates_released_under_section_436a_of_cr_p_c____total",
+   "name": "Number of inmates released under Section 436A of Cr.P.C. - Total",
+   "type": "double"
+  }
+ ],
+ "total": 39,
+ "index_name": "f1bc9e58-5eb6-439b-852b-3fb8b3aeda01",
+ "url": "https://www.data.gov.in/resource/f1bc9e58-5eb6-439b-852b-3fb8b3aeda01",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "sl__no_": "1",
+   "state_ut": "Andhra Pradesh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "2",
+   "state_ut": "Arunachal Pradesh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "3",
+   "state_ut": "Assam",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 1,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 1,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 1,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 1
+  },
+  {
+   "sl__no_": "4",
+   "state_ut": "Bihar",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 48,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 48,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 39,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 39
+  },
+  {
+   "sl__no_": "5",
+   "state_ut": "Chhattisgarh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "6",
+   "state_ut": "Goa",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "7",
+   "state_ut": "Gujarat",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "8",
+   "state_ut": "Haryana",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "9",
+   "state_ut": "Himachal Pradesh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "10",
+   "state_ut": "Jharkhand",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 5,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 5,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 3,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 3
+  },
+  {
+   "sl__no_": "11",
+   "state_ut": "Karnataka",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 1,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 1,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 1,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 1
+  },
+  {
+   "sl__no_": "12",
+   "state_ut": "Kerala",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 17,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 17,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "13",
+   "state_ut": "Madhya Pradesh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 35,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 35,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 35,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 35
+  },
+  {
+   "sl__no_": "14",
+   "state_ut": "Maharashtra",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "15",
+   "state_ut": "Manipur",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "16",
+   "state_ut": "Meghalaya",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "17",
+   "state_ut": "Mizoram",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "18",
+   "state_ut": "Nagaland",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "19",
+   "state_ut": "Odisha",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "20",
+   "state_ut": "Punjab",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "21",
+   "state_ut": "Rajasthan",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 132,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 3,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 135,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 68,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 68
+  },
+  {
+   "sl__no_": "22",
+   "state_ut": "Sikkim",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "23",
+   "state_ut": "Tamil Nadu",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "24",
+   "state_ut": "Telangana",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "25",
+   "state_ut": "Tripura",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "26",
+   "state_ut": "Uttar Pradesh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 981,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 12,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 993,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 408,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": 4,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 412
+  },
+  {
+   "sl__no_": "27",
+   "state_ut": "Uttarakhand",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 15,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 15,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 15,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 15
+  },
+  {
+   "sl__no_": "28",
+   "state_ut": "West Bengal",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 56,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 9,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 65,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 13,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": 4,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 17
+  },
+  {
+   "sl__no_": "Total (States)",
+   "state_ut": "Total (States)",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 1291,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 24,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 1315,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 583,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": 8,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 591
+  },
+  {
+   "sl__no_": "29",
+   "state_ut": "Andaman and Nicobar Islands",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "30",
+   "state_ut": "Chandigarh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "31",
+   "state_ut": "Dadra and Nagar Haveli and Daman and Diu",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "32",
+   "state_ut": "Delhi",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "33",
+   "state_ut": "Jammu and Kashmir",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 66,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 3,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 69,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 64,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": 1,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 65
+  },
+  {
+   "sl__no_": "34",
+   "state_ut": "Ladakh",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "35",
+   "state_ut": "Lakshadweep",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "36",
+   "state_ut": "Puducherry",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": "0"
+  },
+  {
+   "sl__no_": "Total (UTs)",
+   "state_ut": "Total (UTs)",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 66,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 3,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 69,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 64,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": 1,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 65
+  },
+  {
+   "sl__no_": "Total (All India)",
+   "state_ut": "Total (All India)",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___male": 1357,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___female": 27,
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___transgender": "0",
+   "number_of_inmates_eligible_for_pre__mature_release_under_section_436a___total": 1384,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____male": 647,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____female": 9,
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____transgender": "0",
+   "number_of_inmates_released_under_section_436a_of_cr_p_c____total": 656
+  }
+ ]
+}

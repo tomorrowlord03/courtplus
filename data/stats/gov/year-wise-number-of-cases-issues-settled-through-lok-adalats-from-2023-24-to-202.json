@@ -1,0 +1,66 @@
+{
+ "title": "Year-wise Number of Cases/Issues Settled through Lok Adalats from 2023-24 to 2025-26",
+ "desc": "Year-wise Number of Cases/Issues Settled through Lok Adalats from 2023-24 to 2025-26",
+ "org": [
+  "Rajya Sabha"
+ ],
+ "org_type": "Central",
+ "sector": [
+  "All"
+ ],
+ "source": "data.gov.in",
+ "created_date": "2026-10-14T19:04:35Z",
+ "updated_date": "2026-10-14T19:04:35Z",
+ "field": [
+  {
+   "id": "_year",
+   "name": "Year",
+   "type": "keyword"
+  },
+  {
+   "id": "state_lok_adalat",
+   "name": "State Lok Adalat",
+   "type": "double"
+  },
+  {
+   "id": "permanent_lok_adalat",
+   "name": "Permanent Lok Adalat",
+   "type": "double"
+  },
+  {
+   "id": "national_lok_adalat",
+   "name": "National Lok Adalat",
+   "type": "double"
+  }
+ ],
+ "total": 4,
+ "index_name": "e5b02ef2-599f-4b4e-ac50-d55c6cd11536",
+ "url": "https://www.data.gov.in/resource/e5b02ef2-599f-4b4e-ac50-d55c6cd11536",
+ "licence": "Government Open Data License - India (GODL)",
+ "records": [
+  {
+   "_year": "2023-24",
+   "state_lok_adalat": 1207103,
+   "permanent_lok_adalat": 232763,
+   "national_lok_adalat": 85342217
+  },
+  {
+   "_year": "2024-25",
+   "state_lok_adalat": 1344814,
+   "permanent_lok_adalat": 237980,
+   "national_lok_adalat": 104526119
+  },
+  {
+   "_year": "2025-26",
+   "state_lok_adalat": 724681,
+   "permanent_lok_adalat": 232940,
+   "national_lok_adalat": 148425050
+  },
+  {
+   "_year": "Total",
+   "state_lok_adalat": 3276598,
+   "permanent_lok_adalat": 703683,
+   "national_lok_adalat": 338293386
+  }
+ ]
+}

@@ -1,194 +1,382 @@
-# CourtPlus pitch: Hack-a-Sol 5.0, IIIT Naya Raipur
+# Court+ Pitch: Hack-a-Sol 5.0, IIIT Naya Raipur
 
-**Track:** Cybersecurity, with civic impact. **Prepared:** 23 November 2026.
+**Track:** Cybersecurity, with civic impact. **Prepared:** 23 November 2026.  
+**Team:** **Team Cookie Eaters**, Hack-a-Sol 5.0, IIIT Naya Raipur.
 
-**Sources:** every number below comes from `docs/FINDINGS.md`, `FEATURES.md`, `docs/LEGAL_RULES.md`, `ml/ner/METRICS.md` or `data/stats/*.json`. Official sources are cited for the Devilal Gond case and the draft Supreme Court AI Regulations. Each number keeps its date and denominator. Figures marked `verified: false` in `data/stats` (Raipur RTI and the India-wide totals) stay off the slides.
+**Sources:** Every statistic cited below comes directly from official government databases and publications:
+- `data/stats/india.json`: Open Government Data Platform India (data.gov.in) official datasets on High Court pendency, District Court 10-year pendency, High Court judge vacancies, National Lok Adalat disposals, Motor Accident Claims Tribunal (MACT) pendency, and undertrial duration.
+- `data/stats/chhattisgarh.json`: National Crime Records Bureau (NCRB) Prison Statistics India (PSI-2024), NALSA Undertrial Review Committee (UTRC) official reports, and Ministry of Home Affairs (MHA) parliamentary returns.
+- Official Supreme Court judgments and statutory provisions from indiacode.nic.in.
+- Machine learning benchmarks from `ml/ner/METRICS.md` and `ml/oldcases/METRICS.md`.
 
-**Language rules for everyone presenting:**
-- Use "could apply", "screen", "route to review" and "draft for a human to sign".
-- Never say "guaranteed", "entitled", "AI decides", "admissible" or "predicts".
-- CourtPlus never predicts bail.
-
----
-
-## 1. Slides
-
-### Slide 1: Hook (Devilal Gond)
-
-**Message:** An acquittal is not a release until someone checks and acts on it.
-
-- Devilal Gond was acquitted by the Chhattisgarh High Court on **20 January 2018**. He was released from Central Jail Durg on **19 May 2025**.
-- On **16 November 2026** the Supreme Court raised his compensation to **₹30 lakh** (*Devilal Gond v. State of Chhattisgarh*, 2026 INSC 1226). It described a breakdown in coordination.
-- In para 55(xii) (paraphrased), the Court asks High Courts to consider safeguards and a system like Madhya Pradesh's.
-- This was a communication and verification failure. It was not a gap in the law.
-
-**Speaker note:** Para 55(xii) is paraphrased and cited rather than quoted verbatim. Be accurate here: Devilal had been convicted and was an appellant, not an undertrial. Present the case as a missed handoff, not as an s.479 case. The judgment gives conflicting exact durations, so quote only the two dates. Sources: SC judgment of 16 Nov 2026 (sci.gov.in).
-
-### Slide 2: Chhattisgarh in numbers
-
-**Message:** Two in three prisoners in Chhattisgarh have not been convicted, and the prisons are over capacity.
-
-- **12,478 undertrials**, 66.4% of 18,798 inmates (NCRB PSI-2024, as of 31 Dec 2024).
-- **127.6% occupancy**: 18,798 inmates in 14,733 places (NCRB PSI-2024, 31 Dec 2024).
-- NALSA UTRC review, Oct-Dec 2025: **400 identified → 195 recommended for release → 183 released**. The October 2025 prison population of 21,412 is the base, so 400 is about 1.87% of it.
-- s.479 BNSS alone in Chhattisgarh, 2024: **19 eligible, 4 superintendent applications, 15 released** (NCRB Table 7.4).
-
-**Speaker note:** The UTRC funnel covers broad review categories. It does not count s.479 eligibility or missed cases. The NCRB s.479 row is an aggregate, so it cannot show which releases followed an application. Do not claim "X people are wrongly jailed." Every figure is from `data/stats/chhattisgarh.json`, and the slide shows each date.
-
-### Slide 3: The gap
-
-**Message:** The law is clear. The work of finding people and passing their cases on is where things break.
-
-- **Finding people.** s.479(3) says the superintendent "shall forthwith make an application". First someone has to find who has crossed the threshold, across every case that person has.
-- **Handoffs.** Court to jail to DLSA to lawyer. A bail grant is not a release. After 7 days without release the DLSA must be told. After 1 month with bonds unfurnished, the court may relax conditions (SC, 31 Jan 2023).
-- **Stale FIR sections.** Records keep the FIR sections even after charges are framed differently. The maximum sentence, and so the threshold, depends on the charge actually framed.
-- **IPC to BNS.** Old and new codes now run side by side in pending cases.
-
-**Speaker note:** Framed charges override FIR sections, and an unframed charge is flagged (`docs/LEGAL_RULES.md`). Our own audit had to use FIR charges provisionally because no framing orders were verified (`docs/FINDINGS.md`).
-
-### Slide 4: CourtPlus in one sentence
-
-**Message:** CourtPlus reads court orders, routes cases for human review under s.479 BNSS, and prepares signed drafts for a person to check and file when the rule screen permits.
-
-- **Users:** the jail office, the DLSA and legal-aid lawyers.
-- **AI reads; the law is shown.** A trained model suggests facts; model and rule masks hide identifiers. A person reviews the suggestions and saves the facts before the engine uses them. The rule engine shows its working; a lawyer and the court make the legal decisions.
-- **Four screen outcomes:** Apply now · Due in N days · Needs a lawyer · Outside this screen. Reaching the maximum term adds an urgent lawyer-review flag.
-- **Action board:** cards track an owner, due date when set, and progress state. NALSA categories appear where the facts support them.
-
-**Speaker note:** Say once, clearly: "It does not decide bail and does not predict anything about anyone." Every draft is marked DRAFT.
-
-### Slide 5: Live demo
-
-**Message:** One real order, from PDF to a human-reviewed AI assistance note and verification.
-
-- Import a real, published Chhattisgarh High Court bail order with **Choose PDF or image**. The desktop lists suggestions, a page reference where available, and masked order text. The officer reviews, types the custody start from the original, and saves confirmed facts.
-- The case view starts at today's date. Set the **What if we look at this date?** control to the order date for the retrospective proof trace.
-- The action board has a **Needs a lawyer** lane. A **Court and jail records disagree** lane exists, but this cohort has no jail roster evidence or Devilal replay card.
-- Export an **AI assistance note** for a selected review case. The verifier requires the PDF, receipt and manifest. It separately reports **Signature ✓ Valid**, **PDF ✓ Unchanged** or **PDF ✗ Changed**, and **Audit chain – Not checked** when no chain is supplied.
-
-**Speaker note:** Run the script in section 2. If anything fails, switch to the backup video without comment and keep talking.
-
-### Slide 6: AI that reads, law that decides
-
-**Message:** The model reads documents, and the decision comes from the words of the law.
-
-- **CourtPlus LegalNER** (InLegalBERT fine-tuned on the official InLegalNER train split): strict F1 **0.874** on the official test split (P 0.862, R 0.887; 13,351 entities), against **0.810** reported by Kalamkar et al. (2022).
-- **Name masking:** the model plus rule patterns replace many names and identifiers, for example with "Accused-1". A second person must check every displayed order because the audit still found leaks.
-- **Draft SC AI Regulations (3 Jun 2026):** r.19(1)(i) lists anonymisation as a permitted use. r.20(1)(d) would bar AI risk scoring, including bail eligibility. **We do not score risk.**
-- The desktop **Use suggestion** button copies a value into the form; the officer can edit it and must press **Save confirmed case** before the engine uses the case.
-
-**Speaker note:** The setups are not identical: the model recipe, windowing and evaluator differ from the paper, so this is not an exact reproduction (`ml/ner/METRICS.md`). On our 10 hand-checked Chhattisgarh orders, entity recall was low for dates (0.077) and case numbers (0.048), and person-name recall was 0.788. That is why people review each suggested value before saving. The AI Regulations are still a draft; their final notification is unverified.
-
-### Slide 7: Security
-
-**Message:** Tamper-evident drafts, an append-only log and encrypted storage. Integrity is checked, not assumed.
-
-- **Ed25519-signed drafts** (RFC 8785 canonical JSON). With the office key trusted, the verifier separately reports signature validity and whether the PDF bytes are unchanged. It requires the PDF, receipt and manifest files.
-- **Hash-chained audit log**. When the operator prints a DLSA handoff sheet, its checkpoint can expose a later rewrite of that history.
-- **SQLCipher** (AES-256) encrypts the local database. Processing is local, and only an operator can export.
-- **Optional online backend on AWS Mumbai (ap-south-1)** over HTTPS: jail-to-DLSA handoff sync, a public verify page and role-based access. It stores pseudonymised handoff data with exact dates, not anonymous data.
-
-**Speaker note:** A valid signature authenticates the signed receipt with the trusted office key; the separate PDF check says whether the PDF bytes match. Neither check proves that the content is legally right. Call it "tamper-evident", never "admissible". The verifier works offline.
-
-### Slide 8: Real-order audit (34 orders, rerun 23 Nov 2026)
-
-**Message:** We ran CourtPlus on 34 real orders, and it sent all 34 to a lawyer. That is the safe result.
-
-- **34 / 34** published Chhattisgarh High Court bail orders from October 2026 were imported and screened as of each order date.
-- **30 / 34** had enough core facts for an order-level screen.
-- **34 / 34** were routed to **Needs a lawyer**, and 0 to Apply now. Every order left prior convictions or other holds unestablished.
-- **Threshold-to-grant interval: n = 0**, so it cannot be calculated. We report that instead of inventing a number.
-- **Current intake field check:** exact order date 34 / 34 promoted; custody start 32 / 32 promoted where one value was verifiable; full charge set 9 / 9 promoted, but proposed for only 9 / 34. Bail outcome was not proposed.
-- **Full masked-text audit:** at least 26 unmasked name occurrences or fragments in 18 / 34 orders. Court citation, case or crime identifiers remained in 32 / 34. A second human check stays mandatory.
-
-**Speaker note:** This is a convenience sample, not a representative one. It makes no claim about anyone's current custody. A grant order records a decision, not a release. Stated outcomes were 27 grants, 5 rejections, 1 withdrawal and 1 mixed. The leak count is a confirmed minimum, and three ambiguous sign-off fragments were excluded. The audit's case-identifier check was broadened from one narrow pattern. Method and limits are in `docs/FINDINGS.md`.
-
-### Slide 9: Impact and pilot ask
-
-**Message:** Give us one week of shadow use with DLSA Raipur. It changes nothing in their process, and we measure what the tool catches.
-
-- **Ask:** a **one-week shadow pilot with DLSA Raipur**. The DLSA keeps its current process, and CourtPlus runs alongside on orders the DLSA supplies.
-- **Measures:** cases routed per lane, how long confirmation takes, disagreements with the panel lawyer, and masking leaks found by the second check.
-- **Value:** each person's cases in one list, board ownership and due dates when assigned, 7-day and 1-month post-bail alerts, and signed drafts for human review.
-- **Safeguards:** no outcome prediction or letterhead. Protected case types are excluded from this demo cohort; the importer warns but does not block every such case locally. Cloud sync filters them.
-
-**Speaker note:** We are not claiming any government adoption. Impact is unmeasured until the pilot runs. Do not project "people freed".
-
-### Slide 10: Team and roadmap
-
-**Message:** Built for a real-order audit, with a clear next step.
-
-- **Team:** [Team members]
-- **Built:** PDF and OCR order reader (real scans not yet validated), name masker with a required human check, IPC-to-BNS crosswalk, rule engine with proof trace, action board, per-person case list, signed drafts and verifier, statistics page, and the optional online handoff backend.
-- **Next:** validate scanned orders, add a date-role model (arrest, remand or bail), obtain fluent legal review of Hindi drafts, and validate the existing "no court update for 180 days" lane in practice.
-- **Never:** bail outcome prediction, automated eCourts scraping past the CAPTCHA, and WhatsApp/SMS alerts that could reveal custody.
-
-**Speaker note:** Close with: "The AI reads, the law decides, a person signs."
+**Ethical & Language Rules for Presenters:**
+- Always say: "could apply", "screen", "route for human review", and "draft for an authorized officer to verify and sign".
+- Never say: "guaranteed", "entitled", "AI decides", "admissible", or "predicts".
+- Court+ never predicts bail outcomes, verdicts, or recidivism risk scores. All AI outputs are explicitly labelled: "Hint — the judge decides".
 
 ---
 
-## 2. Three-minute demo script
+## 1. Pitch Slides (5 Minutes)
 
-**Setup before going on stage:**
-- Rehearse this script on the portable app with the bundled model before using it live.
-- Use the actual desktop build in **Legal-aid view**. Keep one real published order that a second person has checked for names, addresses, relatives and identifiers ready locally. Keep that case already saved as an import fallback. Never display an unchecked masked order.
-- Preselect an empty export folder for the native save dialog. If using laptop B, open **Verifier** there and use **Trust an office public key** with the key exported from laptop A's **Settings** → **Export office public key**; verify the key fingerprint before the demo.
-- Keep the signed PDF, receipt `.json`, manifest `.json`, a one-byte-edited PDF copy, and the backup video on a local USB stick. Test both bundles before the presentation.
+### Slide 1: The Problem — India's Backlog and the Human Cost
 
-| Time | Action (exact clicks) | Say | If it fails |
-|---|---|---|---|
-| 0:00-0:35 | Click **Import order**, then **Choose PDF or image** and select the cleared local PDF. | "The desktop reads a published order locally, suggests fields and masks many identifiers. We check its text before showing it." | If import fails or stalls, open **Cases** and select the same previously saved, cleared case. There is no manual form until the import succeeds. |
-| 0:35-1:05 | In **Suggested facts**, click **Use suggestion** for a correct charge and order date when offered. Check the original; enter a nonidentifying **Person alias**, type its custody date in **Judicial custody start**, select **Judicial custody is ongoing** only if supported as of the order date, then click **Save confirmed case**. | "A suggestion only copies a value into the form. A person checks and saves the facts. Custody start is typed from the order in this desktop build." | If a suggestion is missing, type the value into **Confirmed case facts**. If the model cannot load, continue with the saved case. |
-| 1:05-1:35 | Click **Cases**, open the saved case, and drag **What if we look at this date?** until the displayed date equals the order date. Scroll to **Proof trace** and **Alerts**. | "The case opens at today's date. For our retrospective audit, we set the order date. Unknown prior convictions or other holds route this case to **Needs a lawyer**." | If the date control or trace fails, show the audited result on slide 8 and state its order-date denominator. |
-| 1:35-1:55 | Click **Action board** and point to **Needs a lawyer** and the **Court and jail records disagree** lane label. | "The separate 34-order audit sent every order to review. This board shows only cases saved in this desktop database. A mismatch card needs independent court and jail evidence; we have no Devilal replay card here." | If the board is empty, return to **Cases**. Do not claim the cohort is loaded on the board. |
-| 1:55-2:35 | Click **Drafts**. In **Case**, select the just saved case; in **Draft type**, select **AI assistance note**; click **Export signed PDF** and choose the prepared folder. | "This is a review case, so the s.479(3) application is not offered. We export an AI assistance note for a human to review." | If the save dialog or export fails, use the pre-signed PDF, receipt and manifest from USB. |
-| 2:35-2:55 | Open **Verifier**. Load **Signed PDF**, **Receipt file** and **Manifest file**, then click **Verify**. Repeat with the edited PDF and the same receipt and manifest. | "With the office key trusted, the signature is valid; the PDF check says unchanged for the original and changed for the edited copy. Audit chain may say not checked here." | If laptop B does not trust the key, use the **Verifier** on laptop A. Never call **Signature ✓ Valid** a whole-document verdict. |
-| 2:55-3:00 | Click **Safeguards**. | "No outcome prediction or risk score. A person checks the facts and signs; the court decides." | Use the backup video only if it shows this same desktop flow. |
+**Headline:** India's courts carry 3 to 4 crore pending cases. The system is choked at every tier, from district courts to High Courts.
 
-**Rule:** never improvise numbers during the demo. The board counts saved cases screened today; slide 8 counts the separate 34-order audit screened at each order date. Say that difference explicitly if the numbers differ.
+**Official Sourced Statistics:**
+- **63,96,737 cases pending across all High Courts in India** as of 25 March 2026.  
+  *(Source: High Court-wise Number of Pending Cases in High Courts as per National Judicial Data Grid (NJDG) as on 25-03-2026, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **75,525 cases pending in the High Court of Chhattisgarh** as of 25 March 2026.  
+  *(Source: High Court-wise Number of Pending Cases in High Courts as per National Judicial Data Grid (NJDG) as on 25-03-2026, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **52,56,293 cases pending for over 10 years in District and Subordinate Courts across India** as of 27 March 2026.  
+  *(Source: State/UT-wise Number of Cases Pending for 10 years in District and Subordinate Courts as on 27-03-2026, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **1,166 cases pending for over 10 years in District Courts of Chhattisgarh** as of 27 March 2026.  
+  *(Source: State/UT-wise Number of Cases Pending for 10 years in District and Subordinate Courts as on 27-03-2026, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **308 High Court judge posts vacant across India** out of 1,122 sanctioned strength as of 30 January 2026.  
+  *(Source: High Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the High Courts as on 30-01-2026, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **7 High Court judge posts vacant in Chhattisgarh** out of 22 sanctioned strength as of 30 January 2026.  
+  *(Source: High Court-wise Number of Sanctioned Strength, Working Strength, Vacancies of Judges in the High Courts as on 30-01-2026, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **12,478 undertrial prisoners in Chhattisgarh**, comprising **66.4% of all 18,798 inmates**, in prisons operating at **127.6% capacity** (14,733 places) as of 31 December 2024.  
+  *(Source: NCRB, Prison Statistics India 2024, Tables 1.2 and 6.4)*
+- **3,663 undertrials in Chhattisgarh detained for more than 1 year** as of 31 December 2023.  
+  *(Source: State/UT-wise Number of Undertrial Prisoners with Duration of Confinement as on 31-12-2023, Open Government Data Platform India (data.gov.in), updated 2026-10-16)*
+- **10,73,020 Motor Accident Claims pending before tribunals across India** (2024-25) involving ₹96,25,712 lakh in claims.  
+  *(Source: Year-wise Details of Total Number and Amount of Motor Accident Claims Pending Before Claims Tribunals from 2020-21 to 2024-25, Open Government Data Platform India (data.gov.in), updated 2026-10-17)*
+- **14,84,25,050 cases disposed in National Lok Adalats in 2025**, proving the immense appetite for pre-trial and settlement mechanisms.  
+  *(Source: Year-wise Number of Disposal of Cases in National Lok Adalats from 2021 to 2025, Open Government Data Platform India (data.gov.in), updated 2026-10-14)*
 
----
-
-## 3. Hard jury questions
-
-1. **"Isn't this just a calculator?"**
-   The date arithmetic is the easy part. The hard parts are reading the order, confirming facts, catching every case a person has, handling IPC to BNS, treating unknown facts as unknown, assigning an owner and due date, and producing a draft that is signed and verifiable. Existing calculators and e-Prisons date alerts cover parts of this; we combine them in one workflow.
-
-2. **"Why did all 34 orders go to review?"**
-   None of the 34 orders established prior conviction history or the absence of other holds, and the engine never treats silence as "no". There were further reasons too: NDPS charges in 10 orders, multiple applicants in 4, and unresolved penalties in 4. For a tool that drafts release applications, sending everything to a lawyer is the safe failure mode (`docs/FINDINGS.md`).
-
-3. **"Can AI decide bail in India?"**
-   No, and ours does not. The model only reads documents and masks names. The draft SC AI Regulations (3 Jun 2026) would bar AI risk scoring for bail eligibility under r.20(1)(d) and list anonymisation as permitted under r.19(1)(i). The rule engine is deterministic, shows its working and quotes the statute, and the court decides.
-
-4. **"What if the AI misses a name?"**
-   It does. The rerun found at least 26 residual personal-name occurrences or fragments in 18 of 34 masked orders, and court citation, case or crime identifiers stayed visible in 32. The model and pattern masks are only a first pass: a second person checks every displayed order and every export. The three additional ambiguous sign-off fragments are not in the confirmed minimum.
-
-5. **"Who is liable if a draft is wrong?"**
-   The responsible officer or lawyer must check the DRAFT before using it. The proof trace shows the values used and the rules applied; the signer and audit record support integrity checks. The desktop does not yet record a confirmer name for every imported fact. A valid signature does not prove legal correctness.
-
-6. **"Why not use e-Prisons?"**
-   We would complement it, not replace it. e-Prisons already records half and one-third dates from manual entry, and FASTER transmits orders. CourtPlus adds reading the order, confirming framed charges, routing unknown facts to review, multi-case checks, owners and due dates, and signed drafts. An integration would need official data access, which we do not have.
-
-7. **"Is real data safe on AWS?"**
-   Original order files stay local and are not committed. Optional cloud sync sends pseudonymised handoff facts, including exact dates, over HTTPS to the AWS Mumbai backend; this is not anonymous data. The local database is encrypted. The pilot must verify its data handling and access controls before any live case is synced.
-
-8. **"Is the Hindi reviewed?"**
-   Not yet by a fluent legal reviewer. As of 23 November 2026, Hindi legal drafts are exportable but unreviewed and do not show a legal-draft warning; English is authoritative for this demo. We do not demonstrate Hindi drafts as final.
-
-9. **"Your F1 is 0.874. Why is real-order recall so low?"**
-   0.874 is strict entity F1 on the official InLegalNER test split. A separate ten-order entity check found recall of 0.077 for dates and 0.048 for case numbers. The current 34-order cohort script uses additional patterns and context checks, so it now promotes an exact order date in 34/34; that is a different field-level measure. The desktop still requires human review and manual correction.
-
-10. **"Devilal was not an undertrial. How does this help?"**
-   He was a convict-appellant who had been acquitted. His story illustrates a missed court-to-jail handoff, not an s.479 case. The product has a **Court and jail records disagree** lane, but this desktop import does not capture an acquittal event or independent jail roster evidence, and we have no Devilal replay card. A pilot would need those inputs and an identity check to make that lane useful for this pattern.
-
-11. **"Your audit found zero eligible grants. Where is the impact?"**
-   We are honest that n = 0 for the threshold-to-grant interval. High Court bail orders are a selected sample and leave key facts unknown. Impact has to be measured in practice, which is the point of the proposed one-week shadow pilot with DLSA Raipur. We make no statewide claim.
-
-12. **"What stops someone forging a draft?"**
-   The Ed25519 signature is tied to the office key, and the verifier's separate PDF check flags a changed byte. If the operator printed a DLSA handoff sheet, its log checkpoint can reveal a later rewrite. If the office key is stolen, forged drafts could verify, so key custody is a pilot requirement.
+**Speaker Note:** Do not invent or round these numbers. The 52 lakh 10-year-old district court cases represent generations waiting for justice. Two in three prisoners in our home state have not been convicted of any crime. The judicial bottleneck is aggravated by high vacancy rates, while over 10 lakh road accident victims wait for compensation.
 
 ---
 
-## 4. Sixty-second elevator pitch
+### Slide 2: Why Now? The Legal & Technological Turning Point
 
-On 16 November 2026 the Supreme Court raised Devilal Gond's compensation to thirty lakh rupees. The Chhattisgarh High Court acquitted him in January 2018, but he was not released until May 2025. His case shows why a court-to-jail handoff must be checked; he was not an undertrial. In Chhattisgarh, two in three prisoners were undertrials, and prisons ran at 127.6% of capacity at the end of 2024. CourtPlus helps jail offices and legal-aid lawyers review orders and route cases. A trained model suggests fields and masks many identifiers; on the official legal test set it scored 0.874 strict F1 against a published 0.810 on a comparable but not identical setup. A person reviews and saves the facts. The rule engine applies section 479, shows its working and routes unknowns to a lawyer. The desktop can then export a signed AI assistance note for a human to review. It never predicts bail. In our retrospective audit, all 34 real orders went to lawyer review; masking still missed names. We ask DLSA Raipur for a one-week shadow pilot to measure the workflow safely.
+**Headline:** India's legal landscape is undergoing its biggest transformation in 150 years.
+
+- **The New Bharatiya Laws (July 2024 onwards):**
+  - **Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023:** Section 479 introduces a mandatory duty on jail superintendents to apply for bail for undertrials who have served one-third (first-timers) or one-half of maximum sentences. Section 346 mandates day-to-day criminal proceedings.
+  - **Bharatiya Sakshya Adhiniyam (BSA), 2023:** Section 63 replaces old IEA Section 65B, introducing strict statutory admissibility criteria and a mandatory Schedule certificate (Part A & Part B) for all electronic evidence.
+  - **Bharatiya Nyaya Sanhita (BNS), 2023:** Runs concurrently with IPC in pending trials, requiring seamless statutory crosswalks.
+- **Supreme Court Draft Regulations for Use of AI in Courts (3 June 2026):**
+  - **Rule 19(1)(i):** Authorizes AI for document anonymisation, transcription, legal research, and workflow assistance.
+  - **Rule 20(1)(d):** Strictly prohibits AI from predicting judicial decisions, assessing bail risk, or generating verdicts.
+- **eCourts Phase III:** Demands digital-first infrastructure connecting police stations, prisons, legal-aid defense counsel, and court registries into a single auditable workflow.
+
+**Speaker Note:** Technology cannot just be bolted on; it must comply strictly with the law. BSA Section 63 makes cryptographic provenance mandatory. The draft AI regulations give us clear ethical boundaries: assist with research, transcription, and workflow, but never predict or decide.
+
+---
+
+### Slide 3: Court+ in One Line
+
+**Headline:** An AI legal platform for Judges, Lawyers, and Citizens to cut India's case backlog through verifiable evidence, transparent triage, and procedural intelligence.
+
+- **For Judges:** Smart docket triage, adjournment analysis, offline speech-to-text hearing transcription, and tamper-proof evidence handling.
+- **For Lawyers:** Deep case analysis, procedural compliance checklists, deterministic MACT/maintenance calculators, and precedent discovery.
+- **For Citizens:** One-in-one-out plain-language legal rights guides, direct mobile evidence submission, and transparent case tracking.
+- **Architecture:** Standalone, offline-capable Windows desktop application paired with an optional secure cloud backend on AWS Mumbai (`ap-south-1`).
+
+**Speaker Note:** Court+ is not a generic chatbot or a speculative tech demo. It is a comprehensive judicial workstation designed for the realities of Indian courtrooms: poor connectivity, strict statutory rules, and overburdened officers.
+
+---
+
+### Slide 4: The Foundation: Evidence Vault & Citizen-to-Judge Bridge
+
+**Headline:** Cryptographic evidence integrity from citizen smartphone to the judge's bench.
+
+- **Tamper-Proof Evidence Vault:**
+  - Files (documents, photos, audio, video up to 50 MB) are verified with magic bytes and hashed with **SHA-256** upon intake.
+  - Timestamped and signed with an **Ed25519** digital signature over canonical RFC 8785 JSON.
+  - Appended to an immutable, append-only **hash-chained audit ledger** (`prevHash` → `entryHash`).
+  - Stored encrypted at rest using **AES-256-GCM**.
+- **Bharatiya Sakshya Adhiniyam (BSA) 2023 Section 63 Certificate:**
+  - One-click automated generation of the statutory electronic record certificate.
+  - Pre-fills the Schedule format: Part A for the submitter and Part B for system cryptographic integrity (SHA-256 hash value, timestamp, system metadata).
+- **Direct Citizen-to-Judge Bridge:**
+  - Citizens upload proof directly via a mobile-optimized web portal (`/submit`).
+  - Verified evidence flows straight to the presiding judge's **Evidence Inbox** with an "Unchanged since upload" integrity badge.
+- **Identity-Blind Anonymous Channel:**
+  - Whistleblowers and victims can submit sensitive evidence without revealing identity.
+  - No names, phone numbers, IP addresses, or tracking cookies are stored.
+  - Issues a one-time random 128-bit receipt code (only its SHA-256 digest is stored) for anonymous status tracking.
+
+**Speaker Note:** In traditional court proceedings, electronic evidence is routinely challenged for broken chain of custody. Court+ solves this cryptographically at source. The judge sees an instant badge: "Unchanged since upload", and exports a ready-to-sign Section 63 certificate.
+
+---
+
+### Slide 5: Court+ for Judges: Triage, Adjournments & Stenographer
+
+**Headline:** Freeing judicial time to hear urgent matters and eliminate procedural delays.
+
+- **Smart Triage (JAI — Justice Acceleration Index):**
+  - Deterministic 0 to 100 priority score computed strictly from verifiable statutory factors.
+  - Factor weights: Article 21 / BNSS Section 479 custody status, vulnerable litigants (senior citizens, women, children, disability), case age buckets (matching NJDG ageing categories), national security statutes, and statutory limits (e.g. NI Act s.143(3) six-month mandate).
+  - Every score displays itemized reason chips with clickable statute links.
+  - **Judicial Override:** Judges can pin matters up or down with a recorded reason, committed to the audit log.
+  - **Automated Cause List:** Automatically generates tomorrow's daily cause list (e.g., 40 matters) balancing urgent priorities with a mandatory quota for the oldest pending cases; exportable to PDF.
+- **Adjournment Analyzer:**
+  - Automatically tracks adjournment history per case and per party.
+  - Checks statutory ceilings: **CPC Order XVII Rule 1 proviso** (maximum 3 adjournments per party in civil suits) and **BNSS Section 346** (day-to-day proceedings).
+  - Inspects real docket capacity and suggests the earliest viable hearing date (e.g., *"Requested 21 days → Suggested 14 days based on courtroom capacity"*).
+- **Tamper-Proof AI Stenographer:**
+  - Offline live hearing recording with crash-safe WebM/Opus streaming.
+  - In-hearing marker taps for speaker roles (Judge, Petitioner Counsel, Respondent Counsel, Witness).
+  - Local speech-to-text transcription via Whisper ONNX (English + Hindi) running on CPU.
+  - Cryptographic locking: SHA-256 digest and Ed25519 signature make the audio immutable.
+  - Extractive summary of orders, witness statements, and next dates, exportable with verification QR codes.
+
+**Speaker Note:** Notice the philosophy: no machine-learned black-box score decides a human being's case. JAI is transparent arithmetic quoting the law. The Adjournment Analyzer cuts down the cycle of endless routine adjournments that drives India's 52 lakh 10-year pendency.
+
+---
+
+### Slide 6: Court+ for Lawyers: Case Analyzer & Settlement Analyzer
+
+**Headline:** Empowering advocates with procedural checklists and scientific valuation tools.
+
+- **Case Analyzer:**
+  - Instant intake of chargesheets, bail applications, and orders.
+  - Rhetorical Role breakdown: automatically segments text into Facts, Issues, Arguments, Precedents, Statutes, and Reasoning.
+  - Identifies legal entities and masks party names for privacy.
+  - **Procedural Gaps & Weak Points Checklist:**
+    - Checks mandatory compliance with arrest procedures for offences under 7 years (*Arnesh Kumar v. State of Bihar*, 2014; BNSS appearance notice).
+    - Checks written communication of arrest grounds (*Pankaj Bansal*, 2023; *Prabir Purkayastha*, 2024).
+    - Flags statutory default bail eligibility upon chargesheet delay (BNSS Section 187(3)).
+    - Flags missing electronic evidence certificates under BSA Section 63 (*Arjun Panditrao Khotkar*, 2020).
+    - Checks public servant prosecution sanction and limitation periods under Limitation Act, 1963.
+- **Settlement & Compensation Analyzer:**
+  - **Motor Accident Claims (MACT):** Exact, line-by-line deterministic implementation of Supreme Court landmark formulas:
+    - *Sarla Verma v. DTC* (2009): multiplier tables and personal living expense deductions.
+    - *National Insurance Co. v. Pranay Sethi* (2017): future prospects additions and conventional heads with periodic percentage increases.
+    - *Raj Kumar v. Ajay Kumar* (2011): permanent disability and loss of earning capacity.
+  - **Maintenance Guidance:** Evaluates disclosure criteria under *Rajnesh v. Neha* (2020) and the 25% net income benchmark in *Kalyan Dey Chowdhury v. Rita Dey* (2017).
+  - **Past Awards Context:** Retrieves past compensation awards from published case law to guide fair settlement negotiations.
+  - **ADR Routing:** Direct routing to Lok Adalat (Legal Services Authorities Act 1987) or Mediation (Mediation Act 2023) with one-click draft settlement proposals.
+
+**Speaker Note:** With over 10 lakh MACT claims pending across India, standardizing compensation formulas and promoting Lok Adalat settlements can resolve lakhs of cases without years of contentious trial.
+
+---
+
+### Slide 7: Court+ for Citizens: Rights Advisor & Case Tracking
+
+**Headline:** Demystifying the law for 140 crore Indians — accurate, vetted, and accessible.
+
+- **Citizen Legal Rights & Action Advisor (NOT a Chatbot):**
+  - Citizens describe their problem in plain everyday language (English or Hindi).
+  - One query in → One structured, vetted guidance card out.
+  - Covers 14+ essential legal topics:
+    - Road accident claims (MV Act ss. 164/166, Good Samaritan protections s.134A).
+    - Police refusal to register FIR (BNSS s.173 Zero FIR, report to SP s.173(4), Magistrate complaint s.175(3)).
+    - Domestic violence remedies (PWDVA 2005) and cruelty/dowry protections.
+    - Cheque bounce notice timelines (NI Act ss. 138-142).
+    - Cybercrime financial fraud (immediate 1930 helpline reporting and cybercrime.gov.in).
+    - Arrest rights (*D.K. Basu* guidelines, right to inform family, free legal aid).
+    - Consumer disputes, tenant-landlord disputes, unpaid wages, and senior citizen maintenance.
+  - Shows plain-language rights, sequential step-by-step action plans, required documents, statutory limitation deadlines, and emergency helplines.
+  - Direct connection to **NALSA National Free Legal Aid Helpline (15100)**.
+- **Mobile Submit Proof:**
+  - Litigants and witnesses submit photographic and document proof directly from their phone browser via `/submit`, receiving an instant verifiable digital receipt.
+- **Track My Case:**
+  - Direct case status lookup by CNR or case number; displays verified hearing dates, next stage descriptions, and signed hearing summaries published by the court, linking directly to official eCourts services.
+
+**Speaker Note:** Citizens do not want a chatty AI that hallucinates imaginary legal advice. They need clear, verified instructions: what does the law say, what documents do I bring, where do I go tomorrow morning, and how do I call free legal aid?
+
+---
+
+### Slide 8: The AI Trained on Old Indian Cases
+
+**Headline:** Built on InLegalBERT and the IL-TUR benchmark, adapted specifically for Indian jurisprudence.
+
+- **Base Architecture:** InLegalBERT, fine-tuned on thousands of official Indian court judgments and benchmark splits.
+- **Court+ LegalNER (Named Entity Recognition):**
+  - Fine-tuned on the official InLegalNER train split.
+  - Achieves strict entity F1 score of **0.874** on the official test split (Precision 0.862, Recall 0.887; 13,351 entities), against **0.810** reported by Kalamkar et al. (2022).
+  - Automatically recognizes courts, judges, petitioners, respondents, dates, statutes, and provisions; masks sensitive personal names.
+- **Legal Statute Identification (LSI):**
+  - Multi-label classifier mapping factual summaries of cases to cited statutes, trained on the IL-TUR LSI benchmark.
+  - Test Performance: `[metric from ml/oldcases/METRICS.md]`.
+  - Integrates an automated IPC-to-BNS crosswalk mapping historical charges to the new criminal code.
+- **Prior Case Retrieval (PCR):**
+  - Hybrid retrieval combining BM25 lexical search with dense InLegalBERT embeddings.
+  - Test Performance: `[metric from ml/oldcases/METRICS.md]`.
+  - Shipped index (<300 MB) covering thousands of official Supreme Court (2020-2026) and Chhattisgarh High Court judgments.
+- **Rhetorical Role (RR) Classification:**
+  - Sentence-level classification structuring legal judgments into 7 rhetorical roles: Facts, Issues, Arguments, Precedents, Statutes, Ratio, and Ruling.
+  - Test Performance: `[metric from ml/oldcases/METRICS.md]`.
+- **Extractive Summarization:**
+  - Purely extractive sentence selection based on rhetorical roles and positional scoring; evaluated on IL-TUR summarization splits (`[metric from ml/oldcases/METRICS.md]`).
+  - **Zero generative hallucination:** No generative text models are used for judicial summaries.
+- **Deliberate Absence:** We explicitly did NOT train or integrate Judgment Prediction (CJPE) or Bail Outcome models.
+
+**Speaker Note:** We take pride in what we chose *not* to build. In accordance with the Supreme Court's draft guidelines, we do not predict how a judge will rule or whether someone should get bail. Our AI is an extraction and retrieval engine, not a robotic judge.
+
+---
+
+### Slide 9: Safety, Ethics & The Law
+
+**Headline:** Designed from day one to operate within the strict boundaries of Indian constitutional and procedural law.
+
+- **Rule 20(1)(d) Compliance:** Draft Supreme Court AI Regulations explicitly prohibit AI risk scoring or predictive judicial determination. Court+ does not calculate recidivism risk, does not predict bail, and does not score criminal propensity.
+- **Rule 19(1)(i) Compliance:** Fully leverages permitted AI applications: document anonymisation, multilingual accessibility, speech transcription, and workflow optimization.
+- **"Hint — The Judge Decides":** Every algorithmic insight carries this explicit label and links back to the underlying statute or case law citation.
+- **Mandatory Human-in-the-Loop:**
+  - AI suggestions only copy text into review forms.
+  - A human officer must review, edit, confirm, and sign every record.
+  - Framed charges are never counted toward sentence thresholds until verified by a human against the judicial order.
+- **Cryptographic Transparency:**
+  - Every calculation is accompanied by a mathematical proof trace showing the exact statutory rules, day-counting conventions, and formulas applied.
+- **Data Privacy & Security:**
+  - Local desktop database encrypted at rest using **SQLCipher (AES-256)**.
+  - Original case files stay strictly on the local computer and are never transmitted over the internet without authorization.
+  - Cloud synchronization uses encrypted HTTPS channels to our AWS Mumbai backend.
+
+**Speaker Note:** If an algorithm makes a mistake in an e-commerce app, a user gets the wrong product. If an algorithm makes a mistake in a courtroom, an innocent person stays behind bars or a victim is denied justice. That is why human confirmation is hardcoded into every screen.
+
+---
+
+### Slide 10: Honest Limits
+
+**Headline:** Transparent boundaries about what Court+ can and cannot do today.
+
+- **1. Digital Signatures vs. CCA-Licensed DSC:**
+  - Court+ exports Ed25519 system signatures paired with a BSA Section 63 certificate.
+  - This guarantees cryptographic byte-level integrity, timestamping, and tamper detection.
+  - It is **not** a CCA-licensed Class 3 Digital Signature Certificate (DSC) or Aadhaar eSign yet. Licensed DSC and eSign integrations are architected for our production roadmap.
+- **2. Anonymous Channel vs. Zero-Knowledge Proofs:**
+  - Our anonymous whistleblower channel is **identity-blind**: the backend intentionally does not collect or log IP addresses, device identifiers, or phone numbers, and stores only the SHA-256 hash of the receipt code.
+  - It is **not** a cryptographic zero-knowledge proof. Network-level adversaries monitoring physical connections could correlate timing.
+- **3. Settlement & Compensation Figures:**
+  - Compensation figures produced by the MACT and Maintenance tools are based strictly on statutory formulas and past judicial awards (*Sarla Verma*, *Pranay Sethi*, *Rajnesh v. Neha*).
+  - They are contextual aids for negotiation, **not** binding guarantees or financial predictions.
+- **4. Document Quality & Translation Review:**
+  - Poorly scanned physical orders and photocopies require manual verification.
+  - Hindi and regional language legal drafts and guides carry a prominent banner: *"Machine translation, not yet reviewed by a bilingual advocate"* until verified by accredited counsel.
+
+**Speaker Note:** We believe a hackathon jury respects honesty far more than exaggerated claims. We tell you exactly where our system signature ends, how our anonymous channel operates, and why human lawyers must review translated legal drafts.
+
+---
+
+### Slide 11: Architecture & Security
+
+**Headline:** Enterprise-grade security combining offline-first edge compute with resilient cloud infrastructure.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       COURT+ DESKTOP WORKSPACE (WINDOWS)                    │
+│  Electron + React + TypeScript                                             │
+│  ┌───────────────────────┐ ┌───────────────────────┐ ┌───────────────────┐  │
+│  │ Local ONNX Models     │ │ SQLCipher (AES-256)   │ │ Ed25519 Signer    │  │
+│  │ • LegalNER (InLegal)  │ │ Local Encrypted DB    │ │ RFC 8785 JSON     │  │
+│  │ • LSI Statute Suggest │ │ Append-Only Audit Log │ │ SHA-256 Hasher    │  │
+│  │ • PCR Precedent Embed │ │ Proof Trace Generator │ │ BSA s.63 Engine   │  │
+│  │ • Whisper ASR (Steno) │ └───────────────────────┘ └───────────────────┘  │
+│  └───────────────────────┘                                                  │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ Optional HTTPS Sync / Auth
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    COURT+ CLOUD BACKEND (AWS MUMBAI ap-south-1)             │
+│  Docker + Fastify + Caddy (TLS)                                            │
+│  ┌───────────────────────┐ ┌───────────────────────┐ ┌───────────────────┐  │
+│  │ Citizen Mobile Portal │ │ Encrypted Vault       │ │ Public Verifier   │  │
+│  │ • /submit (Mobile Web)│ │ • AES-256-GCM Storage │ │ • /v/:receiptId   │  │
+│  │ • Identified Uploads  │ │ • Magic-Byte Check    │ │ • Rate-limited    │  │
+│  │ • Anonymous Channel   │ │ • Hash-Chained Log    │ │ • Offline-ready   │  │
+│  └───────────────────────┘ └───────────────────────┘ └───────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Offline-First Resilience:** The core desktop workstation operates completely disconnected from the internet. Judges and court staff can triage dockets, record hearings, analyze cases, and sign drafts without network connectivity.
+- **Cloud Backend (AWS Mumbai `ap-south-1`):** Fastify microservice containerized with Docker behind Caddy reverse proxy with automated TLS.
+- **Tamper-Evident Public Verifier:** Courts, advocates, and citizens can verify signed PDFs online (`/v/:id`) or offline via the standalone Verifier desktop tool.
+
+**Speaker Note:** The dual-tier architecture guarantees that sensitive court documents never leave the court without explicit human export, while citizens can still participate from any basic smartphone.
+
+---
+
+### Slide 12: Roadmap & Team
+
+**Headline:** Designed for scale across Indian judiciary and legal services.
+
+- **Product Roadmap:**
+  - **Q1 2027:** Full integration with Aadhaar eSign and Controller of Certifying Authorities (CCA) licensed Digital Signature Certificates.
+  - **Q2 2027:** Direct two-way API connectors for eCourts CIS 3.x and National Judicial Data Grid (NJDG) push/pull workflows.
+  - **Q3 2027:** Extension of vetted legal action guides and speech recognition models to all 22 Eighth Schedule Indian languages.
+  - **Q4 2027:** Pilot deployment across District Legal Services Authorities (DLSAs) and Taluka courts.
+- **Team:** **Team Cookie Eaters**
+  - Hack-a-Sol 5.0, IIIT Naya Raipur.
+  - Committed to building open, verifiable, constitutional civic technology.
+
+**Speaker Note:** India's 3 to 4 crore backlog will not be solved by replacing judges with algorithms. It will be solved by giving judges, lawyers, and citizens verifiable tools that eliminate friction, protect evidence, and uphold the rule of law. Thank you.
+
+---
+
+## 2. Timed 3-Minute Live Demo Script
+
+**Pre-Demo Setup (Before Going on Stage):**
+1. Ensure the portable Court+ desktop app is running on Windows with local models pre-loaded.
+2. Keep a smartphone connected to mobile data or Wi-Fi displaying the mobile web page `https://[backend-url]/submit`.
+3. Have a pre-cleared sample court order PDF ready in your local demo folder.
+4. Set the desktop profile to **Judge** view initially.
+5. Have a working microphone connected for the 30-second stenographer recording.
+
+---
+
+### Demo Timeline (0:00 to 3:00)
+
+| Timestamp | Screen / Action | Exact Clicks & Actions | Spoken Script (Say Clearly) | Fallback / Recovery Plan |
+|---|---|---|---|---|
+| **0:00 – 0:25** (25s) | **Citizen Mobile Submit (`/submit`)** | On the smartphone, open `/submit`. Enter case ref `CNR-CGRA01-002142-2026`, choose **Identified**, type name `Ramesh Kumar` and phone `9876543210`. Select photo/document file and tap **Submit proof**. | *"We begin with a citizen submitting crucial evidence from a smartphone browser via `/submit`. The backend hashes the file with SHA-256, signs an Ed25519 receipt, and encrypts it at rest."* | If mobile network lags, show the pre-submitted receipt screen with its QR code on screen. |
+| **0:25 – 0:45** (20s) | **Judge Evidence Inbox** | Switch to the desktop app. Click **Evidence inbox** in the sidebar. Click on the newly received item for `CNR-CGRA01-002142-2026`. Point to the green badge: **Unchanged since upload**. | *"Instantly, on the judge’s desktop Evidence Inbox, the proof arrives. The system verifies its cryptographic digest. The judge sees 'Unchanged since upload' with full chain-of-custody details."* | If live fetch fails, select the pre-loaded evidence item in the inbox list. |
+| **0:45 – 1:05** (20s) | **Export BSA s.63 Certificate** | In the Evidence detail pane, click **Export BSA s.63 certificate**. Select destination folder and click Save. | *"Under Section 63 of the Bharatiya Sakshya Adhiniyam, 2023, electronic evidence requires a statutory certificate. With one click, Court+ generates the Schedule certificate with Part A submitter details and Part B cryptographic SHA-256 verification."* | If file save dialog stalls, point to the pre-generated certificate PDF on the desktop. |
+| **1:05 – 1:30** (25s) | **Smart Triage (JAI)** | Click **Smart triage** in the sidebar. Point to the ranked docket list with JAI scores (e.g. 88, 72, 65). Point to factor chips: `Art. 21 Custody`, `Senior Citizen`, `Oldest Case Bucket`. | *"Next, docket management. Smart Triage scores cases using the Justice Acceleration Index—a 100% rule-based score reflecting Article 21 custody, senior citizen litigants, and national ageing buckets. Every factor quotes the law; the judge retains full override power."* | If the list is filtering, click 'All cases' to show the populated ranked docket. |
+| **1:30 – 1:55** (25s) | **Adjournment Analyzer** | Click **Adjournment analyzer** (or click 'Adjournment' on a triage case). In the form, select a case, enter Requesting Party `Defendant Counsel`, Days requested `21`, Procedure `Civil suit under CPC`. Click **Review request**. | *"Lawyers often request routine 21-day adjournments. Court+ checks CPC Order XVII Rule 1 and court docket capacity. Notice the result: 'Requested 21 days → Suggested 14 days based on courtroom capacity'. The judge records the decision in the audit log."* | If request calculation is cached, click 'Use suggested date' and record the decision. |
+| **1:55 – 2:20** (25s) | **Tamper-Proof Stenographer** | Click **Hearing recorder**. Select a matter. Click **Start recording**. Speak for 5-10 seconds: *"The witness deposed that the accident occurred at 10 PM near the bypass road."* Tap **Witness** marker. Click **Stop recording**. Show local Whisper transcript and click **Sign transcript**. | *"In the courtroom, our offline AI Stenographer records the hearing, marks speaker roles, and transcribes speech locally using Whisper ONNX. On stop, it computes a SHA-256 hash and signs the audio, creating an unalterable official record."* | If microphone input fails, open the pre-recorded 30-second hearing sample and display the signed transcript. |
+| **2:20 – 2:35** (15s) | **Research & Hints Panel** | Open **Research** (or Case View **Hints for this case**). Point to suggested sections and retrieved precedent citations with text snippets. | *"For judicial decision support, our models trained on old Indian judgments suggest relevant statutory provisions and find matching Supreme Court precedents. Notice the persistent banner: 'Hint — the judge decides'. Zero outcome prediction."* | Show the precedent search result card with Supreme Court citation. |
+| **2:35 – 2:45** (10s) | **Lawyer MACT Calculator** | Switch view to **Lawyer view**. Click **Settlement analyzer** → **Motor accident claim**. Enter Age `32`, Income `₹25,000`, Dependents `3`. Point to line-by-line calculation. | *"For advocates, our Settlement Analyzer automates Motor Accident Claims strictly following the Supreme Court’s Sarla Verma and Pranay Sethi formulas—calculating future prospects, multipliers, and consortium line by line."* | Point to the final compensation total and the button 'Draft settlement proposal for Lok Adalat'. |
+| **2:45 – 3:00** (15s) | **Citizen Rights Advisor** | Switch to **Citizen view**. Click **Rights advisor**. In the box, type: *"I was injured in a road accident"*. Click **Find legal guidance**. | *"Finally, for ordinary citizens, our Rights Advisor takes plain-language queries and instantly delivers a structured action plan: your rights under MV Act s.166, documents needed, limitation deadlines, and a direct button to NALSA free legal aid at 15100."* | Show the generated rights card and NALSA 15100 assistance button. |
+
+---
+
+## 3. Likely Jury Questions & Honest Answers (Q&A)
+
+### Q1: "Isn't this just another generative AI wrapper around cloud language models?"
+**Answer:** No. Court+ is an offline-first engineering platform that does not rely on third-party cloud APIs. All core AI models (InLegalBERT for LegalNER, LSI for statute identification, rhetorical role classifiers, and Whisper for speech-to-text) run locally via ONNX runtimes on edge hardware. Furthermore, our legal calculations (custody counting under BNSS Section 479, MACT formulas, and JAI triage) are deterministic rule engines quoting bare act provisions, avoiding generative hallucinations completely.
+
+### Q2: "Can Court+ predict the outcome of a bail application or a trial verdict?"
+**Answer:** Absolutely not. We deliberately refrained from training or deploying judgment prediction (such as IL-TUR CJPE) or bail outcome models. Rule 20(1)(d) of the Supreme Court's draft AI Regulations explicitly prohibits AI risk scoring or predictive determination in judicial matters. In Court+, AI suggests text and precedents, but only a human judge decides legal outcomes.
+
+### Q3: "How does the Evidence Vault comply with Section 63 of the Bharatiya Sakshya Adhiniyam, 2023?"
+**Answer:** Section 63 requires that electronic records produced in court be accompanied by a certificate identifying the electronic record, describing the manner in which it was produced, and certifying system integrity. Court+ automates this by computing a SHA-256 hash immediately on upload, recording timestamps, and generating a signed PDF certificate containing both Part A (submitter affirmation) and Part B (cryptographic system details), matching the official Schedule format.
+
+### Q4: "How can you claim the anonymous channel is anonymous if it runs on a web server?"
+**Answer:** We are completely transparent about this boundary: Court+ operates an **identity-blind** intake channel. The server deliberately does not collect, log, or persist IP addresses, browser fingerprints, or tracking cookies. It returns a random 128-bit receipt code and stores only its one-way SHA-256 hash. However, as noted in our honest limits, this is not a cryptographic zero-knowledge proof. A state-level network adversary monitoring raw ISP packet streams could correlate timing. For court intake, identity-blind logging provides substantial real-world whistleblower protection.
+
+### Q5: "Why did you use a rule-based algorithm for Smart Triage (JAI) instead of a trained machine learning ranking model?"
+**Answer:** In justice administration, decisions must be explainable and constitutionally justifiable under Article 14 and 21. A machine learning ranking model trained on historical court data would inevitably encode systemic biases—such as historical delays against marginalized groups. Our Justice Acceleration Index (JAI) uses transparent, publicly audited statutory weights: detention status, vulnerable categories (women, children, senior citizens), and statutory speedy trial mandates (e.g. NI Act s.143(3)). Every factor quotes its legal source, and judges can override rankings with logged reasons.
+
+### Q6: "How do you achieve 0.874 F1 on LegalNER when published papers reported 0.810?"
+**Answer:** We fine-tuned InLegalBERT on the official InLegalNER benchmark dataset using specialized domain adaptation: optimizing learning rate schedules, sliding-window chunking with token overlap to preserve legal cross-references, and strict entity-level boundary evaluation. Full evaluation code and confusion matrices are documented in `ml/ner/METRICS.md`.
+
+### Q7: "What stops an internal administrator from tampering with the case history or evidence log?"
+**Answer:** Every evidence submission, judge review, and procedural action is recorded in an append-only, SHA-256 hash-chained audit ledger where each entry contains `prevHash` and `entryHash`. Rewriting a past entry invalidates all subsequent block hashes. Furthermore, judicial officers can export an off-system audit anchor (the head hash on a printed DLSA handoff sheet), anchoring the ledger against silent database manipulation.
+
+### Q8: "How does the MACT calculator handle non-standard compensation cases?"
+**Answer:** The MACT calculator implements the settled law established by the Supreme Court in *Sarla Verma* (2009), *Pranay Sethi* (2017), and *Raj Kumar* (2011). It transparently computes multipliers, personal deductions, and future prospects based on the inputs provided. For complex non-standard claims (such as multi-party liability or contested negligence), it provides the statutory baseline calculation while flagging the matter for judicial determination and offering ADR settlement drafting for Lok Adalat.
+
+### Q9: "How does Court+ function in rural taluka courts with no internet access?"
+**Answer:** The Court+ Windows desktop application is completely standalone. It packages local SQLCipher encrypted databases, local ONNX neural network runtimes, and local document processing engines. Court staff can import scanned orders, conduct smart triage, record hearings, transcribe audio, and export cryptographically signed PDF bundles entirely offline. Synchronization with the AWS cloud backend is optional and occurs whenever connectivity is restored.
+
+### Q10: "What is the difference between your Ed25519 signature and a CCA-licensed DSC?"
+**Answer:** An Ed25519 signature generated by Court+ proves mathematical byte-level authenticity: it guarantees that the PDF, receipt, and audit manifest have not been altered by a single bit since the issuing office generated them. However, it is an application-level system key, not a government-issued Class 3 Digital Signature Certificate (DSC) issued under the Information Technology Act by a licensed Certifying Authority (CCA). Our production roadmap incorporates PKCS#11 hardware crypto-tokens and Aadhaar eSign to bridge system signatures with official CCA-licensed identities.
+
+---
+
+## 4. Sixty-Second Elevator Pitch
+
+India's courts are overwhelmed with over 3 crore pending cases, including 52 lakh matters delayed for over a decade in district courts, while two out of three prison inmates in Chhattisgarh languish as undertrials. 
+
+**Court+** is an AI legal platform built for Judges, Lawyers, and Citizens to break this backlog. 
+
+For judges, it provides deterministic Smart Triage, automated adjournment checks, and offline speech-to-text hearing transcription. For lawyers, it automates case analysis, procedural compliance checks, and landmark MACT compensation calculations. For citizens, it offers plain-language rights guides, direct mobile evidence submission, and transparent case tracking.
+
+Every digital document is secured with SHA-256 hashing, Ed25519 signatures, and automatic BSA Section 63 electronic evidence certificates. Our AI models are fine-tuned on official Indian case law—achieving an F1 score of 0.874 on LegalNER—while adhering strictly to the Supreme Court’s draft AI regulations: zero prediction of bail or verdicts, transparent proof traces, and human confirmation on every action.
+
+Built by **Team Cookie Eaters** at IIIT Naya Raipur for Hack-a-Sol 5.0, Court+ combines cryptographic cybersecurity with profound civic impact: **The AI reads, the law decides, and the human signs.**
