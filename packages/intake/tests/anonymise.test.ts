@@ -84,3 +84,46 @@ it('keeps abbreviated addresses covered through the end of the address', () => {
   const text = 'Fictional person, resident of H. No. 123 Example Lane. The hearing ended.';
   expect(anonymise(text, []).text).toBe('Fictional person, resident of [Address]. The hearing ended.');
 });
+
+it('masks an entire fictional alias chain and reuses its pseudonym for each spelling', () => {
+  const text = '1 - Fiction Alpha @ Fable @ कल्पना पात्र S/o Trial Parent\n... Applicant\n'
+    + 'FICTION ALPHA met someone. fable filed a note. कल्पना पात्र signed it.';
+  const result = anonymise(text, []);
+  expect(result.text).toBe('1 - Accused-1 S/o [Relative]\n... Applicant\n'
+    + 'Accused-1 met someone. Accused-1 filed a note. Accused-1 signed it.');
+  expect(result.mapping.get('Fable')).toBe('Accused-1');
+  expect(result.mapping.get('कल्पना पात्र')).toBe('Accused-1');
+});
+
+it('masks fictional names across a soft line break and preserves paragraph and page boundaries', () => {
+  const text = 'Fiction Alpha S/o Trial Parent\n... Applicant\n'
+    + 'The statement of FICTION\n  alpha was filed. Fictional Alpha was a heading.\n'
+    + 'Fiction\n\nAlpha appears in a new paragraph. Fiction\fAlpha starts a new page.';
+  expect(anonymise(text, []).text).toBe('Accused-1 S/o [Relative]\n... Applicant\n'
+    + 'The statement of Accused-1 was filed. Fictional Alpha was a heading.\n'
+    + 'Fiction\n\nAlpha appears in a new paragraph. Fiction\fAlpha starts a new page.');
+});
+
+it('matches a fictional name found by the model across a line break against an inline repeat', () => {
+  const name = 'Fiction\r\n Alpha';
+  const text = `${name} appeared. fiction alpha filed a note.`;
+  const entities: Entity[] = [{ label: 'PETITIONER', text: name, start: 0, end: name.length, score: 0.99 }];
+  expect(anonymise(text, entities).text).toBe('Accused-1 appeared. Accused-1 filed a note.');
+});
+
+it('masks a fictional party name with a single extra letter after a narrative reference', () => {
+  const text = 'Fiction Alpha S/o Trial Parent\n... Applicant\n'
+    + 'The police seized the parcel from the possession of\nFiction Alppha. '
+    + 'A label read Fiction Alppha. A statement of Fiction Alphyx followed.';
+  expect(anonymise(text, []).text).toBe('Accused-1 S/o [Relative]\n... Applicant\n'
+    + 'The police seized the parcel from the possession of\nAccused-1. '
+    + 'A label read Fiction Alppha. A statement of Fiction Alphyx followed.');
+});
+
+it.each(['Late', 'x'])('masks a fictional relative after a malformed kinship marker (%s)', suffix => {
+  const text = `Fiction Alpha S/o${suffix} Trial Alpha, aged about 30, R/o Sample Lane\n... Applicant\n`
+    + 'The notation s/otherwise was quoted.';
+  const entities: Entity[] = [{ label: 'PETITIONER', text: 'Fiction Alpha', start: 0, end: 'Fiction Alpha'.length, score: 0.99 }];
+  expect(anonymise(text, entities).text).toBe('Accused-1 S/o [Relative], R/o [Address]\n... Applicant\n'
+    + 'The notation s/otherwise was quoted.');
+});
