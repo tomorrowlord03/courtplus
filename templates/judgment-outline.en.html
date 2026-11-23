@@ -1,0 +1,43 @@
+<p><strong>In the Court of:</strong> <bdi>{{court}}</bdi></p>
+<p><strong>Case Reference:</strong> <bdi>{{caseNo}}</bdi></p>
+<p><strong>Date:</strong> <bdi>{{date}}</bdi></p>
+<p><strong>Presiding Judge:</strong> <bdi>{{judgeName}}</bdi></p>
+
+<h2>Parties</h2>
+<p dir="auto"><bdi>{{parties}}</bdi></p>
+
+<h2>Facts</h2>
+{{factsBlock}}
+
+<h2>Issues</h2>
+{{issuesBlock}}
+
+<h2>Evidence</h2>
+<p dir="auto">{{evidenceNotes}}</p>
+
+<h2>Arguments</h2>
+<p dir="auto">{{argumentsNotes}}</p>
+
+<h2>Reasoning</h2>
+<p dir="auto">{{reasoningNotes}}</p>
+
+<h2>Findings</h2>
+<div class="judicial-entry">
+  <p><em>[The judicial findings on each point for determination are to be formulated and recorded by the Presiding Judge. No automated outcome is generated.]</em></p>
+  <p dir="auto">{{findingsPrompt}}</p>
+</div>
+
+<h2>Order</h2>
+<div class="judicial-entry">
+  <p><em>[Final operative order and directions to be recorded and signed by the Presiding Judge. No automated outcome is generated.]</em></p>
+  <p dir="auto">{{orderPrompt}}</p>
+</div>
+
+<div class="signatures">
+  <p></p>
+  <p>Presiding Judge:<br><bdi>{{judgeName}}</bdi><br>Date and signature ____________________</p>
+</div>
+
+<footer class="draft-footer" style="margin-top: 24pt; border-top: 1px solid #c5ced7; padding-top: 8pt; font-size: 9pt; color: #556270;">
+  <p>Draft prepared with Court+ assistance - to be checked and signed by the author</p>
+</footer>

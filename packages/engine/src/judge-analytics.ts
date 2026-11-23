@@ -1,12 +1,15 @@
 import type {
   AgingBucket,
   BenchBacklogSummary,
+  CaseMeta,
   CaseRecord,
   DailyRatePoint,
+  Hearing,
   ISODate,
   JudgeMetric,
 } from '@courtplus/contracts';
 import { day, iso } from './dates.js';
+import { courtBacklog } from './jai.js';
 
 // Official NJDG / data.gov.in benchmarks as of 27-03-2026
 export const OFFICIAL_NJDG_BENCHMARKS = {
@@ -18,49 +21,23 @@ export const OFFICIAL_NJDG_BENCHMARKS = {
   hcJudgeVacanciesChhattisgarh: 7,
 };
 
-function getCaseStartDate(record: CaseRecord, asOfNum: number): number {
-  const dates: number[] = [];
-  if (record.filingDate) {
-    const d = day(record.filingDate);
-    if (d !== undefined) dates.push(d);
-  }
-  if (record.firstRemandOn) {
-    const d = day(record.firstRemandOn);
-    if (d !== undefined) dates.push(d);
-  }
-  for (const spell of record.custody) {
-    const d = day(spell.start);
-    if (d !== undefined) dates.push(d);
-  }
-  for (const event of record.events) {
-    const d = day(event.on);
-    if (d !== undefined) dates.push(d);
-  }
-  if (record.orderDate) {
-    const d = day(record.orderDate);
-    if (d !== undefined) dates.push(d);
-  }
-  return dates.length > 0 ? Math.min(...dates) : asOfNum;
+function getDisposalDate(record: CaseRecord): number | undefined {
+  const explicit = day(record.disposalDate);
+  if (explicit !== undefined || record.pendingStatus !== 'disposed') return explicit;
+  return record.events.filter(event => event.kind === 'acquitted' || event.kind === 'convicted')
+    .map(event => day(event.on)).filter(date => date !== undefined).sort((a, b) => a - b)[0];
 }
 
-function getDisposalDate(record: CaseRecord): number | undefined {
-  if (record.disposalDate) {
-    const d = day(record.disposalDate);
-    if (d !== undefined) return d;
-  }
-  if (record.pendingStatus === 'disposed') {
-    for (const event of record.events) {
-      if (['acquitted', 'convicted', 'released'].includes(event.kind)) {
-        const d = day(event.on);
-        if (d !== undefined) return d;
-      }
-    }
-    if (record.releasedOn) {
-      const d = day(record.releasedOn);
-      if (d !== undefined) return d;
-    }
-  }
-  return undefined;
+type CourtRecords = { metadata: readonly CaseMeta[]; hearings: readonly Hearing[] };
+
+function countAdjournments(record: CaseRecord, hearings: readonly Hearing[], asOf: ISODate): number {
+  const recordedDates = new Set(hearings.map(hearing => hearing.date));
+  const recorded = hearings.filter(hearing => hearing.outcome === 'adjourned' && hearing.date <= asOf).length;
+  const legacyDates = new Set(record.events.filter(event => event.kind === 'hearing' &&
+    day(event.on) !== undefined && event.on <= asOf && !recordedDates.has(event.on) &&
+    /^(?:adjourned|adjournment granted|(?:the )?(?:case|matter|hearing) (?:was |is )?adjourned)\b/i.test(event.note?.trim() ?? ''))
+    .map(event => event.on));
+  return recorded + legacyDates.size;
 }
 
 export function classifyAging(ageDays: number): keyof AgingBucket {
@@ -75,24 +52,34 @@ export function computeJudgePerformance(
   cases: CaseRecord[],
   asOf: ISODate,
   targetJudgeName?: string,
+  court?: CourtRecords,
 ): BenchBacklogSummary {
-  const asOfNum = day(asOf) ?? (Date.now() / 86_400_000);
+  const asOfNum = day(asOf) ?? Math.floor(Date.now() / 86_400_000);
+  const snapshot = iso(asOfNum);
+  const metadata = new Map(court?.metadata.map(meta => [meta.caseId, meta]));
+  const hearingsByCase = new Map<string, Hearing[]>();
+  for (const hearing of court?.hearings ?? []) {
+    const group = hearingsByCase.get(hearing.caseId) ?? [];
+    group.push(hearing);
+    hearingsByCase.set(hearing.caseId, group);
+  }
 
-  // Group cases by judge
-  const judgeGroups = new Map<string, CaseRecord[]>();
+  const judgeGroups = new Map<string, { record: CaseRecord; filed?: number; disposed?: number; hearings: Hearing[] }[]>();
   for (const c of cases) {
     const judge = c.judgeName?.trim() || 'Court Bench (Unassigned)';
     if (targetJudgeName && judge.toLowerCase() !== targetJudgeName.trim().toLowerCase()) {
       continue;
     }
+    const meta = metadata.get(c.id);
+    const hearings = hearingsByCase.get(c.id) ?? [];
+    const filed = day(meta?.filedOn) ?? day(c.filingDate);
+    if (filed !== undefined && filed > asOfNum) continue;
+    const disposedFromHearing = hearings.filter(hearing => hearing.outcome === 'disposed')
+      .map(hearing => day(hearing.date)).filter(date => date !== undefined).sort((a, b) => a - b)[0];
+    const disposed = day(meta?.disposedOn) ?? disposedFromHearing ?? getDisposalDate(c);
     const group = judgeGroups.get(judge) ?? [];
-    group.push(c);
+    group.push({ record: c, filed, disposed, hearings });
     judgeGroups.set(judge, group);
-  }
-
-  // If no judge assigned yet and we had cases, ensure at least one group
-  if (judgeGroups.size === 0 && cases.length > 0 && !targetJudgeName) {
-    judgeGroups.set('Presiding Judge', cases);
   }
 
   const judges: JudgeMetric[] = [];
@@ -104,72 +91,61 @@ export function computeJudgePerformance(
     let disposedCases = 0;
     let totalAdjournmentsGranted = 0;
     let totalLifespanDays = 0;
-
-    const aging: AgingBucket = {
-      under1Year: 0,
-      oneToThreeYears: 0,
-      threeToFiveYears: 0,
-      fiveToTenYears: 0,
-      overTenYears: 0,
-    };
+    let datedLifespans = 0;
+    let disposalVelocity = 0;
+    const closed = new Set<string>();
 
     const byCaseType: Record<string, { pending: number; disposed: number }> = {};
     const timelineMap = new Map<ISODate, { filed: number; disposed: number }>();
+    function countOn(date: number | undefined, kind: 'filed' | 'disposed') {
+      if (date === undefined || date > asOfNum) return;
+      const on = iso(date);
+      const entry = timelineMap.get(on) ?? { filed: 0, disposed: 0 };
+      entry[kind]++;
+      timelineMap.set(on, entry);
+    }
 
-    for (const c of judgeCases) {
+    for (const { record: c, filed, disposed, hearings } of judgeCases) {
       const caseType = c.caseType ?? (c.charges.length > 0 ? 'criminal' : 'civil');
       if (!byCaseType[caseType]) byCaseType[caseType] = { pending: 0, disposed: 0 };
-
-      // Count adjournments in this case
-      const adjCount = c.events.filter(e =>
-        e.kind === 'hearing' && /adjourn/i.test(e.note ?? '')
-      ).length;
-      totalAdjournmentsGranted += adjCount;
-
-      const startDay = getCaseStartDate(c, asOfNum);
-      const disposalDay = getDisposalDate(c);
-      const isDisposed = c.pendingStatus === 'disposed' || disposalDay !== undefined;
-
-      // Timeline event tracking
-      const fileIso = iso(startDay);
-      const tEntry = timelineMap.get(fileIso) ?? { filed: 0, disposed: 0 };
-      tEntry.filed += 1;
-      timelineMap.set(fileIso, tEntry);
+      totalAdjournmentsGranted += countAdjournments(c, hearings, snapshot);
+      const isDisposed = disposed === undefined ? c.pendingStatus === 'disposed' : disposed <= asOfNum;
+      countOn(filed, 'filed');
+      countOn(disposed, 'disposed');
 
       if (isDisposed) {
+        closed.add(c.id);
         disposedCases += 1;
         byCaseType[caseType].disposed += 1;
-        const endDay = disposalDay ?? asOfNum;
-        const lifespan = Math.max(1, endDay - startDay);
-        totalLifespanDays += lifespan;
-
-        const dispIso = iso(endDay);
-        const dEntry = timelineMap.get(dispIso) ?? { filed: 0, disposed: 0 };
-        dEntry.disposed += 1;
-        timelineMap.set(dispIso, dEntry);
+        if (disposed !== undefined && disposed > asOfNum - 30) disposalVelocity++;
       } else {
         activeCases += 1;
         byCaseType[caseType].pending += 1;
-        const ageDays = Math.max(0, asOfNum - startDay);
-        const bucket = classifyAging(ageDays);
-        aging[bucket] += 1;
-        totalLifespanDays += ageDays;
+      }
+      const end = isDisposed ? disposed : asOfNum;
+      if (filed !== undefined && end !== undefined && end >= filed) {
+        totalLifespanDays += end - filed;
+        datedLifespans++;
       }
     }
 
+    const backlog = courtBacklog(judgeCases.map(({ record, filed, disposed }) => ({
+      caseId: record.id,
+      filedOn: filed === undefined ? undefined : iso(filed),
+      disposedOn: disposed === undefined ? undefined : iso(disposed),
+    })), snapshot, closed);
+    const [under1Year = 0, oneToThreeYears = 0, threeToFiveYears = 0, fiveToTenYears = 0, overTenYears = 0] =
+      backlog.age.map(bucket => bucket.count);
     const totalFiled = activeCases + disposedCases;
     const clearanceRate = totalFiled > 0
       ? Math.round((disposedCases / totalFiled) * 1000) / 10
       : 0;
-    const avgCaseLifespanDays = totalFiled > 0
-      ? Math.round(totalLifespanDays / totalFiled)
+    const avgCaseLifespanDays = datedLifespans > 0
+      ? Math.round(totalLifespanDays / datedLifespans)
       : 0;
     const adjournmentRatio = disposedCases > 0
       ? Math.round((totalAdjournmentsGranted / disposedCases) * 10) / 10
       : totalAdjournmentsGranted;
-
-    // Monthly velocity estimation (cases disposed per 30 days of active sitting)
-    const disposalVelocity = Math.max(1, Math.round(disposedCases * 1.5));
 
     // Construct sorted timeline for filings vs resolutions
     const timeline: DailyRatePoint[] = [...timelineMap.entries()]
@@ -179,14 +155,14 @@ export function computeJudgePerformance(
         date,
         filed: counts.filed,
         disposed: counts.disposed,
-        clearanceRate: counts.filed > 0 ? Math.round((counts.disposed / counts.filed) * 100) : 100,
+        clearanceRate: counts.filed > 0 ? Math.round((counts.disposed / counts.filed) * 100) : 0,
       }));
 
-    const sampleCase = judgeCases[0];
+    const sampleCase = judgeCases[0].record;
     judges.push({
       judgeName,
-      courtRoom: sampleCase?.courtRoom ?? 'Courtroom 1',
-      court: sampleCase?.court ?? 'District & Sessions Court',
+      courtRoom: sampleCase.courtRoom,
+      court: sampleCase.court,
       activeCases,
       disposedCases,
       totalFiled,
@@ -195,8 +171,9 @@ export function computeJudgePerformance(
       avgCaseLifespanDays,
       totalAdjournmentsGranted,
       adjournmentRatio,
-      aging,
+      aging: { under1Year, oneToThreeYears, threeToFiveYears, fiveToTenYears, overTenYears },
       timeline,
+      weeks: backlog.weeks,
       byCaseType,
     });
 

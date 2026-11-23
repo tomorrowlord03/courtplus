@@ -8,6 +8,7 @@ const statuteQuotes: Record<'bnss479_1' | 'bnss479_2' | 'bnss479_3', { text: str
   JSON.parse(readFileSync(join(resourceRoot, 'data', 'statutes', 'quotes.json'), 'utf8'));
 const section479 = [statuteQuotes.bnss479_1, statuteQuotes.bnss479_2, statuteQuotes.bnss479_3]
   .map(({ text }) => text).join('\n\n');
+const draftListLines = ['________________________________', '________________________________'];
 
 interface Signatures {
   verifiedBy?: string;
@@ -51,15 +52,151 @@ export interface DlsaHandoffData {
   receivedBy?: string;
 }
 
+export interface InterimOrderSheetData {
+  court?: string;
+  caseNo?: string;
+  parties?: string;
+  date?: ISODate;
+  presidingOfficer?: string;
+  appearances?: string;
+  proceedings?: string;
+  directions?: string;
+  nextDate?: ISODate;
+  nextPurpose?: string;
+  benchNotes?: string;
+}
+
+export interface NoticeToAppearData {
+  court?: string;
+  caseNo?: string;
+  parties?: string;
+  recipientName?: string;
+  recipientRole?: string;
+  recipientAddress?: string;
+  date?: ISODate;
+  appearanceDate?: ISODate;
+  appearanceTime?: string;
+  purpose?: string;
+  documentsRequired?: string;
+  consequenceOfDefault?: string;
+  issuedBy?: string;
+}
+
+export interface AdjournmentOrderData {
+  court?: string;
+  caseNo?: string;
+  parties?: string;
+  date?: ISODate;
+  requestingParty?: string;
+  reason?: string;
+  adjournmentCount?: number;
+  statutoryLimitNote?: string;
+  costs?: string;
+  nextDate?: ISODate;
+  nextPurpose?: string;
+  judgeName?: string;
+}
+
+export interface JudgmentOutlineData {
+  court?: string;
+  caseNo?: string;
+  parties?: string;
+  date?: ISODate;
+  judgeName?: string;
+  facts?: string;
+  issues?: readonly string[];
+  evidenceNotes?: string;
+  argumentsNotes?: string;
+  reasoningNotes?: string;
+  findingsPrompt?: string;
+  orderPrompt?: string;
+}
+
+export interface RegularBailApplicationData {
+  court?: string;
+  caseNo?: string;
+  applicant?: string;
+  respondent?: string;
+  policeStation?: string;
+  charges?: string;
+  arrestDate?: ISODate;
+  custodyPeriod?: string;
+  facts?: string;
+  grounds?: readonly string[];
+  undertakings?: readonly string[];
+  prayer?: string;
+  advocateName?: string;
+  advocateEnrollment?: string;
+  verifiedBy?: string;
+}
+
+export interface AnticipatoryBailApplicationData {
+  court?: string;
+  applicant?: string;
+  respondent?: string;
+  policeStation?: string;
+  allegedOffences?: string;
+  apprehensionReason?: string;
+  facts?: string;
+  grounds?: readonly string[];
+  undertakings?: readonly string[];
+  prayer?: string;
+  advocateName?: string;
+  advocateEnrollment?: string;
+  verifiedBy?: string;
+}
+
+export interface LegalNoticeData {
+  date?: ISODate;
+  sender?: string;
+  senderAddress?: string;
+  recipient?: string;
+  recipientAddress?: string;
+  advocateName?: string;
+  advocateAddress?: string;
+  advocateContact?: string;
+  transactionFacts?: string;
+  defaultDetails?: string;
+  claimAmount?: string;
+  curePeriodDays?: number;
+  consequences?: string;
+}
+
+export interface ChequeBounceNoticeData {
+  date?: ISODate;
+  drawer?: string;
+  drawerAddress?: string;
+  payee?: string;
+  payeeAddress?: string;
+  advocateName?: string;
+  advocateAddress?: string;
+  chequeNo?: string;
+  chequeDate?: ISODate;
+  chequeAmount?: string;
+  draweeBank?: string;
+  presentationDate?: ISODate;
+  returnDate?: ISODate;
+  returnReason?: string;
+  memoReceiptDate?: ISODate;
+}
+
 export interface DraftData {
   S479_3_APPLICATION: ApplicationData;
   DLSA_7_DAY: DlsaIntimationData;
   AI_ASSISTANCE_NOTE: AiAssistanceData;
   RIGHTS_CARD: RightsCardData;
   DLSA_HANDOFF: DlsaHandoffData;
+  INTERIM_ORDER_SHEET: InterimOrderSheetData;
+  NOTICE_TO_APPEAR: NoticeToAppearData;
+  ADJOURNMENT_ORDER: AdjournmentOrderData;
+  JUDGMENT_OUTLINE: JudgmentOutlineData;
+  REGULAR_BAIL_APPLICATION: RegularBailApplicationData;
+  ANTICIPATORY_BAIL_APPLICATION: AnticipatoryBailApplicationData;
+  LEGAL_NOTICE: LegalNoticeData;
+  CHEQUE_BOUNCE_NOTICE: ChequeBounceNoticeData;
 }
 
-export type DraftKind = Parameters<CourtPlusApi['exportDraft']>[0] | 'DLSA_HANDOFF';
+export type DraftKind = keyof DraftData;
 type LegalLanguage = 'en' | 'hi';
 type TextValue = string | number | undefined;
 
@@ -92,6 +229,10 @@ function listItems(values: readonly string[]) {
 
 function orderedList(values: readonly string[]) {
   return '<ol>' + listItems(values) + '</ol>';
+}
+
+function unorderedList(values: readonly string[]) {
+  return '<ul>' + listItems(values) + '</ul>';
 }
 
 interface DocumentBody {
@@ -223,6 +364,204 @@ function rightsCard(data: RightsCardData, _lang: LegalLanguage, root: string, re
   };
 }
 
+function interimOrderSheet(data: InterimOrderSheetData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'अंतरिम आदेश पत्रक (Interim Order Sheet)' : 'Interim Order Sheet',
+    lang,
+    draft: true,
+    body: template('interim-order-sheet.' + lang + '.html', {
+      court: data.court,
+      caseNo: data.caseNo,
+      parties: data.parties,
+      date: data.date,
+      presidingOfficer: data.presidingOfficer,
+      appearances: data.appearances,
+      proceedings: data.proceedings,
+      directions: data.directions,
+      nextDate: data.nextDate,
+      nextPurpose: data.nextPurpose,
+      benchNotes: data.benchNotes,
+    }),
+  };
+}
+
+function noticeToAppear(data: NoticeToAppearData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'उपसंजात होने हेतु सूचना (Notice to Appear)' : 'Notice to Appear',
+    lang,
+    draft: true,
+    body: template('notice-to-appear.' + lang + '.html', {
+      court: data.court,
+      caseNo: data.caseNo,
+      parties: data.parties,
+      recipientName: data.recipientName,
+      recipientRole: data.recipientRole,
+      recipientAddress: data.recipientAddress,
+      date: data.date,
+      appearanceDate: data.appearanceDate,
+      appearanceTime: data.appearanceTime,
+      purpose: data.purpose,
+      documentsRequired: data.documentsRequired,
+      consequenceOfDefault: data.consequenceOfDefault,
+      issuedBy: data.issuedBy,
+    }),
+  };
+}
+
+function adjournmentOrder(data: AdjournmentOrderData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'स्थगन आदेश (Adjournment Order)' : 'Adjournment Order',
+    lang,
+    draft: true,
+    body: template('adjournment-order.' + lang + '.html', {
+      court: data.court,
+      caseNo: data.caseNo,
+      parties: data.parties,
+      date: data.date,
+      requestingParty: data.requestingParty,
+      reason: data.reason,
+      adjournmentCount: data.adjournmentCount,
+      statutoryLimitNote: data.statutoryLimitNote,
+      costs: data.costs,
+      nextDate: data.nextDate,
+      nextPurpose: data.nextPurpose,
+      judgeName: data.judgeName,
+    }),
+  };
+}
+
+function judgmentOutline(data: JudgmentOutlineData, lang: LegalLanguage): DocumentBody {
+  const verifiedBadge = lang === 'hi'
+    ? 'Draft from case record - verify / प्रकरण अभिलेख से प्रारूप - सत्यापन करें'
+    : 'Draft from case record - verify';
+  const factsBlock = data.facts
+    ? '<div class="notice" style="margin-bottom:6pt"><span class="badge">' + verifiedBadge + '</span></div><p dir="auto">' + escapeHtml(data.facts) + '</p>'
+    : '<p><em>' + (lang === 'hi' ? '[पीठासीन न्यायाधीश द्वारा अभिलिखित किए जाने हैं]' : '[To be recorded by the Presiding Judge]') + '</em></p>';
+  const issuesBlock = data.issues && data.issues.length > 0
+    ? '<div class="notice" style="margin-bottom:6pt"><span class="badge">' + verifiedBadge + '</span></div>' + orderedList(data.issues)
+    : '<p><em>' + (lang === 'hi' ? '[न्यायालय द्वारा विचारणीय बिंदु विरचित किए जाने हैं]' : '[Points for determination to be framed by the Court]') + '</em></p>';
+
+  return {
+    title: lang === 'hi' ? 'निर्णय प्रारूप (Judgment Outline)' : 'Judgment Outline',
+    lang,
+    draft: true,
+    body: template('judgment-outline.' + lang + '.html', {
+      court: data.court,
+      caseNo: data.caseNo,
+      parties: data.parties,
+      date: data.date,
+      judgeName: data.judgeName,
+      evidenceNotes: data.evidenceNotes,
+      argumentsNotes: data.argumentsNotes,
+      reasoningNotes: data.reasoningNotes,
+      findingsPrompt: data.findingsPrompt ?? '—',
+      orderPrompt: data.orderPrompt ?? '—',
+    }, {
+      factsBlock,
+      issuesBlock,
+    }),
+  };
+}
+
+function regularBailApplication(data: RegularBailApplicationData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'धारा 483 बीएनएसएस के अंतर्गत नियमित जमानत आवेदन' : 'Regular Bail Application under Section 483 BNSS',
+    lang,
+    draft: true,
+    body: template('regular-bail-application.' + lang + '.html', {
+      court: data.court,
+      caseNo: data.caseNo,
+      applicant: data.applicant,
+      respondent: data.respondent,
+      policeStation: data.policeStation,
+      charges: data.charges,
+      arrestDate: data.arrestDate,
+      custodyPeriod: data.custodyPeriod,
+      facts: data.facts,
+      prayer: data.prayer,
+      advocateName: data.advocateName,
+      advocateEnrollment: data.advocateEnrollment,
+      verifiedBy: data.verifiedBy,
+    }, {
+      grounds: orderedList(data.grounds?.length ? data.grounds : draftListLines),
+      undertakings: unorderedList(data.undertakings?.length ? data.undertakings : draftListLines),
+    }),
+  };
+}
+
+function anticipatoryBailApplication(data: AnticipatoryBailApplicationData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'धारा 482 बीएनएसएस के अंतर्गत अग्रिम जमानत आवेदन' : 'Anticipatory Bail Application under Section 482 BNSS',
+    lang,
+    draft: true,
+    body: template('anticipatory-bail-application.' + lang + '.html', {
+      court: data.court,
+      applicant: data.applicant,
+      respondent: data.respondent,
+      policeStation: data.policeStation,
+      allegedOffences: data.allegedOffences,
+      apprehensionReason: data.apprehensionReason,
+      facts: data.facts,
+      prayer: data.prayer,
+      advocateName: data.advocateName,
+      advocateEnrollment: data.advocateEnrollment,
+      verifiedBy: data.verifiedBy,
+    }, {
+      grounds: orderedList(data.grounds?.length ? data.grounds : draftListLines),
+      undertakings: unorderedList(data.undertakings?.length ? data.undertakings : draftListLines),
+    }),
+  };
+}
+
+function legalNotice(data: LegalNoticeData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'विधिक मांग सूचना (Legal Notice)' : 'Legal Notice',
+    lang,
+    draft: true,
+    body: template('legal-notice.' + lang + '.html', {
+      date: data.date,
+      sender: data.sender,
+      senderAddress: data.senderAddress,
+      recipient: data.recipient,
+      recipientAddress: data.recipientAddress,
+      advocateName: data.advocateName,
+      advocateAddress: data.advocateAddress,
+      advocateContact: data.advocateContact,
+      transactionFacts: data.transactionFacts,
+      defaultDetails: data.defaultDetails,
+      claimAmount: data.claimAmount,
+      curePeriodDays: data.curePeriodDays,
+      consequences: data.consequences,
+    }),
+  };
+}
+
+function chequeBounceNotice(data: ChequeBounceNoticeData, lang: LegalLanguage): DocumentBody {
+  return {
+    title: lang === 'hi' ? 'धारा 138 एन.आई. एक्ट के अंतर्गत सांविधिक सूचना' : 'Notice under Section 138 Proviso (b) NI Act',
+    lang,
+    draft: true,
+    body: template('cheque-bounce-notice.' + lang + '.html', {
+      date: data.date,
+      drawer: data.drawer,
+      drawerAddress: data.drawerAddress,
+      payee: data.payee,
+      payeeAddress: data.payeeAddress,
+      advocateName: data.advocateName,
+      advocateAddress: data.advocateAddress,
+      chequeNo: data.chequeNo,
+      chequeDate: data.chequeDate,
+      chequeAmount: data.chequeAmount,
+      draweeBank: data.draweeBank,
+      presentationDate: data.presentationDate,
+      returnDate: data.returnDate,
+      returnReason: data.returnReason,
+      memoReceiptDate: data.memoReceiptDate,
+      demandPeriodDays: 15,
+    }),
+  };
+}
+
 type Renderers = {
   [K in DraftKind]: (data: DraftData[K], lang: LegalLanguage, root: string, requested: string) => DocumentBody;
 };
@@ -233,6 +572,14 @@ const renderers: Renderers = {
   AI_ASSISTANCE_NOTE: aiAssistance,
   RIGHTS_CARD: rightsCard,
   DLSA_HANDOFF: handoff,
+  INTERIM_ORDER_SHEET: interimOrderSheet,
+  NOTICE_TO_APPEAR: noticeToAppear,
+  ADJOURNMENT_ORDER: adjournmentOrder,
+  JUDGMENT_OUTLINE: judgmentOutline,
+  REGULAR_BAIL_APPLICATION: regularBailApplication,
+  ANTICIPATORY_BAIL_APPLICATION: anticipatoryBailApplication,
+  LEGAL_NOTICE: legalNotice,
+  CHEQUE_BOUNCE_NOTICE: chequeBounceNotice,
 };
 
 export function renderDocument<K extends DraftKind>(

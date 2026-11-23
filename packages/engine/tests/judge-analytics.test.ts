@@ -79,4 +79,33 @@ describe('Judge Performance & Backlog Analytics engine', () => {
     expect(OFFICIAL_NJDG_BENCHMARKS.hcPendingIndia).toBe(6396737);
     expect(OFFICIAL_NJDG_BENCHMARKS.hcJudgeVacanciesChhattisgarh).toBe(7);
   });
+
+  it('uses recorded filing and disposal dates and excludes future activity', () => {
+    const base: CaseRecord = { id: 'fictional-case', personId: 'fictional-person', charges: [], custody: [],
+      events: [{ kind: 'hearing', on: '2026-01-10', note: 'Matter adjourned' }], pendingStatus: 'disposed' };
+    const records: CaseRecord[] = [
+      { ...base, filingDate: '2026-01-01', disposalDate: '2026-03-15' },
+      { ...base, id: 'fictional-undated', orderDate: '2025-01-01', pendingStatus: 'trial',
+        events: [{ kind: 'hearing', on: '2026-01-12', note: 'No adjournment granted' }] },
+      { ...base, id: 'fictional-future', filingDate: '2026-03-10' },
+      { ...base, id: 'fictional-undated-disposal', releasedOn: '2026-01-15', events: [] },
+    ];
+    const snapshot = computeJudgePerformance(records, '2026-02-01', undefined, {
+      metadata: [{ caseId: base.id, filedOn: '2026-01-04', caseType: 'civil', stage: 'Fictional',
+        partiesInCustody: false, partyFlags: [], nationalSecurity: false }],
+      hearings: [
+        { caseId: base.id, date: '2026-01-10', purpose: 'Fictional hearing', outcome: 'adjourned' },
+        { caseId: base.id, date: '2026-01-24', purpose: 'Fictional hearing', outcome: 'adjourned' },
+        { caseId: base.id, date: '2026-02-10', purpose: 'Fictional hearing', outcome: 'adjourned' },
+      ],
+    });
+    const [bench] = snapshot.judges;
+    expect(bench).toMatchObject({ activeCases: 2, disposedCases: 1, totalAdjournmentsGranted: 2,
+      aging: { under1Year: 1 }, disposalVelocity: 0 });
+    expect(bench.timeline).toEqual([{ date: '2026-01-04', filed: 1, disposed: 0, clearanceRate: 0 }]);
+    expect(bench.weeks).toHaveLength(8);
+    expect(bench.weeks?.filter(week => week.filed || week.disposed)).toEqual([
+      { start: '2025-12-29', filed: 1, disposed: 0 },
+    ]);
+  });
 });

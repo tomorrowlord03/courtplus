@@ -113,7 +113,10 @@ export async function createHandlers(store: Store, ports: HandlerPorts) {
       figures: loadFigures(join(ports.resourceDirectory, 'data', 'stats')),
     }),
     judgeDashboard: async (asOf, judgeName) => {
-      return engine.computeJudgePerformance(listCases(), asOf ?? boardDate ?? indiaDate(), judgeName);
+      const court = readProfile(store)?.role === 'judge'
+        ? { metadata: store.court.meta(), hearings: store.court.hearings() }
+        : undefined;
+      return engine.computeJudgePerformance(listCases(), asOf ?? boardDate ?? indiaDate(), judgeName, court);
     },
     ...exportHandlers,
   };

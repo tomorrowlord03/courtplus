@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import type { Card, CaseRecord, CourtPlusApi, DashboardActivity, Person } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import Database from 'better-sqlite3-multiple-ciphers';
 import { appendAudit, type AuditEntry } from './audit';
+import { markStartup } from './startup-perf';
 import { roleSchema } from './validation';
 import type { CardPatch } from './handlers/board';
 import { courtMigration, courtStore } from './handlers/triage';
@@ -77,6 +78,7 @@ export async function openEncryptedDatabase(
 ): Promise<Database.Database> {
   const path = join(directory, databaseFile);
   const keyPath = join(directory, keyFile);
+  markStartup('DPAPI start');
   if (!await keyStorage.isAsyncEncryptionAvailable()) throw new Error('OS key encryption is unavailable');
 
   if (!existsSync(keyPath)) {
@@ -87,6 +89,7 @@ export async function openEncryptedDatabase(
   if (!/^[0-9a-f]{64}$/.test(key)) throw new Error('The encrypted database key is invalid');
   if (shouldReEncrypt) await writeWrappedKey(keyPath, key, keyStorage);
 
+  markStartup('DPAPI ready');
   const db = new Database(path);
   try {
     db.pragma("cipher='sqlcipher'");
@@ -104,6 +107,7 @@ export async function openEncryptedDatabase(
         db.pragma(`user_version = ${index + 1}`);
       }
     }).immediate();
+    markStartup('SQLCipher schema ready');
     return db;
   } catch (error) {
     db.close();

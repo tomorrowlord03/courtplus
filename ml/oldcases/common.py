@@ -65,6 +65,8 @@ def tokenizer(base):
 
 def chunks(tokenizer, texts, length=WINDOW, stride=STRIDE):
     """Window less than the model's limit by the two BERT framing tokens."""
+    if stride == 0:
+        return [[ids] for ids in truncate(tokenizer, texts, length)]
     body = length - 2
     windows = []
     for ids in tokenizer(texts, add_special_tokens=False, verbose=False)["input_ids"]:

@@ -2,6 +2,7 @@ import { access, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Tokenizer } from '@huggingface/tokenizers';
 import type { InferenceSession } from 'onnxruntime-node';
+import { contextualRoleInputs } from './context.js';
 
 export async function readJson<T>(file: string): Promise<T> {
   return JSON.parse(await readFile(file, 'utf8')) as T;
@@ -12,6 +13,8 @@ export interface ModelManifest<Label> {
   length: number;
   stride: number;
   threshold: number | null;
+  thresholds?: (number | null)[];
+  roleContext?: 'adjacent';
   source: string;
 }
 
@@ -46,18 +49,34 @@ class LocalModel {
   ) {}
 
   async *run(texts: Iterable<string>, output: 'logits' | 'embedding'): AsyncGenerator<Float32Array> {
-    const encode = (text: string) => tokenWindows(
-      this.tokenizer.encode(text, { add_special_tokens: false }).ids,
-      this.manifest.length, this.manifest.stride,
-    ).map(row => [this.special.cls, ...row, this.special.sep]);
-    const batch: number[][] = [];
+    yield* this.runRows(this.windows(texts), output);
+  }
+
+  runRoles(sentences: readonly string[]): AsyncGenerator<Float32Array> {
+    if (this.manifest.roleContext !== 'adjacent') return this.run(sentences, 'logits');
+    const rows = contextualRoleInputs(sentences.map(text => this.encode(text)), this.manifest.length, this.special);
+    return this.runRows(rows, 'logits');
+  }
+
+  private encode(text: string): number[] {
+    return this.tokenizer.encode(text, { add_special_tokens: false }).ids;
+  }
+
+  private *windows(texts: Iterable<string>): Iterable<number[]> {
     for (const text of texts) {
-      for (const row of encode(text)) {
-        batch.push(row);
-        if (batch.length < 8) continue;
-        yield* await this.infer(batch, output);
-        batch.length = 0;
+      for (const row of tokenWindows(this.encode(text), this.manifest.length, this.manifest.stride)) {
+        yield [this.special.cls, ...row, this.special.sep];
       }
+    }
+  }
+
+  private async *runRows(rows: Iterable<number[]>, output: string): AsyncGenerator<Float32Array> {
+    const batch: number[][] = [];
+    for (const row of rows) {
+      batch.push(row);
+      if (batch.length < 8) continue;
+      yield* await this.infer(batch, output);
+      batch.length = 0;
     }
     if (batch.length) yield* await this.infer(batch, output);
   }

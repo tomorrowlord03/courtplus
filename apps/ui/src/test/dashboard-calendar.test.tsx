@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import type { Card, CaseRecord, CourtPlusApi, ScreeningResult } from '@courtplus/contracts';
 import { addDays, AppProvider, todayIST } from '../lib/context';
 import type { WorkspaceApi } from '../lib/api';
+import { setRoleOverride } from '../lib/roles';
 import { App } from '../App';
 import { datedAlerts } from '../lib/deadlines';
 import { Dashboard } from '../screens/Dashboard';
@@ -45,7 +46,7 @@ describe('release dashboard and calendar', () => {
   it('shows a useful empty state when no cases are saved', async () => {
     show(<Dashboard />, api([], []));
     expect(await screen.findByText('No cases saved yet')).toBeInTheDocument();
-    expect(screen.getByText('Import orders to see your trend')).toBeInTheDocument();
+    expect(screen.getByText('No case data recorded yet')).toBeInTheDocument();
   });
   it('shows eight weeks of dated saves and deduplicated case resolutions', async () => {
     const mock = api([record, { ...record, id: 'fictional-second' }]);
@@ -56,14 +57,19 @@ describe('release dashboard and calendar', () => {
         { cardId: 'fictional-b', caseId: record.id, on: asOf },
       ],
     }));
-    show(<Dashboard />, mock);
-    const chart = await screen.findByRole('region', { name: 'Cases filed vs resolved' });
-    await userEvent.click(within(chart).getByText('Weekly figures'));
-    const rows = within(chart).getAllByRole('row');
-    expect(rows).toHaveLength(9);
-    expect(within(rows[7]).getAllByRole('cell').map(cell => cell.textContent)).toEqual(['1', '0']);
-    expect(within(rows[8]).getAllByRole('cell').map(cell => cell.textContent)).toEqual(['1', '1']);
-    expect(within(chart).getByText('Cases saved changed by 0% from the previous week.')).toBeVisible();
+    setRoleOverride('lawyer');
+    try {
+      show(<Dashboard />, mock);
+      const chart = await screen.findByRole('region', { name: 'Cases filed vs resolved' });
+      await userEvent.click(within(chart).getByText('Weekly figures'));
+      const rows = within(chart).getAllByRole('row');
+      expect(rows).toHaveLength(9);
+      expect(within(rows[7]).getAllByRole('cell').map(cell => cell.textContent)).toEqual(['1', '0']);
+      expect(within(rows[8]).getAllByRole('cell').map(cell => cell.textContent)).toEqual(['1', '1']);
+      expect(within(chart).getByText('Cases saved changed by 0% from the previous week.')).toBeVisible();
+    } finally {
+      setRoleOverride(undefined);
+    }
   });
   it('counts dated alerts from today through seven days ahead and opens the calendar', async () => {
     const mock = api();

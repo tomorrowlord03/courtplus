@@ -1,10 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import type { CaseRecord, CourtEvent } from '@courtplus/contracts';
+import type { CaseRecord, CourtEvent, PublicCaseTrack } from '@courtplus/contracts';
 import { btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
-import { todayIST, useApp } from '../lib/context';
 import { t, ui } from '../lib/i18n';
 import { CitizenSettlementEstimator } from './CitizenSettlementEstimator';
-import { HearingBreakdowns, loadHearingBreakdowns, type HearingBreakdownResult } from './HearingBreakdowns';
+import { HearingBreakdowns } from './HearingBreakdowns';
 
 // Track my case: what this Court+ backend holds about a case, in plain words. eCourts stays the
 // authoritative status, so its link is always shown.
@@ -54,79 +53,52 @@ export function caseDates(record: CaseRecord, today: string) {
   };
 }
 
-function CaseHistory({ events }: { events: CourtEvent[] }) {
-  const byDate = new Map<string, CourtEvent[]>();
-  for (const event of events) {
-    const day = byDate.get(event.on);
-    if (day) day.push(event);
-    else byDate.set(event.on, [event]);
-  }
-  if (!byDate.size) return <p className="text-sm">{t('track.noHistory', 'No court events have been recorded here yet.')}</p>;
-  const latestHearing = events.filter(event => event.kind === 'hearing').at(-1)?.on;
-  return <ol className="space-y-2 text-sm">{Array.from(byDate, ([date, day]) => {
-    const hasHearing = day.some(event => event.kind === 'hearing');
-    const entries = day.map((event, index) => <li key={event.kind + '-' + index}>
-      {ui(EVENT_WORDS[event.kind])}{event.note ? ' — ' + event.note : ''}
-      {event.source?.page && <p>{t('track.hearing.orderPage', 'Source document page')} {event.source.page}</p>}
-    </li>);
-    if (hasHearing) return <li key={date}>
-      <details className="rounded border p-2" open={date === latestHearing}>
-        <summary className="font-medium"><time dateTime={date}>{date}</time> · {t('track.hearing.recorded', 'Recorded hearing')}</summary>
-        <p className="mt-2">{t('track.hearing.recordedItems', 'What the court office recorded that day')}</p>
-        <ul className="list-disc pl-5">{entries}</ul>
-        {day.every(event => event.kind === 'hearing' && !event.note) &&
-          <p className="mt-1">{t('track.hearing.noDetails', 'The record gives the date only. Check the court order for decisions and instructions.')}</p>}
-      </details>
-    </li>;
-    return <li key={date}>
-      <time dateTime={date} className="font-medium">{date}</time>
-      <ul className="list-disc pl-5">{entries}</ul>
-    </li>;
-  })}</ol>;
+async function trackBase(): Promise<string> {
+  const desktop = (window as Window & { courtplusDesktop?: { settings?: () => Promise<{ backendUrl: string }> } }).courtplusDesktop;
+  if (!desktop?.settings) return '';
+  const settings = await desktop.settings();
+  if (!settings.backendUrl) throw new Error('Set the Court+ backend URL in Settings to track a case.');
+  return settings.backendUrl;
 }
 
 export function TrackCase() {
-  const { api } = useApp();
-  const [record, setRecord] = useState<CaseRecord | null | undefined>(undefined);
-  const [summaries, setSummaries] = useState<HearingBreakdownResult>();
+  const [record, setRecord] = useState<PublicCaseTrack | null | undefined>(undefined);
+  const [reference, setReference] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const today = todayIST();
 
   async function look(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const reference = String(new FormData(event.currentTarget).get('reference') ?? '');
-    setBusy(true);
-    setError(null);
-    setRecord(undefined);
-    setSummaries(undefined);
+    setBusy(true); setError(null); setReference(reference);
     try {
-      const found = findCase(await api.listCases(), reference) ?? null;
-      setRecord(found);
-      if (found) setSummaries(await loadHearingBreakdowns(found.id));
+      const response = await fetch((await trackBase()) + '/track/' + encodeURIComponent(reference.trim()));
+      if (response.status === 404) { setRecord(null); return; }
+      if (!response.ok) throw new Error('Case lookup failed (' + response.status + ').');
+      setRecord(await response.json() as PublicCaseTrack);
     } catch (e) { setError(errMsg(e)); setRecord(undefined); }
     finally { setBusy(false); }
   }
 
-  const dates = record ? caseDates(record, today) : undefined;
   return <Page title={t('track.title', 'Track my case')} note={t('track.note', 'See what this court office has recorded. The eCourts website has the official status.')}>
     <form className="panel" onSubmit={event => void look(event)}>
       <label>{t('track.reference', 'Case number or CNR')}
-        <input className="field-control" name="reference" required maxLength={100} autoComplete="off" placeholder="e.g. CGRP010012342024" />
+        <input className="field-control" name="reference" required maxLength={100} autoComplete="off" placeholder={ui('e.g. CGRP010012342024')} />
       </label>
       <button className={btnPrimary + ' mt-2'} disabled={busy}>{busy ? ui("Looking…") : t('track.find', 'Find my case')}</button>
     </form>
-    <ErrorNote error={error} />
+    <ErrorNote error={error && ui(error)} />
     <p className="mt-3"><a href={ECOURTS_CASE_STATUS} target="_blank" rel="noreferrer">{t('track.ecourts', 'Official case status on eCourts services')}</a></p>
 
-    {record === null && <p role="status" className="panel mt-3">{t('track.noUniqueMatch', 'This court office could not find a unique case with that number. Try the CNR or use the eCourts link above.')}</p>}
-    {record && dates && <section className="panel mt-3" aria-label={ui("Case status")}>
-      <h2 className="text-lg font-semibold">{record.caseNo ?? record.cnr ?? record.id}{record.court ? ` · ${record.court}` : ''}</h2>
-      <p><strong>{t('track.stage', 'Stage')}:</strong> {ui(record.pendingStatus)} — {ui(STAGE_GLOSSARY[record.pendingStatus])}</p>
-      <p><strong>{t('track.next', 'Next date')}:</strong> {dates.next ? `${dates.next.on} (${ui(EVENT_WORDS[dates.next.kind])})` : t('track.noNext', 'No next date recorded here yet')}</p>
+    {record === null && <p role="status" className="panel mt-3">{t('track.notFound', 'This court office has no case with that number. Check the number, or use the eCourts link above.')}</p>}
+    {record && <section className="panel mt-3" aria-label={ui('Case status')}>
+      <h2 className="text-lg font-semibold">{reference}</h2>
+      <p><strong>{t('track.stage', 'Stage')}:</strong> {record.stage ? `${ui(record.stage)} — ${ui(STAGE_GLOSSARY[record.stage])}` : ui('No stage recorded here yet')}</p>
+      <p><strong>{t('track.next', 'Next date')}:</strong> {record.nextDate ?? t('track.noNext', 'No next date recorded here yet')}</p>
       <h3 className="mt-3 font-semibold">{t('track.history', 'What has happened so far')}</h3>
-      <CaseHistory events={dates.past} />
-      <HearingBreakdowns result={summaries} />
+      {record.hearingDates.length ? <ol className="text-sm">{record.hearingDates.map(date => <li key={date}>{date}: {ui('Hearing')}</li>)}</ol>
+        : <p className="text-sm">{t('track.noHistory', 'No hearings recorded here yet.')}</p>}
+      <HearingBreakdowns record={record} />
     </section>}
 
     <CitizenSettlementEstimator />

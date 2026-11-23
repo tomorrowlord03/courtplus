@@ -10,10 +10,11 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import numpy as np
-import onnxruntime as ort
 
 from common import DATA, GOV, OUTPUT, chunks, overlap, split, tokenizer, truncate, write_json
+from context import contextual_roles
 from government import sampled_orders
+from validation import logit_rows, logit_session
 
 SUMMARY_ROLES = ("Fact", "Issue", "RatioOfTheDecision", "RulingByPresentCourt")
 PROVISION = r"\d{1,3}(?:-?[A-Z])?(?:\s*\(\s*[\da-z]+\s*\))*"
@@ -30,21 +31,10 @@ class LocalModel:
     def __init__(self, directory):
         self.manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
         self.tokenizer = tokenizer(directory)
-        options = ort.SessionOptions()
-        options.intra_op_num_threads = 4
-        options.inter_op_num_threads = 1
-        self.session = ort.InferenceSession(str(directory / "model.onnx"), options, providers=["CPUExecutionProvider"])
+        self.session = logit_session(directory / "model.onnx")
 
     def rows(self, inputs):
-        for offset in range(0, len(inputs), 16):
-            batch = inputs[offset:offset + 16]
-            width = max(map(len, batch))
-            ids = np.full((len(batch), width), self.tokenizer.pad_token_id, dtype=np.int64)
-            mask = np.zeros_like(ids)
-            for i, row in enumerate(batch):
-                ids[i, :len(row)] = row
-                mask[i, :len(row)] = 1
-            yield from self.session.run(["logits"], {"input_ids": ids, "attention_mask": mask})[0]
+        yield from logit_rows(self.session, inputs, self.tokenizer.pad_token_id)
 
     def sections(self, text):
         windows = chunks(self.tokenizer, [text], self.manifest["length"], self.manifest["stride"])[0]
@@ -52,8 +42,12 @@ class LocalModel:
         labels = self.manifest["labels"]
         return [labels[i] for i in np.argsort(-maxima, kind="stable")[:5]]
 
-    def roles(self, sentences, progress=False):
-        ids = truncate(self.tokenizer, sentences, self.manifest["length"])
+    def roles(self, documents, progress=False):
+        length = self.manifest["length"]
+        if self.manifest.get("roleContext") == "adjacent":
+            ids = [row for document in documents for row in contextual_roles(self.tokenizer, document, length)]
+        else:
+            ids = truncate(self.tokenizer, [sentence for document in documents for sentence in document], length)
         order = sorted(range(len(ids)), key=lambda i: len(ids[i]))
         batches = np.empty((len(ids), len(self.manifest["labels"])), dtype=np.float32)
         for count, (i, logits) in enumerate(zip(order, self.rows([ids[i] for i in order]), strict=True), 1):
@@ -122,7 +116,7 @@ def summary(data, output):
     test = split(data, "summ", "test")
     # One length-bucketed classifier pass avoids padding short sentences to the
     # longest sentence in their judgment. Restore document order before selection.
-    predictions = model.roles([sentence for row in test for sentence in row["document"]], progress=True)
+    predictions = model.roles([row["document"] for row in test], progress=True)
     offset = 0
     systems = {"role_position": Counter(), "lead_6": Counter()}
     for row in test:

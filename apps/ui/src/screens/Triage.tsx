@@ -1,7 +1,8 @@
 import { ui } from '../lib/i18n';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { Authority, CaseMeta, CourtAction, CourtSettings, CourtWorkspace, CourtWorkspaceApi, Hearing,
+import { Circle, Clock, ShieldAlert } from 'lucide-react';
+import type { Authority, CaseMeta, CaseTier, CourtAction, CourtSettings, CourtWorkspace, CourtWorkspaceApi, Hearing,
   PriorityOverride } from '@courtplus/contracts';
 import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
 import { addDays, todayIST, useApp } from '../lib/context';
@@ -18,6 +19,8 @@ const partyFlags: Record<CaseMeta['partyFlags'][number], string> = {
   seniorCitizen: 'Senior citizen', woman: 'Woman', child: 'Child', disability: 'Disability', undertrial: 'Undertrial',
 };
 const listingBasis = { adjournment: 'Adjournment decision', oldest: 'Oldest-case allocation', priority: 'Priority order' };
+const tierLevels = [1, 2, 3] as const;
+const tierIcons = { 1: ShieldAlert, 2: Clock, 3: Circle };
 export const fieldStyle = 'field-control';
 
 export function tomorrowIST(): string {
@@ -60,6 +63,14 @@ export function SourceLink({ authority }: { authority: Authority }) {
   </a>;
 }
 
+function TierBadge({ tier }: { tier: CaseTier }) {
+  const Icon = tierIcons[tier.level];
+  return <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-sm">
+    <Icon size={16} aria-hidden="true" />
+    {ui("Tier {level} — {label}", { level: tier.level, label: ui(tier.label) })}
+  </span>;
+}
+
 type Submit = (action: CourtAction) => Promise<CourtWorkspace | undefined>;
 const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim();
 const optionalDays = (form: FormData, key: string) => text(form, key) ? Number(text(form, key)) : undefined;
@@ -70,16 +81,20 @@ export function Triage() {
   const [selected, setSelected] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterFlag, setFilterFlag] = useState('');
+  const [filterTier, setFilterTier] = useState<CaseTier['level']>();
   const [query, setQuery] = useState('');
   const [pinnedCase, setPinnedCase] = useState('');
   const [message, setMessage] = useState('');
   const selectedCase = data?.cases.find(item => item.id === selected);
   const meta = data?.metadata.find(item => item.caseId === selected);
   const labels = new Map(data?.cases.map(item => [item.id, item.label]));
-  const visible = data?.ranked.filter(({ meta }) =>
+  const matching = data?.ranked.filter(({ meta }) =>
     (!filterType || meta.caseType === filterType) &&
     (!filterFlag || (filterFlag === 'custody' ? meta.partiesInCustody : meta.partyFlags.some(flag => flag === filterFlag))) &&
     (!query || (labels.get(meta.caseId) ?? meta.caseId).toLowerCase().includes(query.trim().toLowerCase()))) ?? [];
+  const tierCounts = { 1: 0, 2: 0, 3: 0 };
+  for (const { tier } of matching) tierCounts[tier.level]++;
+  const visible = filterTier ? matching.filter(({ tier }) => tier.level === filterTier) : matching;
 
   async function submit(action: CourtAction) {
     setMessage('');
@@ -91,7 +106,7 @@ export function Triage() {
     return result;
   }
 
-  return <Page title={ui("Smart triage")} note={ui("Priority hint - the judge decides")}>
+  return <Page title={ui("Smart triage")} note={ui("Rule-based priority - not AI, not a judgement about any person. The judge decides.")}>
     <ErrorNote error={error} />
     {message && <p role="status">{message}</p>}
     {!window.courtplusJudge && <p>{ui("Open Smart triage in the desktop workspace.")}</p>}
@@ -119,7 +134,7 @@ export function Triage() {
       </section>
       <section className="panel">
         <h2>{ui("Ranked pending cases")}</h2>
-        <p>{ui("Each chip shows points earned and maximum points. The weights are local scheduling rules.")}</p>
+        <p>{ui("Factor chips show points earned and maximum points. The weights are local scheduling rules.")}</p>
         <div className="flex flex-wrap gap-3">
           <label>{ui("Find case")}<input className={fieldStyle} value={query} onChange={e => setQuery(e.target.value)} /></label>
           <label>{ui("Case type")}<select className={fieldStyle} value={filterType} onChange={e => setFilterType(e.target.value)}>
@@ -131,16 +146,45 @@ export function Triage() {
             {Object.entries(partyFlags).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
           </select></label>
         </div>
+        <div role="group" aria-label={ui("Filter by priority tier")} className="my-3 flex flex-wrap gap-2">
+          {tierLevels.map(level => <button key={level} type="button" className={filterTier === level ? btnPrimary : btn}
+            aria-pressed={filterTier === level} onClick={() => setFilterTier(level)}>
+            {ui("Tier {level} ({count})", { level, count: tierCounts[level] })}
+          </button>)}
+          <button type="button" className={filterTier === undefined ? btnPrimary : btn}
+            aria-pressed={filterTier === undefined} onClick={() => setFilterTier(undefined)}>{ui("All")}</button>
+        </div>
         {!visible.length && <p>{data.ranked.length ? ui("No pending cases match these filters.") : ui("No pending cases with confirmed filing details.")}</p>}
         <ol className="grid gap-4">
-          {visible.map(({ meta, score, factors, override }) => <li key={meta.caseId} className="rounded-lg border p-3">
-            <h3>{labels.get(meta.caseId)} · {score}/100</h3>
+          {visible.map(({ meta, tier, score, factors, override }) => <li key={meta.caseId} className="rounded-lg border p-3">
+            <h3>{labels.get(meta.caseId)}</h3>
+            <TierBadge tier={tier} />
             <p>{caseTypes[meta.caseType]} · {meta.stage} · Filed {meta.filedOn}</p>
             {override && <p>{ui("Judge pin") + " "}{override.direction}. {override.reason}</p>}
+            <details className="my-2">
+              <summary>{ui("Why this tier")}</summary>
+              <p>{ui("Tiers order the list from recorded case facts. They do not decide any legal right.")}</p>
+              {tier.triggers.length ? <ul>{tier.triggers.map(({ rule, source }) => {
+                const urgent = /^BNSS s\.479: (.+) \(checked (\d{4}-\d{2}-\d{2})\)$/.exec(rule);
+                const due = /^BNSS s\.479 due in (\d+) days$/.exec(rule);
+                const wording = urgent ? ui('BNSS s.479: {status} (checked {date})',
+                  { status: ui(urgent[1]), date: urgent[2] })
+                  : due ? ui('BNSS s.479 due in {days} days', { days: due[1] }) : ui(rule);
+                return <li key={rule}>{wording}{' '}<SourceLink authority={source} />
+                  {(urgent || due) && <> · <Link to={`/case/${encodeURIComponent(meta.caseId)}`}>{ui('View s.479 proof trace')}</Link></>}
+                </li>;
+              })}</ul>
+                : <p>{ui("No priority trigger recorded")}</p>}
+              {'statutoryStatus' in tier && tier.statutoryStatus === 'NEEDS_LAWYER_REVIEW' &&
+                <p>{ui('BNSS s.479 needs a lawyer; this check adds no tier priority.')}</p>}
+              {'statutoryStatus' in tier && tier.statutoryStatus === 'OUTSIDE_SCREEN' &&
+                <p>{ui('BNSS s.479 is outside this check; this check adds no tier priority.')}</p>}
+            </details>
             <div className="flex flex-wrap gap-2">{factors.map(item =>
               <span key={item.label} className="rounded-full border px-2 py-1 text-sm">{item.label} {item.points}/{item.weight}</span>)}</div>
             <details className="my-2">
               <summary>{ui("Factor reasons and sources")}</summary>
+              <p>{ui("Ordering aid (not a tier)")}: {score}/100</p>
               <ul>{factors.map(item => <li key={item.label}>{item.label}. {item.reason}{' '}
                 {item.sources.map(source => <span key={source.section}><SourceLink authority={source} />{' '}</span>)}</li>)}</ul>
             </details>

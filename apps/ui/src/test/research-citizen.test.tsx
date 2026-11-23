@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import {
-  HINT_LABEL, RESEARCH_INSTALLING, type CaseRecord, type CourtPlusApi, type HearingApi, type PrecedentHit, type ResearchApi,
+  HINT_LABEL, RESEARCH_INSTALLING, type CaseRecord, type CourtPlusApi, type PrecedentHit, type ResearchApi,
 } from '@courtplus/contracts';
 import india from '../../../../data/stats/india.json';
 import { App } from '../App';
@@ -124,6 +124,7 @@ describe('Hints for this case (judge)', () => {
     const research = bridge();
     window.courtplusResearch = research;
     wrap(<Routes><Route path="/case/:caseId" element={<CaseView />} /></Routes>, api(), '/case/fictional-c7');
+    await userEvent.click(await screen.findByText('Hints (judge decides)'));
     await userEvent.click(await screen.findByRole('button', { name: 'Show hints' }));
     const sections = await screen.findByRole('group', { name: 'Suggested sections' });
     expect(sections).toHaveTextContent('IPC 379');
@@ -144,6 +145,7 @@ describe('Hints for this case (judge)', () => {
     const missing = { available: false as const, reason: RESEARCH_INSTALLING };
     window.courtplusResearch = bridge({ suggestSections: vi.fn(async () => missing), searchPrecedents: vi.fn(async () => missing), classifyRoles: vi.fn(async () => missing) });
     const view = wrap(<Routes><Route path="/case/:caseId" element={<CaseView />} /></Routes>, api(), '/case/fictional-c7');
+    await userEvent.click(await screen.findByText('Hints (judge decides)'));
     await userEvent.click(await screen.findByRole('button', { name: 'Show hints' }));
     expect(await screen.findAllByText(/Precedent search is being installed/)).toHaveLength(3);
     view.unmount();
@@ -188,6 +190,7 @@ describe('Rights advisor', () => {
 });
 
 describe('Track my case', () => {
+  afterEach(() => vi.restoreAllMocks());
   it('finds a case however the number is typed', () => {
     expect(findCase([fictionalCase], ' fictional-7-2026 ')?.id).toBe('fictional-c7');
     expect(findCase([fictionalCase], 'FICTIONAL 8/2026')).toBeUndefined();
@@ -197,60 +200,50 @@ describe('Track my case', () => {
   });
 
   it('shows stage, next date, history and the eCourts link', async () => {
-    wrap(<TrackCase />, mockApi({ listCases: vi.fn(async () => [fictionalCase]) }));
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+      stage: 'trial', nextDate: '2999-01-01', hearingDates: ['2026-01-05'],
+      summaries: [{ hearingDate: '2026-01-05', nextDate: '2999-01-01',
+        summary: 'The court heard the fictional submissions.', verification: 'valid' }],
+    }), { status: 200 }));
+    wrap(<TrackCase />);
     expect(screen.getByRole('link', { name: 'Official case status on eCourts services' })).toHaveAttribute('href', ECOURTS_CASE_STATUS);
     await userEvent.type(screen.getByLabelText('Case number or CNR'), 'fictional 7/2026');
     await userEvent.click(screen.getByRole('button', { name: 'Find my case' }));
     const status = await screen.findByRole('region', { name: 'Case status' });
     expect(status).toHaveTextContent('trial — The court is hearing evidence');
-    expect(status).toHaveTextContent('Next date: 2999-01-01 (Hearing)');
-    expect(status).toHaveTextContent('Charge sheet: the police filed their final report in court — Sample charge sheet filed');
-    expect(await within(status).findByText(/No signed hearing transcript/)).toBeInTheDocument();
+    expect(status).toHaveTextContent('Next date: 2999-01-01');
+    expect(status).toHaveTextContent('Verified by the court');
+    expect(status).toHaveTextContent('The court heard the fictional submissions.');
+    expect(fetch).toHaveBeenCalledWith('/track/fictional%207%2F2026');
   });
 
   it('says when the office has no such case', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }));
     wrap(<TrackCase />);
     await userEvent.type(screen.getByLabelText('Case number or CNR'), 'FICTIONAL-404');
     await userEvent.click(screen.getByRole('button', { name: 'Find my case' }));
-    expect(await screen.findByText(/could not find a unique case with that number/)).toBeInTheDocument();
+    expect(await screen.findByText(/has no case with that number/)).toBeInTheDocument();
   });
 
-  it('groups material from the latest signed transcript of the selected case and keeps other cases out', async () => {
-    const selected = { id: 'hearing-1', caseId: fictionalCase.id, startedAt: '2026-01-06T19:00:00Z', state: 'recorded' as const, transcriptVersions: 3 };
-    const signed = {
-      recordingId: selected.id, version: 2, receipt: 'signed fixture receipt', kind: 'edited' as const,
-      audioSha256: 'a'.repeat(64), textSha256: 'b'.repeat(64), segments: [], edits: [], createdAt: selected.startedAt,
-    };
-    const transcripts = vi.fn(async (id: string) => {
-      if (id === 'unavailable') throw new Error('Fictional unavailable transcript');
-      return [{ ...signed, version: 3, receipt: undefined }, signed, { ...signed, version: 1 }];
-    });
-    const summary = vi.fn<HearingApi['summary']>(async () => ({
-      label: 'Machine summary - verify before use', method: 'Fictional extractive source', basedOnVersion: 2,
-      sentences: [
-        { text: 'A witness described the exhibit.', segmentId: 1, startMs: 8000, keywords: ['witness', 'evidence'], score: 1 },
-        { text: 'The matter was listed on a later date.', segmentId: 1, startMs: 8000, keywords: ['next date'], score: 1 },
+  it('shows only published and verified hearing summaries', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+      stage: 'trial', nextDate: null, hearingDates: ['2026-01-05', '2026-01-06'],
+      summaries: [
+        { hearingDate: '2026-01-05', nextDate: null, summary: 'Fictional court approved summary.', verification: 'valid' },
+        { hearingDate: '2026-01-06', nextDate: null, summary: 'Unverified private text.', verification: 'invalid' },
       ],
-    }));
-    window.courtplusHearing = {
-      list: vi.fn(async () => [selected, { ...selected, id: 'unavailable' }, { ...selected, id: 'another-case', caseId: 'unrelated' }]),
-      transcripts, summary,
-    } as unknown as HearingApi;
-    const record = { ...fictionalCase, events: [...fictionalCase.events,
-      { on: '2026-01-07', kind: 'hearing' as const, source: { docId: 'fictional-order', page: 2 } }] };
-    wrap(<TrackCase />, mockApi({ listCases: vi.fn(async () => [record]) }));
-    const user = userEvent.setup();
-    await user.type(screen.getByLabelText('Case number or CNR'), 'FICTIONAL 7/2026');
-    await user.click(screen.getByRole('button', { name: 'Find my case' }));
-    const section = await screen.findByRole('region', { name: 'Hearing breakdowns' });
-    expect(await within(section).findByText(/Signed transcript version 2/)).toHaveTextContent('7 January 2026');
-    expect(section).toHaveTextContent('Dates or postponements mentioned');
-    expect(section).toHaveTextContent('Evidence or witnesses mentioned');
-    expect(section).toHaveTextContent('00:08');
-    expect(section).toHaveTextContent('Some hearing breakdowns could not be loaded');
-    expect(screen.getByRole('region', { name: 'Case status' })).toHaveTextContent('Source document page 2');
-    expect(summary).toHaveBeenCalledExactlyOnceWith(selected.id, 2);
-    expect(transcripts).not.toHaveBeenCalledWith('another-case');
+    }), { status: 200 }));
+    const localTranscripts = vi.fn();
+    window.courtplusHearing = { transcripts: localTranscripts } as unknown as NonNullable<typeof window.courtplusHearing>;
+    wrap(<TrackCase />);
+    await userEvent.type(screen.getByLabelText('Case number or CNR'), 'FICTIONAL 7/2026');
+    await userEvent.click(screen.getByRole('button', { name: 'Find my case' }));
+    const breakdowns = await screen.findByRole('region', { name: 'Hearing breakdowns' });
+    expect(breakdowns).toHaveTextContent('Fictional court approved summary.');
+    expect(breakdowns).toHaveTextContent('Signature could not be verified');
+    expect(breakdowns).not.toHaveTextContent('Unverified private text.');
+    expect(localTranscripts).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledWith('/track/FICTIONAL%207%2F2026');
   });
 
   it('calculates net receipts or out-of-pocket costs without submitting settlement inputs to the API', async () => {
@@ -289,29 +282,31 @@ describe('Roles and navigation', () => {
   });
 
   const nav = () => within(screen.getByRole('navigation', { name: 'Main' }));
-  const primary = () => [...screen.getByRole('navigation', { name: 'Main' }).querySelectorAll(':scope > ul > li a')].map(link => link.textContent);
+  const group = (title: string) => [...screen.getByRole('navigation', { name: 'Main' }).querySelectorAll(`details[aria-label="${title}"] li a`)].map(link => link.textContent);
+  const groups = () => [...screen.getByRole('navigation', { name: 'Main' }).querySelectorAll('details > summary')].map(summary => summary.textContent);
 
   it('judge: role dashboard, research and India backlog', async () => {
     wrap(<App />);
-    expect(primary()).toEqual(['Judge dashboard', 'Evidence inbox', 'Hearing recorder', 'Research', 'Drafts', 'Cases']);
+    expect(groups()).toEqual(['For Judges', 'For Lawyers', 'For Citizens', 'Common']);
+    expect(group('For Judges')).toEqual(['Judge dashboard', 'Import order', 'Evidence inbox', 'Hearing recorder', 'Research', 'Drafts', 'Cases']);
     expect(await screen.findByRole('heading', { level: 1, name: 'Judge dashboard' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: "India's backlog" })).toBeInTheDocument();
-    expect(nav().getByText('More tools')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Official backlog benchmarks' })).toBeInTheDocument();
+    expect(nav().queryByText('More tools')).not.toBeInTheDocument();
   });
 
   it('lawyer: workspace with research and file evidence; no backlog card', async () => {
     setRoleOverride('lawyer');
     wrap(<App />);
-    expect(primary()).toEqual(['Lawyer workspace', 'Cases', 'Case analyzer', 'Settlement', 'Research', 'File evidence', 'Drafts']);
+    expect(group('For Lawyers')).toEqual(['Lawyer workspace', 'Case analyzer', 'Settlement', 'Research', 'Import order', 'File evidence', 'Drafts']);
     expect(await screen.findByRole('heading', { level: 1, name: 'Lawyer workspace' })).toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: "India's backlog" })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Official backlog benchmarks' })).not.toBeInTheDocument();
   });
 
-  it('citizen: only the citizen tools, and home is Citizen help', async () => {
+  it('citizen: citizen tools grouped together, and home is Citizen help', async () => {
     setRoleOverride('citizen');
     wrap(<App />);
-    expect(primary()).toEqual(['Rights advisor', 'Submit proof', 'Track my case', 'Safeguards']);
-    expect(nav().queryByText('More tools')).not.toBeInTheDocument();
+    expect(group('For Citizens')).toEqual(['Rights advisor', 'Submit proof', 'Track my case', 'Settlement guide']);
+    expect(group('Common')).toContain('Safeguards');
     expect(await screen.findByRole('heading', { level: 1, name: 'Citizen help' })).toBeInTheDocument();
     expect(screen.getByText('Court+')).toBeInTheDocument();
   });

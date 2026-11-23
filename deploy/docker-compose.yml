@@ -20,10 +20,12 @@ services:
       COURTPLUS_HANDOFF_MINUTES: "${COURTPLUS_HANDOFF_MINUTES:-60}"
       COURTPLUS_EVIDENCE_KEY_FILE: /run/secrets/evidence_key
       COURTPLUS_SIGNING_KEY_FILE: /run/secrets/signing_key
+      COURTPLUS_PQ_SIGNING_KEY_FILE: /run/secrets/pq_signing_key
     secrets:
       - db_key
       - evidence_key
       - signing_key
+      - pq_signing_key
     volumes:
       - courtplus_db:/var/lib/courtplus
       - courtplus_evidence:/var/lib/courtplus/evidence
@@ -74,3 +76,5 @@ secrets:
     file: "${COURTPLUS_EVIDENCE_KEY_SOURCE:-./secrets/evidence_key}"
   signing_key:
     file: "${COURTPLUS_SIGNING_KEY_SOURCE:-./secrets/signing_key}"
+  pq_signing_key:
+    file: "${COURTPLUS_PQ_SIGNING_KEY_SOURCE:-./secrets/pq_signing_key}"

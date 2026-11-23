@@ -5,22 +5,27 @@ import type { CourtPlusApi } from '@courtplus/contracts';
 import { useApp } from '../lib/context';
 import { ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
 
-type Result = Awaited<ReturnType<CourtPlusApi['verify']>>;
+type Verification = Awaited<ReturnType<CourtPlusApi['verify']>>;
+type Result = Verification & {
+  signatures?: { ed25519: boolean; mldsa65: boolean };
+  legacy?: boolean;
+  details?: { type: string; keyId?: string; time?: string; hash?: string; sha3_256?: string };
+};
 const TONES = {
   good: 'border-green-700 bg-green-50 text-green-900',
   bad: 'border-red-700 bg-red-50 text-red-900',
   neutral: 'border-slate-300 bg-slate-50 text-slate-700',
 };
 
-const BADGES: { key: keyof Result; title: string; good: string; text: Record<string, string> }[] = [
+const BADGES: { key: keyof Verification; title: string; good: string; text: Record<string, string> }[] = [
   { key: 'signature', title: 'Signature', good: 'valid', text: { valid: '✓ Valid', invalid: '✗ Invalid', unknown_signer: '? Unknown signer' } },
   { key: 'pdf', title: 'PDF', good: 'unchanged', text: { unchanged: '✓ Unchanged', changed: '✗ Changed' } },
   { key: 'chain', title: 'Audit chain', good: 'intact', text: { intact: '✓ Intact', mismatch: '✗ Mismatch', not_checked: '– Not checked' } },
 ];
 
 function verdict(result: Result): { text: string; tone: keyof typeof TONES } {
-  if (result.signature === 'unknown_signer') return { text: 'Could not verify the PDF: unknown signer', tone: 'neutral' };
-  if (result.signature === 'invalid') return { text: 'Could not verify the PDF: invalid signature', tone: 'bad' };
+  if (result.signature === 'unknown_signer') return { text: 'Could not verify the file: unknown signer', tone: 'neutral' };
+  if (result.signature === 'invalid') return { text: 'Could not verify the file: invalid signature or missing signed files', tone: 'bad' };
   if (result.pdf === 'changed') return { text: 'Changed after signing', tone: 'bad' };
   return { text: 'Unchanged since signing', tone: 'good' };
 }
@@ -71,37 +76,51 @@ export function Verifier() {
   const summary = result && verdict(result);
 
   const run = async () => {
-    if (!pdf || !receipt || !manifest) return;
+    if (!pdf || !receipt) return;
     setError(null); setResult(null);
     try {
-      setResult(await api.verify({ pdf: await fileToBytes(pdf), receipt: await fileToText(receipt), manifest: await fileToText(manifest) }));
+      setResult(await api.verify({ pdf: await fileToBytes(pdf), receipt: await fileToText(receipt), manifest: manifest ? await fileToText(manifest) : '{}' }));
     } catch (e) { setError(errMsg(e)); }
   };
 
   const pick = (label: string, accept: string, onFile: (f: File | null) => void, current: File | null) => (
-    <label className="block">{label}
+    <label className="block">{ui(label)}
       <input type="file" accept={accept} onChange={(e) => onFile(e.target.files?.[0] ?? null)} className="mt-1 block" />
       {current && <span className="text-xs text-slate-600">{current.name}</span>}
     </label>
   );
 
   return (
-    <Page title={ui("Verifier")} note={ui("Check that a signed PDF is genuine and unchanged. Works offline.")}>
+    <Page title={ui('Verifier')} note={ui('Check a signed PDF or an original evidence file. Include the manifest for draft, hearing and lawyer PDFs.')}>
       <ErrorNote error={error} />
       <div className="grid max-w-xl gap-3">
-        {pick('Signed PDF', 'application/pdf', setPdf, pdf)}
+        {pick('Signed PDF or original evidence file', '', setPdf, pdf)}
         {pick('Receipt file', '.json,.txt,application/json', setReceipt, receipt)}
         {pick('Manifest file', '.json,application/json', setManifest, manifest)}
         {pick('Or a photo of the QR code (shows the receipt ID)', 'image/*', (f) => {
-          if (f) void decodeQr(f).then((v) => setQrText(v ?? 'No QR code found in this image'), () => setQrText('Could not read this image'));
+          if (f) void decodeQr(f).then((v) => setQrText(v ?? ui('No QR code found in this image')), () => setQrText(ui('Could not read this image')));
         }, null)}
-        {qrText && <p role="status" className="text-sm">{ui("QR says:") + " "}<code>{qrText}</code></p>}
-        <button className={btnPrimary} disabled={!pdf || !receipt || !manifest} onClick={() => void run()}>{ui("Verify")}</button>
+        {qrText && <p role="status" className="text-sm">{ui('QR says:')} <code>{qrText}</code></p>}
+        <button className={btnPrimary} disabled={!pdf || !receipt} onClick={() => void run()}>{ui('Verify')}</button>
       </div>
       <div aria-live="polite">
         {result && summary && (
           <section className="mt-6 space-y-3" aria-label={ui("Verification result")}>
-            <p className={`rounded-lg border-2 px-4 py-3 font-semibold ${TONES[summary.tone]}`}>{summary.text}</p>
+            <p className={`rounded-lg border-2 px-4 py-3 font-semibold ${TONES[summary.tone]}`}>{ui(summary.text)}</p>
+            {result.details && <dl className="break-all text-sm">
+              <dt>{ui('Type')}</dt><dd>{ui(result.details.type)}</dd>
+              <dt>{ui('Signer key ID')}</dt><dd>{result.details.keyId ?? ui('Unavailable')}</dd>
+              <dt>{ui('Signed at')}</dt><dd>{result.details.time ?? ui('Unavailable')}</dd>
+              <dt>SHA-256</dt><dd>{result.details.hash ?? ui('Unavailable')}</dd>
+              {result.details.sha3_256 && <><dt>SHA3-256</dt><dd>{result.details.sha3_256}</dd></>}
+            </dl>}
+            {result.legacy && <p className="text-sm">{ui('Ed25519 only (older receipt, not quantum-safe)')}</p>}
+            {result.signature === 'unknown_signer' && result.signatures?.ed25519 &&
+              <p className="text-sm">{ui("Import the issuer's updated key file")}</p>}
+            {result.signatures && <div className="text-sm">
+              <p>Ed25519: {ui(result.signatures.ed25519 ? 'valid' : 'invalid')}</p>
+              {!result.legacy && <p>ML-DSA-65 (FIPS 204, quantum-safe): {ui(result.signatures.mldsa65 ? 'valid' : 'invalid')}</p>}
+            </div>}
             <div className="grid gap-3 md:grid-cols-3">
               {BADGES.map((b) => {
                 const value = result[b.key];
@@ -109,8 +128,8 @@ export function Verifier() {
                 const tone = notChecked || value === 'unknown_signer' ? 'neutral' : value === b.good ? 'good' : 'bad';
                 return (
                   <div key={b.key} className={`rounded-lg border-2 p-4 text-center ${TONES[tone]}`}>
-                    <p className="text-sm uppercase">{b.title}</p>
-                    <p className="text-2xl font-bold">{notChecked ? ui("– Not checked") : b.text[value]}</p>
+                    <p className="text-sm uppercase">{ui(b.key === 'pdf' && result.details?.type === 'Evidence receipt' ? 'Evidence file' : b.title)}</p>
+                    <p className="text-2xl font-bold">{ui(notChecked ? '– Not checked' : b.text[value])}</p>
                   </div>
                 );
               })}

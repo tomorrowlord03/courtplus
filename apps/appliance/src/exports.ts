@@ -6,23 +6,25 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
-import type { CaseRecord, CourtPlusApi, Person, ScreeningResult } from '@courtplus/contracts';
+import type { CaseRecord, CourtPlusApi, Person, ReleaseDraftKind, ScreeningResult } from '@courtplus/contracts';
+import { generatePqKeyPair, type SigningKey } from '@courtplus/export/signing';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { toDataURL } from 'qrcode';
 import type { Options } from './app.js';
 import type { Session } from './auth.js';
 import { indiaDate, type Cases } from './cases.js';
 import { audit, sha256 } from './db.js';
+import { loadPqSeed } from './evidence.js';
 import { HttpError, missingFeature, requireValue } from './http.js';
 import type { Receipts } from './receipts.js';
 
-type DraftKind = Exclude<Parameters<CourtPlusApi['exportDraft']>[0], 'AI_ASSISTANCE_NOTE'>;
+// The cloud renders only the release drafts; court and lawyer drafts are desktop-only.
+type DraftKind = Exclude<ReleaseDraftKind, 'AI_ASSISTANCE_NOTE'>;
 type DocumentData = {
   S479_3_APPLICATION: { person: Person; caseRecord: CaseRecord; prison: string; result: ScreeningResult };
   DLSA_7_DAY: { person: Person; caseRecord: CaseRecord & { bailGrantedOn: string }; prison: string; district: string; custodyCheckedOn: string };
   RIGHTS_CARD: { dlsaName: string };
 };
-type SigningKey = { keyId: string; label: string; status: 'active'; privateKey: string; publicKey: string };
 type ReturnRow = {
   prison: string; prisonerAlias: string; crimeNumberAndSections: string; admissionOn?: string;
   totalCustodyDays: number; maximumSentence?: string; releasedOn?: string; prisonApplicationToCourtOn?: string;
@@ -54,6 +56,7 @@ async function loadKey(file: string, office: string): Promise<SigningKey> {
   return {
     privateKey, publicKey: key.export({ type: 'spki', format: 'pem' }).toString(),
     keyId: sha256(key.export({ type: 'spki', format: 'der' })), status: 'active', label: office,
+    ...generatePqKeyPair(loadPqSeed(true)),
   };
 }
 
@@ -146,7 +149,8 @@ export async function exportRoutes(
   app: FastifyInstance, options: Options, cases: Cases, receipts: Receipts,
   authenticate: (request: FastifyRequest) => Session,
 ) {
-  const { db, office, prison = '', district = '', signingKeyFile, origin, now = Date.now } = options;
+  const { db, office, prison = '', district = '', signingKeyFile = process.env.COURTPLUS_SIGNING_KEY_FILE,
+    origin, now = Date.now } = options;
   const exporter = await loadExport();
   const signingKey = signingKeyFile && office ? await loadKey(signingKeyFile, office) : undefined;
   const cache = createExportCache();
@@ -175,6 +179,7 @@ export async function exportRoutes(
   return {
     async draft(user: Session, kind: Parameters<CourtPlusApi['exportDraft']>[0], caseId: string, lang: string) {
       if (kind === 'AI_ASSISTANCE_NOTE') return missingFeature('AI_ASSISTANCE_NOTE_ON_DESKTOP');
+      if (kind !== 'S479_3_APPLICATION' && kind !== 'DLSA_7_DAY' && kind !== 'RIGHTS_CARD') return missingFeature('COURT_DRAFTS_ON_DESKTOP');
       if (!exporter) return missingFeature('EXPORT_WORKSPACE_UNAVAILABLE');
       if (!office || !signingKey) return missingFeature('DRAFT_SIGNER_UNCONFIGURED');
       const related = cases.context(caseId);

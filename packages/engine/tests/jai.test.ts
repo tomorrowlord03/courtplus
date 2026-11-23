@@ -53,6 +53,26 @@ describe('Justice Acceleration Index', () => {
     ]);
   });
 
+  it('sorts by pin, tier, score, and then oldest filing date', () => {
+    const ranked = rankCases([
+      matter('Fictional-tier-3', today, { partiesInCustody: true }),
+      matter('Fictional-tier-2-new', '2026-10-01', { partyFlags: ['seniorCitizen'] }),
+      matter('Fictional-tier-2-old', '2026-09-01', { partyFlags: ['seniorCitizen'] }),
+      matter('Fictional-tier-2-high-score', '2026-10-01', { partyFlags: ['disability', 'woman'] }),
+      matter('Fictional-tier-1', today, { nationalSecurity: true }),
+      matter('Fictional-pin-down', today, { nationalSecurity: true }),
+      matter('Fictional-pin-up', today),
+    ], [], [
+      { caseId: 'Fictional-pin-down', direction: 'down', reason: 'Fictional scheduling instruction' },
+      { caseId: 'Fictional-pin-up', direction: 'up', reason: 'Fictional scheduling instruction' },
+    ], today);
+    expect(ranked.map(({ meta, tier, score }) => [meta.caseId, tier.level, score])).toEqual([
+      ['Fictional-pin-up', 3, 0], ['Fictional-tier-1', 1, 5], ['Fictional-tier-2-high-score', 2, 10],
+      ['Fictional-tier-2-old', 2, 7], ['Fictional-tier-2-new', 2, 7], ['Fictional-tier-3', 3, 25],
+      ['Fictional-pin-down', 1, 5],
+    ]);
+  });
+
   it('uses actual filing and disposal weeks and calendar anniversaries for pending age', () => {
     const backlog = courtBacklog([
       matter('Fictional-new', today), matter('Fictional-disposed', '2026-11-20', { disposedOn: today }),

@@ -28,6 +28,8 @@ data/*
 !data/stats/**
 !data/i18n/
 !data/i18n/**
+!data/guides/
+!data/guides/**
 !data/ui/
 !data/ui/**
 !templates/

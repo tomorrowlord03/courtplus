@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import type { Profile as ProfileDetails } from '@courtplus/contracts';
 import { btn, btnPrimary, ErrorNote, errMsg, Page } from '../components/ui';
 import { useApp } from '../lib/context';
-import { ui } from '../lib/i18n';
+import { RIGHTS_CARD_LANGS, ui } from '../lib/i18n';
 import { UI_LANGUAGES } from '../lib/preferences';
 import { PROFILE_ROLES, setRoleOverride } from '../lib/roles';
 import { RoleSwitch } from '../components/RoleSwitch';
@@ -82,7 +82,9 @@ function ProfileForm({ initial, onMessage }: { initial: ProfileDetails | null; o
       <label>{ui("Court or office")}<input className="field-control" name="office" autoComplete="organization" required maxLength={160} defaultValue={initial?.office} /></label>
       <label>{ui("District")}<input className="field-control" name="district" required maxLength={160} defaultValue={initial?.district ?? 'Raipur'} /></label>
       <label>{ui("Designation")}<input className="field-control" name="designation" autoComplete="organization-title" required maxLength={160} defaultValue={initial?.designation} /></label>
-      <label>{ui("Preferred language")}<select className="field-control" name="language" defaultValue={initial?.language === 'hi' ? 'hi' : 'en'}><LanguageOptions /></select></label>
+      <label>{ui("Preferred language")}<select className="field-control" name="language" defaultValue={initial?.language ?? 'en'}>
+        {RIGHTS_CARD_LANGS.map(([code, name]) => <option key={code} value={code} lang={code}>{name}</option>)}
+      </select></label>
       <label>{ui("Bar enrolment or employee ID") + " "}<small>{ui("Optional")}</small><input className="field-control" name="employeeId" maxLength={160} defaultValue={initial?.employeeId} /></label>
       <label>{ui("Email") + " "}<small>{ui("Optional")}</small><input className="field-control" name="email" type="email" autoComplete="email" maxLength={254} defaultValue={initial?.email} /></label>
     </fieldset>

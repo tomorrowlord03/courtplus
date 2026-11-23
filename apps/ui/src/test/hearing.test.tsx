@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import type { CaseRecord, CourtPlusApi, HearingApi, TranscriptVersion } from '@courtplus/contracts';
+import type { CaseRecord, CourtPlusApi, TranscriptVersion } from '@courtplus/contracts';
+import type { HearingBridge } from '../screens/hearing-tools';
 import { AppProvider } from '../lib/context';
 import { HearingRecorder } from '../screens/HearingRecorder';
 import { HearingTranscript } from '../screens/HearingTranscript';
@@ -19,7 +20,7 @@ const machine: TranscriptVersion = {
   segments: [{ id: 1, startMs: 0, endMs: 4000, text: 'The fictional matter is adjourned.', speaker: 'judge' }],
 };
 
-function bridge(overrides: Partial<HearingApi> = {}): HearingApi {
+function bridge(overrides: Partial<HearingBridge> = {}): HearingBridge {
   return {
     list: vi.fn(async () => [
       { id: 'r1', caseId: 'fictional-case', startedAt: '2026-11-23T05:00:00Z', state: 'recorded' as const, durationMs: 65_000, signed: true, transcriptVersions: 1 },
@@ -37,7 +38,7 @@ function bridge(overrides: Partial<HearingApi> = {}): HearingApi {
     summary: vi.fn(async () => ({ label: 'Machine summary - verify before use' as const, method: 'TextRank', basedOnVersion: 1,
       sentences: [{ text: 'The fictional matter is adjourned.', segmentId: 1, startMs: 0, keywords: ['adjourned'], score: 1 }] })),
     ...overrides,
-  } as HearingApi;
+  } as HearingBridge;
 }
 
 function renderAt(path: string) {
@@ -47,7 +48,7 @@ function renderAt(path: string) {
   </Routes></MemoryRouter></AppProvider>);
 }
 
-afterEach(() => { delete window.courtplusHearing; });
+afterEach(() => { delete window.courtplusHearing; localStorage.removeItem('courtplus.uiLanguage'); });
 
 describe('hearing recorder screens', () => {
   it('explains that recording needs the desktop app when no recorder bridge exists', () => {
@@ -84,6 +85,14 @@ describe('hearing recorder screens', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Summarise' }));
     const summary = await screen.findByRole('region', { name: 'Hearing summary' });
     expect(summary).toHaveTextContent('Machine summary - verify before use. Hint - the judge decides.');
+  });
+
+  it('shows the Hindi editor and the original transcript text together', async () => {
+    localStorage.setItem('courtplus.uiLanguage', 'hi');
+    window.courtplusHearing = bridge();
+    renderAt('/hearings/r1');
+    expect(screen.getByRole('heading', { name: 'सुनवाई का प्रतिलेख' })).toBeInTheDocument();
+    expect(await screen.findByRole('textbox', { name: 'खंड का पाठ 1' })).toHaveValue(machine.segments[0].text);
   });
 
   it('formats clock times and word differences', () => {

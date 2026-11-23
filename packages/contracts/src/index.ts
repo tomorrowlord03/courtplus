@@ -1,3 +1,6 @@
+import type { CourtDraftKind } from './draft.js';
+import type { BenchBacklogSummary } from './court.js';
+
 export type ISODate = string; // 'YYYY-MM-DD', civil date, Asia/Kolkata
 export type Tri = 'yes' | 'no' | 'unknown';
 
@@ -76,53 +79,6 @@ export type LookupOffenceFn = (act: string, section: string, subsection?: string
 export interface Entity { label: 'COURT'|'PETITIONER'|'RESPONDENT'|'JUDGE'|'LAWYER'|'DATE'|'ORG'|'GPE'|'STATUTE'|'PROVISION'|'PRECEDENT'|'CASE_NUMBER'|'WITNESS'|'OTHER_PERSON'; text: string; start: number; end: number; score: number; page?: number }
 export interface FieldSuggestion { field: string; value: string; entity?: Entity; sentence: string; page?: number; confidence: number }
 
-// Judge Performance & Backlog Dashboard
-export interface AgingBucket {
-  under1Year: number;
-  oneToThreeYears: number;
-  threeToFiveYears: number;
-  fiveToTenYears: number;
-  overTenYears: number; // NJDG critical backlog category (>10 years)
-}
-
-export interface DailyRatePoint {
-  date: ISODate;
-  filed: number;
-  disposed: number;
-  clearanceRate: number; // (disposed / filed) * 100
-}
-
-export interface JudgeMetric {
-  judgeName: string;
-  courtRoom?: string;
-  court?: string;
-  activeCases: number;
-  disposedCases: number;
-  totalFiled: number;
-  clearanceRate: number; // percentage (disposed / totalFiled) * 100
-  disposalVelocity: number; // average cases disposed per sitting cycle
-  avgCaseLifespanDays: number;
-  totalAdjournmentsGranted: number;
-  adjournmentRatio: number; // adjournments / disposed
-  aging: AgingBucket;
-  timeline: DailyRatePoint[];
-  byCaseType: Record<string, { pending: number; disposed: number }>;
-}
-
-export interface BenchBacklogSummary {
-  asOf: ISODate;
-  totalJudges: number;
-  totalActiveCases: number;
-  totalDisposedCases: number;
-  benchClearanceRate: number;
-  stateNjdg10YearComparison: {
-    district10YearPending: number;
-    chhattisgarh10YearPending: number;
-    ratioToNational: number;
-  };
-  judges: JudgeMetric[];
-}
-
 // Board
 export type Lane = 'APPLY_NOW' | 'DUE_30' | 'LAWYER_REVIEW' | 'BAIL_NOT_RELEASED' | 'COURT_JAIL_MISMATCH' | 'NO_UPDATE_180';
 export interface Card { id: string; lane: Lane; personId: string; caseId: string; title: string; owner?: string; dueOn?: ISODate; state: 'open'|'assigned'|'order_verified'|'jail_acknowledged'|'holds_checked'|'closed'; tags: string[] }
@@ -134,7 +90,7 @@ export interface CourtPlusApi {
   saveCase(p: Person, c: CaseRecord): Promise<void>;
   screen(caseId: string, asOf: ISODate): Promise<ScreeningResult>;
   board(asOf: ISODate): Promise<Card[]>; updateCard(id: string, patch: Partial<Card>): Promise<Card>;
-  exportDraft(kind: 'S479_3_APPLICATION'|'DLSA_7_DAY'|'AI_ASSISTANCE_NOTE'|'RIGHTS_CARD', caseId: string, lang: string): Promise<{ pdfPath: string; receiptPath: string; manifestPath: string }>;
+  exportDraft(kind: CourtDraftKind, caseId: string, lang: string): Promise<{ pdfPath: string; receiptPath: string; manifestPath: string }>;
   exportScReturn(asOf: ISODate, format: 'xlsx'|'csv'): Promise<string>;
   verify(bundle: { pdf: Uint8Array; receipt: string; manifest: string }): Promise<{ signature: 'valid'|'invalid'|'unknown_signer'; pdf: 'unchanged'|'changed'; chain: 'intact'|'mismatch'|'not_checked' }>;
   stats(): Promise<unknown>;
@@ -169,6 +125,9 @@ export interface DesktopWorkspaceApi extends CourtPlusApi {
 export * from './evidence.js';
 
 export * from './court.js';
+export * from './tiers.js';
 export * from './hearing.js';
+export * from './hearing-publication.js';
 export * from './lawyer.js';
+export * from './draft.js';
 export * from './research.js';

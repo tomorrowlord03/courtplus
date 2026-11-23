@@ -1,23 +1,44 @@
 import { createElement, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import QRCode from 'qrcode';
-import type { CaseRecord, CourtPlusApi, Status } from '@courtplus/contracts';
+import type { CaseRecord, CourtDraftKind, JudgeDraftKind, LawyerDraftKind, ReleaseDraftKind, Status } from '@courtplus/contracts';
 import { DRAFT_LANGS, RIGHTS_CARD_LANGS, isReviewedLanguage, ui } from '../lib/i18n';
 import { todayIST, useApp } from '../lib/context';
+import { useRole } from '../lib/roles';
 import { Empty, ErrorNote, Page, btnPrimary, errMsg } from '../components/ui';
 
-type Kind = Parameters<CourtPlusApi['exportDraft']>[0];
-const KINDS: [Kind, string][] = [
+const statusLabels: Record<Status, string> = {
+  APPLY_NOW: 'APPLY NOW',
+  DUE_IN_N_DAYS: 'DUE IN N DAYS',
+  NEEDS_LAWYER_REVIEW: 'NEEDS LAWYER REVIEW',
+  OUTSIDE_SCREEN: 'OUTSIDE SCREEN',
+};
+
+type Kind = CourtDraftKind;
+const RELEASE_DRAFTS: [ReleaseDraftKind, string][] = [
   ['S479_3_APPLICATION', 'Application under s.479(3)'],
   ['DLSA_7_DAY', 'DLSA 7-day note'],
   ['AI_ASSISTANCE_NOTE', 'AI assistance note'],
   ['RIGHTS_CARD', 'Rights card'],
 ];
+const JUDGE_DRAFTS: [JudgeDraftKind, string][] = [
+  ['INTERIM_ORDER_SHEET', 'Interim order sheet'],
+  ['NOTICE_TO_APPEAR', 'Notice to appear'],
+  ['ADJOURNMENT_ORDER', 'Adjournment order'],
+  ['JUDGMENT_OUTLINE', 'Judgment outline'],
+];
+const LAWYER_DRAFTS: [LawyerDraftKind, string][] = [
+  ['REGULAR_BAIL_APPLICATION', 'Regular bail application (s.483)'],
+  ['ANTICIPATORY_BAIL_APPLICATION', 'Anticipatory bail application (s.482)'],
+  ['LEGAL_NOTICE', 'Legal notice'],
+  ['CHEQUE_BOUNCE_NOTICE', 'Cheque-bounce notice (NI Act s.138)'],
+];
+const COURT_DRAFT_LANGS = RIGHTS_CARD_LANGS.filter(([code]) => code === 'en' || code === 'hi');
 
 const baseName = (p: string) => p.split(/[\\/]/).pop()!.replace(/\.[^.]+$/, '');
 
 const previewTags = new Set(['div', 'section', 'p', 'h1', 'h2', 'h3', 'span', 'strong', 'b', 'em',
-  'i', 'br', 'bdi', 'code', 'blockquote', 'a', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th']);
+  'i', 'br', 'bdi', 'code', 'blockquote', 'a', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'footer']);
 
 function renderPreview(html: string) {
   const main = new DOMParser().parseFromString(html, 'text/html').querySelector('main');
@@ -32,6 +53,7 @@ function renderPreview(html: string) {
 
 export function Drafts() {
   const { api, view, profile, language } = useApp();
+  const role = useRole();
   const [searchParams] = useSearchParams();
   const requestedCaseId = searchParams.get('caseId');
   const [cases, setCases] = useState<CaseRecord[] | null>(null);
@@ -68,12 +90,15 @@ export function Drafts() {
 
   // Fail closed: the s.479(3) application is offered only once the engine says APPLY_NOW.
   const canApply = status?.caseId === caseId && status.status === 'APPLY_NOW';
-  const kinds = KINDS.filter(([k]) => k !== 'S479_3_APPLICATION' || canApply);
+  const roleDrafts = role === 'judge' ? JUDGE_DRAFTS : role === 'lawyer' ? LAWYER_DRAFTS : [];
+  const kinds: [Kind, string][] = [...RELEASE_DRAFTS, ...roleDrafts]
+    .filter(([k]) => k !== 'S479_3_APPLICATION' || canApply);
   const defaultKind = record?.bailGrantedOn ? 'DLSA_7_DAY' : 'AI_ASSISTANCE_NOTE';
   const selectedKind = currentSelection?.kind;
   const kind = selectedKind && kinds.some(([k]) => k === selectedKind) ? selectedKind : defaultKind;
-  const langs = kind === 'RIGHTS_CARD' ? RIGHTS_CARD_LANGS : DRAFT_LANGS;
-  const preferredLanguage = lang ?? language;
+  const isCourtDraft = roleDrafts.some(([k]) => k === kind);
+  const langs = kind === 'RIGHTS_CARD' ? RIGHTS_CARD_LANGS : isCourtDraft ? COURT_DRAFT_LANGS : DRAFT_LANGS;
+  const preferredLanguage = lang ?? profile?.language ?? language;
   const exportLang = langs.some(([code]) => code === preferredLanguage) ? preferredLanguage : 'en';
 
   const previewKey = JSON.stringify([caseId, kind, exportLang]);
@@ -114,13 +139,15 @@ export function Drafts() {
           </select>
         </label>
         <label>{ui("Draft type")}<select className="field-control" value={kind} onChange={(e) => { setSelection({ requestedCaseId, caseId, kind: e.target.value as Kind }); setLang(undefined); }}>
-            {kinds.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+            {kinds.map(([k, l]) => <option key={k} value={k}>{ui(l)}</option>)}
           </select>
         </label>
         {status?.caseId === caseId && !canApply && (
           <p className="text-sm text-slate-700" data-testid="s479-hidden">
-            No s.479(3) application: the engine result as of {status.asOf} is {status.status.replace(/_/g, ' ')}, not Apply now.
-            {status.status === 'NEEDS_LAWYER_REVIEW' || status.status === 'OUTSIDE_SCREEN' ? ui(" Send this case for lawyer review.") : ''}
+            {ui('No s.479(3) application: the engine result as of {date} is {status}, not Apply now.', {
+              date: status.asOf, status: ui(statusLabels[status.status]),
+            })}
+            {status.status === 'NEEDS_LAWYER_REVIEW' || status.status === 'OUTSIDE_SCREEN' ? ui(' Send this case for lawyer review.') : ''}
           </p>
         )}
         <label>{ui("Language")}<select className="field-control" value={exportLang} onChange={(e) => setLang(e.target.value)}>
@@ -130,6 +157,9 @@ export function Drafts() {
         {kind === 'RIGHTS_CARD' && !isReviewedLanguage(exportLang) && (
           <p className="text-sm text-amber-800">{ui("▲ Machine translation, not legally reviewed. The English text is authoritative.")}</p>
         )}
+        {isCourtDraft && exportLang === 'hi' && (
+          <p className="text-sm text-amber-800">{ui('Hindi draft needs review by a fluent legal reader.')}</p>
+        )}
         <button className={btnPrimary} disabled={!caseId || busy} onClick={() => void run()}>
           {busy ? ui("Preparing…") : ui("Export signed PDF")}
         </button>
@@ -138,13 +168,13 @@ export function Drafts() {
         <div className="panel-heading"><h2>{ui("Live preview")}</h2><span className="count-chip">{ui("Draft")}</span></div>
         <div className="draft-paper">
           {currentPreview?.html ? <div lang={exportLang} dir={exportLang === 'ur' ? 'rtl' : 'ltr'}>{renderPreview(currentPreview.html)}</div> : <>
-            <h3>{KINDS.find(([k]) => k === kind)?.[1]}</h3>
+            <h3>{ui(kinds.find(([k]) => k === kind)?.[1] ?? '')}</h3>
             {currentPreview?.error && <ErrorNote error={currentPreview.error} />}
             {caseId && previewDraft && !currentPreview && <p role="status">{ui("Preparing preview…")}</p>}
             <dl><div><dt>{ui("Case")}</dt><dd>{record?.caseNo ?? record?.cnr ?? record?.id ?? ui("Select a case")}</dd></div>
               <div><dt>{ui("Language")}</dt><dd>{langs.find(([code]) => code === exportLang)?.[1]}</dd></div>
               {profile?.office && <div><dt>{ui("Office default")}</dt><dd>{profile.office}</dd></div>}
-              <div><dt>{ui("Screening status")}</dt><dd>{!caseId ? ui("Select a case") : status?.caseId === caseId ? status.status.replace(/_/g, ' ') : 'Checking…'}</dd></div></dl>
+              <div><dt>{ui("Screening status")}</dt><dd>{!caseId ? ui('Select a case') : status?.caseId === caseId ? ui(statusLabels[status.status]) : ui('Checking…')}</dd></div></dl>
           </>}
           <p className="draft-disclosure">{ui("The signed PDF is generated from confirmed case facts. Check the exported document before filing or sharing.")}</p>
         </div>
@@ -152,7 +182,7 @@ export function Drafts() {
         <section className="mt-6 rounded border p-3" aria-label={ui("Export result")}>
           <h2 className="font-semibold">{ui("Signed PDF ready")}</h2>
           <p className="text-sm">{ui("Receipt ID:") + " "}<code data-testid="receipt-id">{baseName(out.receiptPath)}</code></p>
-          {qr && <img src={qr} alt="QR code for the receipt ID" width={160} height={160} />}
+          {qr && <img src={qr} alt={ui('QR code for the receipt ID')} width={160} height={160} />}
           {/* No file:// preview: the desktop CSP blocks local file loads by design. */}
           <p className="break-all text-sm">{ui("Saved to") + " "}<span className="text-slate-600">{out.pdfPath}</span></p>
         </section>

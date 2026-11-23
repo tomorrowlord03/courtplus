@@ -1,4 +1,4 @@
-import type { Authority, ISODate } from './index.js';
+import type { Authority, CaseTier, ISODate } from './index.js';
 
 export interface Hearing {
   caseId: string;
@@ -38,6 +38,7 @@ export interface TriageFactor {
 
 export interface TriageRank {
   meta: CaseMeta;
+  tier: CaseTier;
   score: number;
   factors: TriageFactor[];
   override?: PriorityOverride;
@@ -117,4 +118,52 @@ export type CourtAction =
 
 export interface CourtWorkspaceApi {
   courtWorkspace(date: ISODate, action: CourtAction): Promise<CourtWorkspace>;
+}
+
+// Judge Performance & Backlog Dashboard
+export interface AgingBucket {
+  under1Year: number;
+  oneToThreeYears: number;
+  threeToFiveYears: number;
+  fiveToTenYears: number;
+  overTenYears: number; // NJDG critical backlog category (>10 years)
+}
+
+export interface DailyRatePoint {
+  date: ISODate;
+  filed: number;
+  disposed: number;
+  clearanceRate: number; // (disposed / filed) * 100
+}
+
+export interface JudgeMetric {
+  judgeName: string;
+  courtRoom?: string;
+  court?: string;
+  activeCases: number;
+  disposedCases: number;
+  totalFiled: number;
+  clearanceRate: number; // percentage (disposed / totalFiled) * 100
+  disposalVelocity: number; // average cases disposed per sitting cycle
+  avgCaseLifespanDays: number;
+  totalAdjournmentsGranted: number;
+  adjournmentRatio: number; // adjournments / disposed
+  aging: AgingBucket;
+  timeline: DailyRatePoint[];
+  weeks?: CourtBacklog['weeks'];
+  byCaseType: Record<string, { pending: number; disposed: number }>;
+}
+
+export interface BenchBacklogSummary {
+  asOf: ISODate;
+  totalJudges: number;
+  totalActiveCases: number;
+  totalDisposedCases: number;
+  benchClearanceRate: number;
+  stateNjdg10YearComparison: {
+    district10YearPending: number;
+    chhattisgarh10YearPending: number;
+    ratioToNational: number;
+  };
+  judges: JudgeMetric[];
 }

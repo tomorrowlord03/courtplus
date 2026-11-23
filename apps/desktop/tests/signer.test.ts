@@ -1,7 +1,9 @@
+import { createCipheriv, randomBytes, scryptSync } from 'node:crypto';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import * as exports from '@courtplus/export';
+import { encodeTrustPem, generatePqKeyPair } from '@courtplus/export/signing';
 import type { ScreeningResult } from '@courtplus/contracts';
 import { describe, expect, it } from 'vitest';
 import { createSigner } from '../src/handlers/signer';
@@ -35,6 +37,70 @@ async function withSigner(run: (store: Store, clock: { now: number }) => Promise
 }
 
 describe('signing key custody', () => {
+  it('upgrades a pre-existing Ed25519 key and imports the hybrid public key under the same key ID', () => withSigner(store => {
+    const { pqPublicKey, pqPrivateKey, pqKeyId, ...legacy } = exports.generateKeyPair('Fictional Office');
+    store.writeSettings({ 'signing-key': JSON.stringify(legacy) }, 'signer.fixture', {});
+    const signer = createSigner(store, exports);
+    const key = signer.key(legacy.label);
+    expect(key.keyId).toBe(legacy.keyId);
+    expect(key.publicKey).toBe(legacy.publicKey);
+    expect(key.pqPublicKey).toBeTruthy();
+    expect(JSON.parse(store.readSetting('signing-key') ?? '{}')).toMatchObject({
+      keyId: legacy.keyId, pqPublicKey: key.pqPublicKey, pqPrivateKey: key.pqPrivateKey,
+    });
+    const peer = exports.generateKeyPair('Fictional Peer');
+    expect(signer.trust(peer.publicKey, peer.label)).toBe(peer.keyId);
+    expect(signer.trust(encodeTrustPem(peer), peer.label)).toBe(peer.keyId);
+    expect(signer.trustStore()).toContainEqual(exports.exportPublicKey(peer));
+    expect(exports.verify({ ...signWith(peer), trustStore: signer.trustStore() }).signature).toBe('valid');
+  }));
+
+  it('rejects a peer PQ upgrade without a binding and preserves the Ed25519 entry', () => withSigner(store => {
+    const signer = createSigner(store, exports);
+    const peer = exports.generateKeyPair('Fictional Peer');
+    signer.trust(peer.publicKey, peer.label);
+    const before = signer.trustStore();
+    const pem = encodeTrustPem(peer).split('-----BEGIN COURTPLUS KEY BINDING-----')[0];
+    expect(() => signer.trust(pem, peer.label)).toThrow('The ML-DSA-65 key is not bound to this Ed25519 key');
+    expect(signer.trustStore()).toEqual(before);
+  }));
+
+  it.each(['active', 'retired'] as const)('keeps a local %s key independent of an imported PQ key', status => withSigner(store => {
+    const { pqPublicKey, pqPrivateKey, pqKeyId, ...local } = exports.generateKeyPair('Fictional Office');
+    store.writeSettings({ 'signing-key': JSON.stringify(local) }, 'signer.fixture', {});
+    const signer = createSigner(store, exports);
+    if (status === 'retired') signer.retire();
+
+    const peer = { ...local, ...generatePqKeyPair() };
+    expect(signer.trust(encodeTrustPem(peer), 'Fictional Peer')).toBe(local.keyId);
+    expect(signer.trustStore()).toEqual([{ ...exports.exportPublicKey(local), status }]);
+  }));
+
+  it('adds the PQ key when a legacy passphrase-protected key is unlocked', () => withSigner(store => {
+    const { pqPublicKey, pqPrivateKey, pqKeyId, privateKey, ...legacy } = exports.generateKeyPair('Fictional Office');
+    const salt = randomBytes(16);
+    const iv = randomBytes(12);
+    const derived = scryptSync(passphrase, salt, 32, { N: 2 ** 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
+    const cipher = createCipheriv('aes-256-gcm', derived, iv);
+    const ciphertext = Buffer.concat([cipher.update(privateKey, 'utf8'), cipher.final()]);
+    const sealed = {
+      salt: salt.toString('base64'), iv: iv.toString('base64'),
+      tag: cipher.getAuthTag().toString('base64'), data: ciphertext.toString('base64'),
+    };
+    store.writeSettings({ 'signing-key': JSON.stringify({ ...legacy, sealed }) }, 'signer.fixture', {});
+    const signer = createSigner(store, exports);
+    expect(() => signer.unlock('wrong fictional passphrase')).toThrow(/Wrong/);
+    expect(signer.publicKey(legacy.label).pqPublicKey).toBeUndefined();
+    expect(signer.unlock(passphrase)).toMatchObject({ keyId: legacy.keyId, protected: true, unlocked: true });
+    const signingKey = signer.key(legacy.label);
+    expect(signingKey.pqPrivateKey).toBeTruthy();
+    const saved = store.readSetting('signing-key')!;
+    expect(saved).not.toContain(signingKey.pqPrivateKey!);
+    signer.lock();
+    expect(signer.unlock(passphrase).unlocked).toBe(true);
+    expect(signer.key(legacy.label).pqPublicKey).toBe(signingKey.pqPublicKey);
+  }));
+
   it('seals the key under a passphrase and signs only while unlocked', () => withSigner((store, clock) => {
     const signer = createSigner(store, exports, () => clock.now);
     const keyId = signer.key('Fictional Office').keyId;

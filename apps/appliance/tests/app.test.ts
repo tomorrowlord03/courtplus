@@ -3,7 +3,10 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Writable } from 'node:stream';
-import type { CaseRecord, Person } from '@courtplus/contracts';
+import type { CaseRecord, Person, ScreeningResult } from '@courtplus/contracts';
+import {
+  createManifest, createReceipt, decodeTrustPem, encodeTrustPem, generateKeyPair, generatePqKeyPair, keyBinding, sha3_256, signHybrid,
+} from '@courtplus/export/signing';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { addAccount } from '../src/auth.js';
@@ -11,6 +14,16 @@ import { canonical, openDb, verifyAudit, type Db } from '../src/db.js';
 import { createExportCache } from '../src/exports.js';
 import { roles, type Role } from '../src/inputs.js';
 import { addIssuer } from '../src/receipts.js';
+
+vi.mock('node:child_process', async importOriginal => ({
+  ...await importOriginal<typeof import('node:child_process')>(),
+  execFile(file: string, args: string[], _options: unknown, done: (error: Error | null) => void) {
+    const output = args.find(arg => arg.startsWith('--print-to-pdf='));
+    if (file !== 'chromium' || !output) return done(new Error('Expected Chromium PDF output'));
+    writeFileSync(output.slice('--print-to-pdf='.length), pdf);
+    done(null);
+  },
+}));
 
 const origin = 'https://courtplus.example.test';
 const password = 'fictional test account password';
@@ -166,6 +179,13 @@ describe.sequential('CourtPlus Cloud', () => {
     }
   });
 
+  test('serves the Hindi interface catalog to the signed-out login screen', async () => {
+    const response = await app.inject({ method: 'GET', url: '/cloud-hi.json' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toContain('application/json');
+    expect(response.json()['App language']).toBe('ऐप की भाषा');
+  });
+
   test('handoff POST, live event, overdue, acknowledgement, and replay', async () => {
     const address = await app.listen({ host: '127.0.0.1', port: 0 });
     const controller = new AbortController();
@@ -280,6 +300,120 @@ describe.sequential('CourtPlus Cloud', () => {
     expect((await verify('invalid!')).statusCode).toBe(400);
   });
 
+  test('publishes hybrid drafts after upgrading the trusted issuer and rejects stripped signatures', async () => {
+    const key = {
+      keyId, label: office, status: 'active' as const, ...generatePqKeyPair(),
+      publicKey: orgKeys.publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+      privateKey: orgKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+    };
+    const result = {
+      status: 'NEEDS_LAWYER_REVIEW', asOf: '2026-11-23', ruleVersion: 'rules-fictional', trace: [],
+    } as ScreeningResult;
+    const { receipt, receiptId } = createReceipt({ issuer: office, inputs: {}, result }, key);
+    const manifest = createManifest(pdf, receipt, key);
+    const publish = (receiptFile: string) => api('legal_aid', 'POST', '/api/receipts', { receipt: receiptFile, manifest });
+    expect((await publish(receipt)).statusCode).toBe(422);
+    expect(addIssuer(db, office, encodeTrustPem(key))).toBe(keyId);
+    const upgrade = db.prepare("SELECT payload_hash FROM audit_log WHERE action = 'issuer.upgrade' ORDER BY id DESC LIMIT 1").get();
+    expect(upgrade).toEqual({ payload_hash: digest(canonical({ keyId, office, pqKeyId: key.pqKeyId })) });
+    const stripped = JSON.parse(receipt);
+    delete stripped.signatures.mldsa65;
+    expect((await publish(JSON.stringify(stripped))).statusCode).toBe(422);
+    expect((await publish(receipt)).statusCode).toBe(201);
+    const verification = await app.inject('/v/' + receiptId);
+    expect(verification.body).toContain('ML-DSA-65 (FIPS 204, quantum-safe)</dt><dd>Valid');
+    expect(verification.body).toContain(sha3_256(pdf));
+  });
+
+  test('verifies full-size v2 bundles over HTTP and requires SHA3 for digest verification', async () => {
+    const issuer = 'Fictional V2 Verification Office';
+    const signingKey = generateKeyPair(issuer);
+    const result = {
+      status: 'NEEDS_LAWYER_REVIEW', asOf: '2026-11-23', ruleVersion: 'rules-fictional', trace: [],
+    } as ScreeningResult;
+    const { receipt } = createReceipt({ issuer, inputs: {}, result }, signingKey);
+    const manifest = createManifest(pdf, receipt, signingKey);
+    expect(receipt.length).toBeGreaterThan(4096);
+    expect(manifest.length).toBeGreaterThan(2048);
+    const input = { receipt, manifest, pdfDigest: digest(pdf) };
+    const verify = () => app.inject({
+      method: 'POST', url: '/api/verify', remoteAddress: '192.0.2.43', headers: users.get('legal_aid'),
+      payload: [{ receipt, manifest, pdf: { $base64: pdf.toString('base64') } }],
+    });
+    addIssuer(db, issuer, signingKey.publicKey);
+    const ed25519Only = await verify();
+    expect(ed25519Only.statusCode).toBe(200);
+    expect(ed25519Only.json()).toMatchObject({
+      signature: 'unknown_signer', signatures: { ed25519: true, mldsa65: false },
+    });
+
+    addIssuer(db, issuer, encodeTrustPem(signingKey));
+    const byDigest = await api('legal_aid', 'POST', '/api/verify-digest', { ...input, pdfSha3_256: sha3_256(pdf) });
+    const full = await verify();
+    const valid = { signature: 'valid', pdf: 'unchanged', signatures: { ed25519: true, mldsa65: true } };
+    expect(byDigest.statusCode).toBe(200);
+    expect(byDigest.json()).toMatchObject(valid);
+    expect(full.statusCode).toBe(200);
+    expect(full.json()).toMatchObject(valid);
+    const missing = await api('legal_aid', 'POST', '/api/verify-digest', input);
+    expect(missing.statusCode).toBe(400);
+    expect(missing.json()).toEqual({ error: 'SHA3_DIGEST_REQUIRED' });
+  });
+
+  test('rejects an issuer upgrade signed by a different PQ key without changing the issuer row', () => {
+    const label = 'Fictional Issuer Binding Office';
+    const key = generateKeyPair(label);
+    addIssuer(db, label, key.publicKey);
+    const issuer = db.prepare('SELECT * FROM issuers WHERE key_id = ?');
+    const before = issuer.get(key.keyId);
+    expect(before).toBeDefined();
+    const binding = signHybrid(keyBinding(key).payload, { ...key, ...generatePqKeyPair() });
+    expect(() => addIssuer(db, label, encodeTrustPem({ ...key, binding })))
+      .toThrow('The ML-DSA-65 key is not bound to this Ed25519 key');
+    expect(issuer.get(key.keyId)).toEqual(before);
+  });
+
+  test('signs appliance drafts with the same v2 key as the evidence vault', async () => {
+    const { privateKey } = generateKeyPairSync('ed25519');
+    const signingKeyFile = join(directory, 'draft-signing-key.pem');
+    const pqFile = join(directory, 'draft-pq-seed');
+    writeFileSync(signingKeyFile, privateKey.export({ type: 'pkcs8', format: 'pem' }), { mode: 0o600 });
+    writeFileSync(pqFile, randomBytes(32).toString('hex'), { mode: 0o600 });
+    vi.stubEnv('COURTPLUS_PQ_SIGNING_KEY_FILE', pqFile);
+    let signingApp: typeof app | undefined;
+    try {
+      const label = 'Fictional Draft Signing Office';
+      const options = { db, origin, office: label, signingKeyFile, evidenceDir: join(directory, 'draft-vault') };
+      signingApp = await buildApp(options);
+      const headers = users.get('dlsa');
+      const evidenceKey = await signingApp.inject({ url: '/api/evidence/signing-key', headers });
+      expect(evidenceKey.statusCode).toBe(200);
+      const trusted = decodeTrustPem(evidenceKey.body);
+      expect(trusted.pqKeyId).toMatch(/^[a-f0-9]{64}$/);
+      addIssuer(db, label, evidenceKey.body);
+
+      const draftCase = { ...record, id: 'c990002', personId: 'p990002' };
+      const saved = await signingApp.inject({ method: 'POST', url: '/api/saveCase', headers, payload: [
+        { ...person, id: draftCase.personId, alias: 'Accused-990002', caseIds: [draftCase.id] }, draftCase,
+      ] });
+      expect(saved.statusCode).toBe(204);
+      const exported = await signingApp.inject({
+        method: 'POST', url: '/api/exportDraft', headers, payload: ['RIGHTS_CARD', draftCase.id, 'en'],
+      });
+      expect(exported.statusCode).toBe(200);
+      const { receiptPath, manifestPath } = exported.json<{ receiptPath: string; manifestPath: string }>();
+      const receipt = await signingApp.inject({ url: receiptPath, headers });
+      const manifest = await signingApp.inject({ url: manifestPath, headers });
+      expect(receipt.statusCode).toBe(200);
+      expect(manifest.statusCode).toBe(200);
+      expect(receipt.json().payload).toMatchObject({ kind: 'courtplus-receipt-v2', keyId: trusted.keyId, pqKeyId: trusted.pqKeyId });
+      expect(manifest.json().payload).toMatchObject({ kind: 'courtplus-manifest-v2', keyId: trusted.keyId, pqKeyId: trusted.pqKeyId });
+    } finally {
+      await signingApp?.close();
+      vi.unstubAllEnvs();
+    }
+  });
+
   test('raw verification rejects PDFs over 4 MiB and the digest path still works', async () => {
     const { receipt, manifest } = draft();
     const raw = (size: number) => app.inject({
@@ -381,6 +515,20 @@ describe.sequential('CourtPlus Cloud', () => {
         authorization: '[Redacted]', cookie: '[Redacted]', 'x-csrf-token': '[Redacted]',
         'x-test-marker': 'fictional-visible',
       });
+    } finally {
+      await loggedApp.close();
+    }
+  });
+
+  test('default logging keeps no client IP and masks anonymous receipt codes', async () => {
+    let logged = '';
+    const stream = new Writable({ write(chunk, _, done) { logged += chunk.toString(); done(); } });
+    const loggedApp = await buildApp({ db, origin, logger: { stream } });
+    try {
+      await loggedApp.inject({ method: 'GET', url: '/evidence/status/fictionalreceiptcode123', remoteAddress: '203.0.113.7' });
+      expect(logged).not.toContain('203.0.113.7');
+      expect(logged).not.toContain('fictionalreceiptcode123');
+      expect(logged).toContain('/evidence/status/[code]');
     } finally {
       await loggedApp.close();
     }

@@ -1,11 +1,15 @@
-import type { CaseRecord, HearingApi, SpeakerRole } from '@courtplus/contracts';
+import type { CaseRecord, HearingApi, SpeakerRole, TranscriptLanguage, TranscriptVersion } from '@courtplus/contracts';
+
+export type HearingBridge = Omit<HearingApi, 'transcribe'> & {
+  transcribe(id: string, language: TranscriptLanguage): Promise<TranscriptVersion>;
+};
 
 declare global {
-  interface Window { courtplusHearing?: HearingApi }
+  interface Window { courtplusHearing?: HearingBridge }
 }
 
 /** The recorder exists only in the desktop app. */
-export function hearingBridge(): HearingApi | undefined {
+export function hearingBridge(): HearingBridge | undefined {
   return typeof window === 'undefined' ? undefined : window.courtplusHearing;
 }
 
@@ -22,19 +26,6 @@ export function clock(ms: number): string {
 
 export const caseLabel = (record?: CaseRecord, fallback = '') =>
   record ? [record.caseNo, record.cnr, record.court].filter(Boolean).join(' · ') || record.id : fallback;
-
-/** Decodes the recorded audio to 16 kHz mono, the input the speech model expects. */
-export async function decodeTo16k(bytes: Uint8Array): Promise<Float32Array> {
-  const context = new OfflineAudioContext(1, 1, 16_000);
-  const buffer = await context.decodeAudioData(bytes.slice().buffer);
-  if (buffer.numberOfChannels === 1) return buffer.getChannelData(0).slice();
-  const mono = new Float32Array(buffer.length);
-  for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
-    const data = buffer.getChannelData(channel);
-    for (let index = 0; index < data.length; index += 1) mono[index] += data[index] / buffer.numberOfChannels;
-  }
-  return mono;
-}
 
 export type DiffPart = { kind: 'same' | 'removed' | 'added'; text: string };
 

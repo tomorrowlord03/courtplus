@@ -1,10 +1,11 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import type { CaseRecord, CourtPlusApi, Status } from '@courtplus/contracts';
 import type { WorkspaceApi } from '../lib/api';
 import { AppProvider } from '../lib/context';
+import { setRoleOverride } from '../lib/roles';
 import { Drafts } from '../screens/Drafts';
 
 vi.mock('../../../../data/i18n/hi.json', () => ({ default: { _meta: { reviewed: false } } }));
@@ -30,6 +31,10 @@ function renderDrafts(status: Status, previewDraft?: WorkspaceApi['previewDraft'
 }
 
 const options = () => screen.getAllByRole('option').map((o) => o.textContent);
+const judgeDrafts = ['Interim order sheet', 'Notice to appear', 'Adjournment order', 'Judgment outline'];
+const lawyerDrafts = ['Regular bail application (s.483)', 'Anticipatory bail application (s.482)', 'Legal notice', 'Cheque-bounce notice (NI Act s.138)'];
+
+afterEach(() => setRoleOverride(undefined));
 
 describe('Drafts s.479(3) offer', () => {
   it('preserves isolated names and references in the live draft preview', async () => {
@@ -64,5 +69,19 @@ describe('Drafts s.479(3) offer', () => {
     expect(screen.getByText(/Machine translation, not legally reviewed/)).toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText('Draft type'), 'AI_ASSISTANCE_NOTE');
     expect(screen.getByLabelText('Language')).toHaveValue('en');
+  });
+
+  it.each([
+    { role: 'judge', offered: judgeDrafts, hidden: lawyerDrafts, kind: 'JUDGMENT_OUTLINE' },
+    { role: 'lawyer', offered: lawyerDrafts, hidden: judgeDrafts, kind: 'REGULAR_BAIL_APPLICATION' },
+  ] as const)('offers $role drafts in English and unreviewed Hindi', async ({ role, offered, hidden, kind }) => {
+    setRoleOverride(role);
+    renderDrafts('APPLY_NOW');
+    await waitFor(() => expect(options()).toContain('Application under s.479(3)'));
+    for (const draft of offered) expect(options()).toContain(draft);
+    for (const draft of hidden) expect(options()).not.toContain(draft);
+    await userEvent.selectOptions(screen.getByLabelText('Draft type'), kind);
+    await userEvent.selectOptions(screen.getByLabelText('Language'), 'hi');
+    expect(screen.getByText('Hindi draft needs review by a fluent legal reader.')).toBeVisible();
   });
 });

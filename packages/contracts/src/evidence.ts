@@ -24,11 +24,13 @@ export interface EvidenceItem {
   mime: string;
   size: number;
   sha256: string;
+  sha3_256?: string;
   receivedAt: string;
   status: EvidenceStatus;
   submitter?: SubmitterInfo;
   receipt: string;
   receiptSignature: string;
+  pqSignature?: string;
   prevHash: string;
   entryHash: string;
   court?: string;
@@ -39,6 +41,7 @@ export interface EvidenceItem {
 export interface EvidenceReceiptPayload {
   id: string;
   sha256: string;
+  sha3_256?: string;
   size: number;
   mime: string;
   receivedAt: string;
@@ -49,6 +52,7 @@ export interface EvidenceReceiptPayload {
 export interface EvidenceReceiptResponse {
   id: string;
   sha256: string;
+  sha3_256?: string;
   size: number;
   mime: string;
   receivedAt: string;
@@ -56,6 +60,7 @@ export interface EvidenceReceiptResponse {
   mode: EvidenceMode;
   receipt: string;
   receiptSignature: string;
+  pqSignature?: string;
   receiptCode?: string;
   entryHash: string;
   prevHash: string;
@@ -67,6 +72,7 @@ export interface EvidenceStatusResponse {
   caseRef: string;
   receivedAt: string;
   sha256: string;
+  sha3_256?: string;
   description?: string;
 }
 
@@ -80,8 +86,10 @@ export interface EvidenceQuery {
 export interface EvidenceVerification {
   valid: boolean;
   sha256: string;
+  sha3_256?: string;
   hashMatch: boolean;
   signatureValid: boolean;
+  signatures?: { ed25519: boolean; mldsa65: boolean };
   chainValid: boolean;
   entryHash: string;
   prevHash: string;

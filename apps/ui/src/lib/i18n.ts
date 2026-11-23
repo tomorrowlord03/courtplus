@@ -22,8 +22,12 @@ const hindiInterface: Readonly<Record<string, string>> = hindi;
 let activeLanguage: UiLanguage = 'en';
 
 /** Localizes interface copy. Case data and quoted source text bypass this function. */
-export function ui(english: string): string {
-  return activeLanguage === 'hi' ? hindiInterface[english.trim()] ?? english : english;
+export function ui(english: string, values?: Record<string, string | number>): string {
+  const key = english.trim();
+  const translation = activeLanguage === 'hi' && Object.hasOwn(hindiInterface, key) ? hindiInterface[key] : undefined;
+  const message = translation === undefined ? english : english.replace(key, () => translation);
+  return values ? message.replace(/\{(\w+)\}/g, (match, name: string) =>
+    Object.hasOwn(values, name) ? String(values[name]) : match) : message;
 }
 
 /** Look up a UI string; falls back to the English default, then the key. */

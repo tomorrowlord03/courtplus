@@ -74,8 +74,9 @@ export function createResearch(options: { modelDir?: string; quantizedSections?:
     }
     return manifest.labels.map((label, i): SectionSuggestion => {
       const score = 1 / (1 + Math.exp(-maxima[i]));
+      const threshold = manifest.thresholds?.[i] ?? manifest.threshold ?? 0.5;
       return {
-        ...label, ...hint, act: 'IPC', score, aboveThreshold: score >= (manifest.threshold ?? 0.5),
+        ...label, ...hint, act: 'IPC', score, aboveThreshold: score >= threshold,
         ...(label.bns.length ? {} : { mappingNote: 'BNS equivalent not mapped' }),
       };
     }).sort((a, b) => b.score - a.score).slice(0, 5);
@@ -95,7 +96,7 @@ export function createResearch(options: { modelDir?: string; quantizedSections?:
     if (!input.length) return [];
     const { model, manifest } = await rr();
     const roles: RoleHint[] = [];
-    for await (const row of model.run(input, 'logits')) {
+    for await (const row of model.runRoles(input)) {
       if (row.length !== manifest.labels.length) throw new Error('Role labels and model output differ.');
       const best = row.reduce((i, value, j) => value > row[i] ? j : i, 0);
       const sum = row.reduce((total, value) => total + Math.exp(value - row[best]), 0);

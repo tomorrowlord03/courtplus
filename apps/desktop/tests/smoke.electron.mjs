@@ -19,14 +19,12 @@ const previewDirectory = process.env.COURTPLUS_THEME_PREVIEW_DIR;
 const launchBudget = (packaged ? startupTimeout(packaged) : 60_000) + 30_000;
 const folderTitle = 'Choose a folder for the signed draft bundle';
 const find = (page, name) => page.getByRole('heading', { name, exact: true });
-// Tools outside the role's own list sit under "More tools" in the sidebar.
+// Shared routes can appear under several roles. Keep the current role when opening one.
 async function navTo(page, name) {
-  const nav = page.locator('nav[aria-label="Main"]');
-  const link = nav.getByRole('link', { name, exact: true });
-  if (!await link.isVisible()) {
-    const more = nav.locator('details.nav-more');
-    if (await more.count() && !await more.evaluate(node => node.open)) await more.locator('summary').click();
-  }
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  const options = { name, exact: true };
+  const current = nav.locator('details:has(> summary.current)').getByRole('link', options);
+  const link = await current.count() ? current : nav.getByRole('link', options).first();
   await link.click();
 }
 const started = Date.now();

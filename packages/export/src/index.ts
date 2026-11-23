@@ -1,6 +1,21 @@
 export { renderHtml } from './render.js';
+export { renderCaseDraft, type CaseDraftContext } from './case-drafts.js';
 export type {
-  AiAssistanceData, ApplicationData, DlsaHandoffData, DlsaIntimationData, DraftData, DraftKind, RightsCardData,
+  AdjournmentOrderData,
+  AiAssistanceData,
+  AnticipatoryBailApplicationData,
+  ApplicationData,
+  ChequeBounceNoticeData,
+  DlsaHandoffData,
+  DlsaIntimationData,
+  DraftData,
+  DraftKind,
+  InterimOrderSheetData,
+  JudgmentOutlineData,
+  LegalNoticeData,
+  NoticeToAppearData,
+  RegularBailApplicationData,
+  RightsCardData,
 } from './render.js';
 export { supportedLanguages } from './resources.js';
 export type { Language, RenderOptions } from './resources.js';

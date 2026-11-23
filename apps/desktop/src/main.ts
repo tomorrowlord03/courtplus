@@ -2,18 +2,13 @@ import { mkdirSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
 import { app, BrowserWindow, dialog, ipcMain, Menu, safeStorage, type IpcMainInvokeEvent } from 'electron';
-import { z } from 'zod';
-import { diagnosticsPassed, runDiagnostics, type DiagnosticsReport } from './diagnostics';
-import { createAsrClient } from './asr/client';
-import { createHandlers } from './handlers';
-import { createRecorder, registerRecorder } from './handlers/recorder';
-import { createResearchHints, registerResearch } from './handlers/research-adapter';
-import { readSettings, saveSettings } from './handlers/settings';
-import { courtArguments } from './handlers/triage';
-import { registerHandlers } from './ipc';
+import type { z } from 'zod';
+import type { DiagnosticsReport } from './diagnostics';
 import { appUrl, developmentUrl, isSameOrigin, lockDownWindow, makeRendererSession, printDocument, webPreferences } from './renderer';
-import { openStore, type Store } from './store';
-import { argumentSchemas, validateArguments } from './validation';
+import { markStartup, observeRenderer, timeStartup } from './startup-perf';
+import type { Store } from './store';
+
+markStartup('main entry');
 
 const diagnosticsFlag = '--courtplus-diagnostics';
 const diagnosticsMode = process.argv.includes(diagnosticsFlag);
@@ -48,23 +43,90 @@ function savePath(filename: string): Promise<string | undefined> {
     .then(result => result.canceled ? undefined : result.filePath);
 }
 
+const startupUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(
+  '<!doctype html><html lang="en"><meta charset="utf-8"><title>Court+</title>' +
+  '<meta name="color-scheme" content="light dark">' +
+  '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'">' +
+  '<body style="display:grid;place-content:center;min-height:100vh;margin:0;font:16px system-ui;text-align:center">' +
+  '<main><h1 style="margin:0">Court+</h1><p role="status">Opening workspace…</p></main></body></html>',
+);
+
 async function start(): Promise<void> {
   const devUrl = diagnosticsMode ? undefined : developmentUrl();
   const rendererUrl = devUrl?.href ?? appUrl;
   const directory = app.getPath('userData');
   const resourceDirectory = app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources');
+
+  let backendUrl = '';
+  const rendererSession = await timeStartup('renderer session', () => makeRendererSession(devUrl, () => backendUrl));
+  Menu.setApplicationMenu(null);
+
+  const newWindow = (verifier = false) => {
+    const window = new BrowserWindow({
+      width: verifier ? 860 : 1280,
+      height: verifier ? 740 : 820,
+      show: false,
+      title: verifier ? 'Court+ Verifier' : 'Court+',
+      webPreferences: {
+        ...webPreferences, session: rendererSession, preload: join(__dirname, 'preload.js'),
+        additionalArguments: diagnosticsMode ? [diagnosticsFlag] : verifier ? ['--courtplus-verifier-window'] : [],
+      },
+    });
+    lockDownWindow(window);
+    return window;
+  };
+
+  const initialVerifier = verifierMode && !diagnosticsMode;
+  const initialWindow = newWindow(initialVerifier);
+  if (initialVerifier) verifierWindow = initialWindow;
+  else mainWindow = initialWindow;
+  if (!diagnosticsMode) {
+    const shown = new Promise<void>(resolve => {
+      initialWindow.once('closed', resolve);
+      initialWindow.once('ready-to-show', () => {
+        initialWindow.removeListener('closed', resolve);
+        initialWindow.show();
+        markStartup('first window shown');
+        resolve();
+      });
+    });
+    observeRenderer(initialWindow, startupUrl, 'startup');
+    await initialWindow.loadURL(startupUrl);
+    await shown;
+    if (initialWindow.isDestroyed()) return;
+  }
+
+  const [
+    { openStore }, { createHandlers }, { createAsrClient }, { createRecorder, registerRecorder },
+    { registerHearingPublish }, { createResearchHints, registerResearch }, { readSettings, saveSettings },
+    { courtArguments }, { registerHandlers }, { argumentSchemas, validateArguments }, { z },
+  ] = await timeStartup('load main modules', () => Promise.all([
+    import('./store.js'), import('./handlers/index.js'), import('./asr/client.js'), import('./handlers/recorder.js'),
+    import('./handlers/hearing-publish.js'), import('./handlers/research-adapter.js'), import('./handlers/settings.js'),
+    import('./handlers/triage.js'), import('./ipc.js'), import('./validation.js'), import('zod'),
+  ]));
+  if (initialWindow.isDestroyed()) return;
+
   mkdirSync(directory, { recursive: true });
-  const database = await openStore(directory, safeStorage);
+  const database = await timeStartup('open store', () => openStore(directory, safeStorage));
+  if (initialWindow.isDestroyed()) {
+    database.close();
+    return;
+  }
   store = database;
-  const backend = () => readSettings(database).backendUrl;
-  const rendererSession = await makeRendererSession(devUrl, backend);
+  backendUrl = readSettings(database).backendUrl;
   const notify = () => {
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('courtplus:boardChanged');
   };
-  const { handlers, cloud, signer, anchor, evidence, boardQueue, courtWorkspace } = await createHandlers(database, {
-    resourceDirectory, boardChanged: notify, folder: chooseFolder, savePath,
-    print: html => printDocument(rendererSession, html),
-  });
+  const { handlers, cloud, signer, anchor, evidence, boardQueue, courtWorkspace } = await timeStartup('workspace handlers',
+    () => createHandlers(database, {
+      resourceDirectory, boardChanged: notify, folder: chooseFolder, savePath,
+      print: html => printDocument(rendererSession, html),
+    }));
+  if (initialWindow.isDestroyed()) {
+    cloud.disconnect();
+    return;
+  }
   stopCloud = cloud.disconnect;
 
   const isTrusted = (event: IpcMainInvokeEvent, method: string): boolean => {
@@ -77,13 +139,16 @@ async function start(): Promise<void> {
   registerHandlers(handlers, isTrusted);
   const asr = createAsrClient(join(resourceDirectory, 'asr'));
   stopAsr = asr.stop;
-  const { encodeReceiptQr } = await import('@courtplus/export');
-  registerRecorder(ipcMain, isTrusted, createRecorder(database, signer, {
+  const hearing = createRecorder(database, signer, {
     directory: join(directory, 'hearings'), findCase: id => database.listCases().find(item => item.id === id),
-    transcribe: asr.transcribe, modelStatus: asr.status, folder: chooseFolder, encodeQr: encodeReceiptQr,
+    transcribe: asr.transcribe, modelStatus: asr.status, folder: chooseFolder,
+    encodeQr: (receiptId, keyId, receiptDigest) =>
+      import('@courtplus/export').then(exports => exports.encodeReceiptQr(receiptId, keyId, receiptDigest)),
     print: html => printDocument(rendererSession, html),
     progress: event => mainWindow?.webContents.send('hearing:progress', event),
-  }));
+  });
+  registerRecorder(ipcMain, isTrusted, hearing);
+  registerHearingPublish(ipcMain, isTrusted, database, hearing, signer, cloud.token, resourceDirectory);
   registerResearch(ipcMain, isTrusted, createResearchHints({ resourceDirectory, audit: database.audit }));
 
   function desktop<Args extends unknown[]>(name: string, schema: z.ZodType<Args>, run: (...args: NoInfer<Args>) => unknown) {
@@ -98,9 +163,9 @@ async function start(): Promise<void> {
   desktop('boardQueue', argumentSchemas.board, boardQueue);
   desktop('settings', noArgs, () => ({ ...readSettings(database), cloud: cloud.status() }));
   desktop('saveSettings', z.tuple([z.unknown()]), input => {
-    const before = backend();
     const settings = saveSettings(database, input);
-    if (before !== settings.backendUrl) {
+    if (backendUrl !== settings.backendUrl) {
+      backendUrl = settings.backendUrl;
       void cloud.signOut();
       // A fresh response replaces the active document's CSP after an origin change.
       setTimeout(() => mainWindow?.webContents.reload(), 150);
@@ -145,21 +210,6 @@ async function start(): Promise<void> {
     return signer.trust(await readFile(path, 'utf8'), basename(path, '.pem'));
   });
 
-  const newWindow = (verifier = false) => {
-    const window = new BrowserWindow({
-      width: verifier ? 860 : 1280,
-      height: verifier ? 740 : 820,
-      show: !diagnosticsMode,
-      title: verifier ? 'Court+ Verifier' : 'Court+',
-      webPreferences: {
-        ...webPreferences, session: rendererSession, preload: join(__dirname, 'preload.js'),
-        additionalArguments: diagnosticsMode ? [diagnosticsFlag] : verifier ? ['--courtplus-verifier-window'] : [],
-      },
-    });
-    lockDownWindow(window);
-    return window;
-  };
-
   showVerifier = () => {
     if (verifierWindow && !verifierWindow.isDestroyed()) {
       verifierWindow.focus();
@@ -167,6 +217,7 @@ async function start(): Promise<void> {
     }
     const window = newWindow(true);
     verifierWindow = window;
+    window.once('ready-to-show', () => window.show());
     void window.loadURL(rendererUrl + '#/verify').catch(() => window.destroy());
   };
   const go = (hash: string) => {
@@ -186,27 +237,27 @@ async function start(): Promise<void> {
     { role: 'editMenu' },
   ]));
 
-  const report = app.isPackaged || diagnosticsMode ? runDiagnostics(directory, rendererSession) : undefined;
-  if (diagnosticsMode && report) {
+  markStartup('IPC registered');
+  if (initialWindow.isDestroyed()) return;
+  const initialUrl = initialVerifier ? rendererUrl + '#/verify' : rendererUrl;
+  if (diagnosticsMode) {
+    const { diagnosticsPassed, runDiagnostics } = await import('./diagnostics.js');
+    if (initialWindow.isDestroyed()) return;
+    const report = timeStartup('diagnostics', () => runDiagnostics(directory, rendererSession));
     ipcMain.handle('diag', (event, ...args: unknown[]) => {
       if (!isTrusted(event, 'diag')) throw new Error('FORBIDDEN');
       validateArguments(argumentSchemas.role, args);
       return report;
     });
-  }
-  if (verifierMode && !diagnosticsMode) {
-    showVerifier();
+    await initialWindow.loadURL(initialUrl);
+    const results = await initialWindow.webContents.executeJavaScript('window.courtplusDiagnostics.diag()') as DiagnosticsReport;
+    store.close();
+    store = undefined;
+    app.exit(diagnosticsPassed(results) ? 0 : 1);
   } else {
-    mainWindow = newWindow();
-    await mainWindow.loadURL(rendererUrl);
-    if (diagnosticsMode) {
-      const results = await mainWindow.webContents.executeJavaScript('window.courtplusDiagnostics.diag()') as DiagnosticsReport;
-      store.close();
-      store = undefined;
-      app.exit(diagnosticsPassed(results) ? 0 : 1);
-    }
+    observeRenderer(initialWindow, initialUrl, 'workspace', !initialVerifier);
+    await initialWindow.loadURL(initialUrl);
   }
-  await report;
 }
 
 app.on('window-all-closed', () => app.quit());
@@ -220,10 +271,13 @@ if (app.requestSingleInstanceLock()) {
     if (argv.includes('--verifier')) showVerifier?.();
     else mainWindow?.focus();
   });
-  void app.whenReady().then(start).catch((error: unknown) => {
+  void app.whenReady().then(() => {
+    markStartup('app.ready');
+    return start();
+  }).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(message);
-    if (!diagnosticsMode) dialog.showErrorBox('CourtPlus could not start', message);
+    if (!diagnosticsMode && mainWindow?.isDestroyed() !== true && verifierWindow?.isDestroyed() !== true) dialog.showErrorBox('CourtPlus could not start', message);
     app.exit(1);
   });
 } else {

@@ -1,9 +1,10 @@
 import { basename } from 'node:path';
+import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 import { z } from 'zod';
 import type Database from 'better-sqlite3-multiple-ciphers';
 import type { AdjournmentDecision, CaseMeta, CaseRecord, CauseList, CourtSettings, CourtWorkspace, CourtWorkspaceApi, Hearing,
-  PriorityOverride } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
+  Person, PriorityOverride, ScreeningResult } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import { appendAudit } from '../audit';
 import { indiaDate } from './board';
 
@@ -68,6 +69,11 @@ export const courtArguments: z.ZodType<Parameters<CourtWorkspaceApi['courtWorksp
 ])]);
 
 export function courtStore(db: Database.Database) {
+  db.exec(`CREATE TABLE IF NOT EXISTS court_screenings (
+    id INTEGER PRIMARY KEY, case_id TEXT NOT NULL REFERENCES cases(id), as_of TEXT NOT NULL,
+    facts_hash TEXT NOT NULL, result TEXT NOT NULL CHECK (json_valid(result)),
+    UNIQUE (case_id, as_of, facts_hash)
+  ) STRICT`);
   function rows<T>(table: string, order: string): T[] {
     return db.prepare<[], { data: string }>(`SELECT data FROM ${table} ORDER BY ${order}`)
       .all().map(row => JSON.parse(row.data) as T);
@@ -90,10 +96,22 @@ export function courtStore(db: Database.Database) {
   );
   const writeSettings = db.prepare("INSERT OR REPLACE INTO settings VALUES ('judgeCourtSettings', ?)");
   const readSettings = db.prepare<[], { value: string }>("SELECT value FROM settings WHERE key = 'judgeCourtSettings'");
+  const readScreening = db.prepare<[string, string, string], { result: string }>(
+    'SELECT result FROM court_screenings WHERE case_id = ? AND as_of = ? AND facts_hash = ? ORDER BY id DESC LIMIT 1',
+  );
+  const writeScreening = db.prepare<[string, string, string, string]>(
+    'INSERT OR IGNORE INTO court_screenings (case_id, as_of, facts_hash, result) VALUES (?, ?, ?, ?)',
+  );
   const audit = (action: string, payload: unknown) => appendAudit(db, 'judge', 'court.' + action, payload);
   const addHearing = (hearing: Hearing, source: string, decision: unknown = {}) =>
     writeHearing.run(hearing.caseId, hearing.date, JSON.stringify(hearing), source, JSON.stringify(decision)).changes > 0;
   return {
+    screening: (caseId: string, asOf: string, factsHash: string) => {
+      const row = readScreening.get(caseId, asOf, factsHash);
+      return row ? JSON.parse(row.result) as ScreeningResult : undefined;
+    },
+    saveScreening: (result: ScreeningResult, factsHash: string) =>
+      writeScreening.run(result.caseId, result.asOf, factsHash, JSON.stringify(result)),
     meta: () => rows<CaseMeta>('court_case_meta', 'case_id'),
     hearings: () => rows<Hearing>('court_hearings', 'date, id'),
     overrides: () => currentOverrides.all().map(row => JSON.parse(row.data) as PriorityOverride),
@@ -156,6 +174,12 @@ function confirmedOrderDates(record: CaseRecord): string[] {
   return [...orderDates];
 }
 
+function hasConfirmedFacts(record: CaseRecord): boolean {
+  const facts = [...record.charges, ...record.custody, ...record.events];
+  return facts.length > 0 && facts.every(fact => fact.source?.verifiedBy?.trim())
+    && record.charges.every(charge => charge.verified);
+}
+
 function describeCases(records: CaseRecord[]): CourtWorkspace['cases'] {
   const datesByCnr = new Map<string, Set<string>>();
   const cnr = (record: CaseRecord) => record.cnr?.trim().toUpperCase();
@@ -173,7 +197,7 @@ function describeCases(records: CaseRecord[]): CourtWorkspace['cases'] {
   }));
 }
 
-export function createCourtHandler(store: { court: ReturnType<typeof courtStore>; listCases(): CaseRecord[] },
+export function createCourtHandler(store: { court: ReturnType<typeof courtStore>; listCases(): CaseRecord[]; listPersons(): Person[] },
   engine: typeof import('@courtplus/engine', { with: { 'resolution-mode': 'import' } }),
   ports: { savePath(name: string): Promise<string | undefined>; print(html: string): Promise<Uint8Array> },
   isJudge: () => boolean,
@@ -182,7 +206,8 @@ export function createCourtHandler(store: { court: ReturnType<typeof courtStore>
   const workspaceHandler: CourtWorkspaceApi['courtWorkspace'] = async (date, action) => {
     if (!isJudge()) throw new Error('Select the Judge role in your desktop profile.');
     const today = indiaDate();
-    const cases = describeCases(store.listCases());
+    const savedCases = store.listCases();
+    const cases = describeCases(savedCases);
     const byId = new Map(cases.map(item => [item.id, item]));
     const requireCase = (caseId: string) => {
       const record = byId.get(caseId);
@@ -239,7 +264,27 @@ export function createCourtHandler(store: { court: ReturnType<typeof courtStore>
       item.adjournments = engine.adjournmentHistory(byCase.get(item.id) ?? [], item.id, today);
     }
     const settings = court.settings() ?? engine.defaultCourtSettings;
-    const ranked = engine.rankCases(metadata.filter(meta => !closed.has(meta.caseId)), hearings, court.overrides(), today);
+    const people = new Map(store.listPersons().map(person => [person.id, person]));
+    const confirmedCases = savedCases.filter(hasConfirmedFacts);
+    const confirmedIds = new Set(confirmedCases.map(record => record.id));
+    const statutory = new Map<string, { status: ScreeningResult['status']; asOf: string;
+      dueInDays?: number; ceilingUrgent?: boolean }>();
+    for (const record of savedCases) {
+      if (closed.has(record.id) || !confirmedIds.has(record.id) || !metaById.has(record.id)) continue;
+      const person = people.get(record.personId);
+      if (!person) continue;
+      const personCases = confirmedCases.filter(item => item.personId === person.id);
+      const factsHash = createHash('sha256').update(JSON.stringify({ ruleVersion: engine.RULE_VERSION,
+        person, personCases })).digest('hex');
+      let result = court.screening(record.id, today, factsHash);
+      if (!result) {
+        result = engine.screen(person, confirmedCases, record.id, today);
+        court.saveScreening(result, factsHash);
+      }
+      statutory.set(record.id, { status: result.status, asOf: result.asOf,
+        dueInDays: result.dueInDays, ceilingUrgent: result.ceilingUrgent });
+    }
+    const ranked = engine.rankCases(metadata.filter(meta => !closed.has(meta.caseId)), hearings, court.overrides(), today, statutory);
 
     if (action.kind === 'decision') {
       const decision = action.decision;

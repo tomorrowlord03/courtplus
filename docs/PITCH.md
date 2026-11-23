@@ -20,7 +20,7 @@
 
 ### Slide 1: The Problem — India's Backlog and the Human Cost
 
-**Headline:** India's courts carry 3 to 4 crore pending cases. The system is choked at every tier, from district courts to High Courts.
+**Headline:** India's courts carry about 5.6 crore pending cases (NJDG / Parliament replies, 2026: 4.98 crore district courts, 63.76 lakh High Courts, about 97,000 Supreme Court). The system is choked at every tier, from district courts to High Courts.
 
 **Official Sourced Statistics:**
 - **63,96,737 cases pending across all High Courts in India** as of 25 March 2026.  
@@ -69,7 +69,7 @@
 
 **Headline:** An AI legal platform for Judges, Lawyers, and Citizens to cut India's case backlog through verifiable evidence, transparent triage, and procedural intelligence.
 
-- **For Judges:** Smart docket triage, adjournment analysis, offline speech-to-text hearing transcription, and tamper-proof evidence handling.
+- **For Judges:** Smart docket triage, adjournment analysis, offline speech-to-text hearing transcription, and tamper-evident evidence handling.
 - **For Lawyers:** Deep case analysis, procedural compliance checklists, deterministic MACT/maintenance calculators, and precedent discovery.
 - **For Citizens:** One-in-one-out plain-language legal rights guides, direct mobile evidence submission, and transparent case tracking.
 - **Architecture:** Standalone, offline-capable Windows desktop application paired with an optional secure cloud backend on AWS Mumbai (`ap-south-1`).
@@ -82,10 +82,10 @@
 
 **Headline:** Cryptographic evidence integrity from citizen smartphone to the judge's bench.
 
-- **Tamper-Proof Evidence Vault:**
+- **Tamper-Evident Evidence Vault:**
   - Files (documents, photos, audio, video up to 50 MB) are verified with magic bytes and hashed with **SHA-256** upon intake.
   - Timestamped and signed with an **Ed25519** digital signature over canonical RFC 8785 JSON.
-  - Appended to an immutable, append-only **hash-chained audit ledger** (`prevHash` → `entryHash`).
+  - Appended to a tamper-evident, append-only **hash-chained audit ledger** (`prevHash` → `entryHash`).
   - Stored encrypted at rest using **AES-256-GCM**.
 - **Bharatiya Sakshya Adhiniyam (BSA) 2023 Section 63 Certificate:**
   - One-click automated generation of the statutory electronic record certificate.
@@ -116,11 +116,11 @@
   - Automatically tracks adjournment history per case and per party.
   - Checks statutory ceilings: **CPC Order XVII Rule 1 proviso** (maximum 3 adjournments per party in civil suits) and **BNSS Section 346** (day-to-day proceedings).
   - Inspects real docket capacity and suggests the earliest viable hearing date (e.g., *"Requested 21 days → Suggested 14 days based on courtroom capacity"*).
-- **Tamper-Proof AI Stenographer:**
+- **Tamper-Evident AI Stenographer:**
   - Offline live hearing recording with crash-safe WebM/Opus streaming.
   - In-hearing marker taps for speaker roles (Judge, Petitioner Counsel, Respondent Counsel, Witness).
   - Local speech-to-text transcription via Whisper ONNX (English + Hindi) running on CPU.
-  - Cryptographic locking: SHA-256 digest and Ed25519 signature make the audio immutable.
+  - Cryptographic locking: SHA-256 digest and Ed25519 signature make the audio tamper-evident: any later change is detected.
   - Extractive summary of orders, witness statements, and next dates, exportable with verification QR codes.
 
 **Speaker Note:** Notice the philosophy: no machine-learned black-box score decides a human being's case. JAI is transparent arithmetic quoting the law. The Adjournment Analyzer cuts down the cycle of endless routine adjournments that drives India's 52 lakh 10-year pendency.
@@ -237,7 +237,7 @@
 
 - **1. Digital Signatures vs. CCA-Licensed DSC:**
   - Court+ exports Ed25519 system signatures paired with a BSA Section 63 certificate.
-  - This guarantees cryptographic byte-level integrity, timestamping, and tamper detection.
+  - This provides cryptographic byte-level integrity, timestamping, and tamper detection.
   - It is **not** a CCA-licensed Class 3 Digital Signature Certificate (DSC) or Aadhaar eSign yet. Licensed DSC and eSign integrations are architected for our production roadmap.
 - **2. Anonymous Channel vs. Zero-Knowledge Proofs:**
   - Our anonymous whistleblower channel is **identity-blind**: the backend intentionally does not collect or log IP addresses, device identifiers, or phone numbers, and stores only the SHA-256 hash of the receipt code.
@@ -287,7 +287,7 @@
 - **Cloud Backend (AWS Mumbai `ap-south-1`):** Fastify microservice containerized with Docker behind Caddy reverse proxy with automated TLS.
 - **Tamper-Evident Public Verifier:** Courts, advocates, and citizens can verify signed PDFs online (`/v/:id`) or offline via the standalone Verifier desktop tool.
 
-**Speaker Note:** The dual-tier architecture guarantees that sensitive court documents never leave the court without explicit human export, while citizens can still participate from any basic smartphone.
+**Speaker Note:** The dual-tier architecture ensures that sensitive court documents never leave the court without explicit human export, while citizens can still participate from any basic smartphone.
 
 ---
 
@@ -304,7 +304,7 @@
   - Hack-a-Sol 5.0, IIIT Naya Raipur.
   - Committed to building open, verifiable, constitutional civic technology.
 
-**Speaker Note:** India's 3 to 4 crore backlog will not be solved by replacing judges with algorithms. It will be solved by giving judges, lawyers, and citizens verifiable tools that eliminate friction, protect evidence, and uphold the rule of law. Thank you.
+**Speaker Note:** India's backlog of about 5.6 crore pending cases (NJDG / Parliament replies, 2026: 4.98 crore district courts, 63.76 lakh High Courts, about 97,000 Supreme Court) will not be solved by replacing judges with algorithms. It will be solved by giving judges, lawyers, and citizens verifiable tools that eliminate friction, protect evidence, and uphold the rule of law. Thank you.
 
 ---
 
@@ -328,7 +328,7 @@
 | **0:45 – 1:05** (20s) | **Export BSA s.63 Certificate** | In the Evidence detail pane, click **Export BSA s.63 certificate**. Select destination folder and click Save. | *"Under Section 63 of the Bharatiya Sakshya Adhiniyam, 2023, electronic evidence requires a statutory certificate. With one click, Court+ generates the Schedule certificate with Part A submitter details and Part B cryptographic SHA-256 verification."* | If file save dialog stalls, point to the pre-generated certificate PDF on the desktop. |
 | **1:05 – 1:30** (25s) | **Smart Triage (JAI)** | Click **Smart triage** in the sidebar. Point to the ranked docket list with JAI scores (e.g. 88, 72, 65). Point to factor chips: `Art. 21 Custody`, `Senior Citizen`, `Oldest Case Bucket`. | *"Next, docket management. Smart Triage scores cases using the Justice Acceleration Index—a 100% rule-based score reflecting Article 21 custody, senior citizen litigants, and national ageing buckets. Every factor quotes the law; the judge retains full override power."* | If the list is filtering, click 'All cases' to show the populated ranked docket. |
 | **1:30 – 1:55** (25s) | **Adjournment Analyzer** | Click **Adjournment analyzer** (or click 'Adjournment' on a triage case). In the form, select a case, enter Requesting Party `Defendant Counsel`, Days requested `21`, Procedure `Civil suit under CPC`. Click **Review request**. | *"Lawyers often request routine 21-day adjournments. Court+ checks CPC Order XVII Rule 1 and court docket capacity. Notice the result: 'Requested 21 days → Suggested 14 days based on courtroom capacity'. The judge records the decision in the audit log."* | If request calculation is cached, click 'Use suggested date' and record the decision. |
-| **1:55 – 2:20** (25s) | **Tamper-Proof Stenographer** | Click **Hearing recorder**. Select a matter. Click **Start recording**. Speak for 5-10 seconds: *"The witness deposed that the accident occurred at 10 PM near the bypass road."* Tap **Witness** marker. Click **Stop recording**. Show local Whisper transcript and click **Sign transcript**. | *"In the courtroom, our offline AI Stenographer records the hearing, marks speaker roles, and transcribes speech locally using Whisper ONNX. On stop, it computes a SHA-256 hash and signs the audio, creating an unalterable official record."* | If microphone input fails, open the pre-recorded 30-second hearing sample and display the signed transcript. |
+| **1:55 – 2:20** (25s) | **Tamper-Evident Stenographer** | Click **Hearing recorder**. Select a matter. Click **Start recording**. Speak for 5-10 seconds: *"The witness deposed that the accident occurred at 10 PM near the bypass road."* Tap **Witness** marker. Click **Stop recording**. Show local Whisper transcript and click **Sign transcript**. | *"In the courtroom, our offline AI Stenographer records the hearing, marks speaker roles, and transcribes speech locally using Whisper ONNX. On stop, it computes a SHA-256 hash and signs the audio, creating a tamper-evident record: any later change is detected."* | If microphone input fails, open the pre-recorded 30-second hearing sample and display the signed transcript. |
 | **2:20 – 2:35** (15s) | **Research & Hints Panel** | Open **Research** (or Case View **Hints for this case**). Point to suggested sections and retrieved precedent citations with text snippets. | *"For judicial decision support, our models trained on old Indian judgments suggest relevant statutory provisions and find matching Supreme Court precedents. Notice the persistent banner: 'Hint — the judge decides'. Zero outcome prediction."* | Show the precedent search result card with Supreme Court citation. |
 | **2:35 – 2:45** (10s) | **Lawyer MACT Calculator** | Switch view to **Lawyer view**. Click **Settlement analyzer** → **Motor accident claim**. Enter Age `32`, Income `₹25,000`, Dependents `3`. Point to line-by-line calculation. | *"For advocates, our Settlement Analyzer automates Motor Accident Claims strictly following the Supreme Court’s Sarla Verma and Pranay Sethi formulas—calculating future prospects, multipliers, and consortium line by line."* | Point to the final compensation total and the button 'Draft settlement proposal for Lok Adalat'. |
 | **2:45 – 3:00** (15s) | **Citizen Rights Advisor** | Switch to **Citizen view**. Click **Rights advisor**. In the box, type: *"I was injured in a road accident"*. Click **Find legal guidance**. | *"Finally, for ordinary citizens, our Rights Advisor takes plain-language queries and instantly delivers a structured action plan: your rights under MV Act s.166, documents needed, limitation deadlines, and a direct button to NALSA free legal aid at 15100."* | Show the generated rights card and NALSA 15100 assistance button. |
@@ -365,13 +365,13 @@
 **Answer:** The Court+ Windows desktop application is completely standalone. It packages local SQLCipher encrypted databases, local ONNX neural network runtimes, and local document processing engines. Court staff can import scanned orders, conduct smart triage, record hearings, transcribe audio, and export cryptographically signed PDF bundles entirely offline. Synchronization with the AWS cloud backend is optional and occurs whenever connectivity is restored.
 
 ### Q10: "What is the difference between your Ed25519 signature and a CCA-licensed DSC?"
-**Answer:** An Ed25519 signature generated by Court+ proves mathematical byte-level authenticity: it guarantees that the PDF, receipt, and audit manifest have not been altered by a single bit since the issuing office generated them. However, it is an application-level system key, not a government-issued Class 3 Digital Signature Certificate (DSC) issued under the Information Technology Act by a licensed Certifying Authority (CCA). Our production roadmap incorporates PKCS#11 hardware crypto-tokens and Aadhaar eSign to bridge system signatures with official CCA-licensed identities.
+**Answer:** An Ed25519 signature generated by Court+ proves mathematical byte-level authenticity: it verifies that the PDF, receipt, and audit manifest have not been altered by a single bit since the issuing office generated them. However, it is an application-level system key, not a government-issued Class 3 Digital Signature Certificate (DSC) issued under the Information Technology Act by a licensed Certifying Authority (CCA). Our production roadmap incorporates PKCS#11 hardware crypto-tokens and Aadhaar eSign to bridge system signatures with official CCA-licensed identities.
 
 ---
 
 ## 4. Sixty-Second Elevator Pitch
 
-India's courts are overwhelmed with over 3 crore pending cases, including 52 lakh matters delayed for over a decade in district courts, while two out of three prison inmates in Chhattisgarh languish as undertrials. 
+India's courts are overwhelmed with about 5.6 crore pending cases (NJDG / Parliament replies, 2026: 4.98 crore district courts, 63.76 lakh High Courts, about 97,000 Supreme Court), including 52 lakh matters delayed for over a decade in district courts, while two out of three prison inmates in Chhattisgarh languish as undertrials. 
 
 **Court+** is an AI legal platform built for Judges, Lawyers, and Citizens to break this backlog. 
 

@@ -1,4 +1,5 @@
-import { generateKeyPairSync, randomBytes } from 'node:crypto';
+import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
+import { decodeTrustPem, verifyHybrid } from '@courtplus/export/signing';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -81,7 +82,7 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     expect(() => validateFileBytes(hugeBuffer, 'huge.pdf')).toThrow();
   });
 
-  test('hashing and identified submission: SHA-256 and Ed25519 signed receipt', async () => {
+  test('identified submissions carry both hashes and signatures and use the server timestamp', async () => {
     const formData = new FormData();
     formData.append('file', new Blob([validPng]), 'screenshot.png');
     formData.append('caseRef', 'CNR-DLCT01-000123-2026');
@@ -90,6 +91,9 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     formData.append('name', 'Sunita Sharma');
     formData.append('phone', '+91-9876543210');
     formData.append('email', 'sunita@example.test');
+    const clientTime = '1999-01-01T00:00:00.000Z';
+    formData.append('receivedAt', clientTime);
+    const beforeUpload = Date.now();
 
     const res = await app.inject({
       method: 'POST',
@@ -109,10 +113,22 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     expect(body.prevHash).toBeDefined();
     expect(body.qrDataUrl).toMatch(/^data:image\/png;base64,/);
 
-    // Verify hashing: SHA-256 of validPng
-    const { createHash } = await import('node:crypto');
-    const expectedHash = createHash('sha256').update(validPng).digest('hex');
-    expect(body.sha256).toBe(expectedHash);
+    const signed = JSON.parse(body.receipt);
+    expect(body.sha256).toBe(createHash('sha256').update(validPng).digest('hex'));
+    expect(body.sha3_256).toBe(createHash('sha3-256').update(validPng).digest('hex'));
+    expect(signed.payload).toMatchObject({
+      kind: 'courtplus-evidence-receipt-v2', receivedAt: body.receivedAt, sha256: body.sha256, sha3_256: body.sha3_256,
+    });
+    expect(signed.signatures).toEqual({ ed25519: body.receiptSignature, mldsa65: body.pqSignature });
+    expect(body.receivedAt).not.toBe(clientTime);
+    expect(Date.parse(body.receivedAt)).toBeGreaterThanOrEqual(beforeUpload);
+    expect(Date.parse(body.receivedAt)).toBeLessThanOrEqual(Date.now());
+    const exported = await app.inject({
+      url: '/api/evidence/signing-key', headers: { authorization: judgeAuthHeader },
+    });
+    expect(exported.statusCode).toBe(200);
+    const trusted = { ...decodeTrustPem(exported.body), status: 'active', label: 'Fictional Evidence Vault' } as const;
+    expect(verifyHybrid(signed, trusted)).toEqual({ ed25519: true, mldsa65: true });
   });
 
   test('anonymous mode: stores NO identity, returns 128-bit receipt code, and tracks status', async () => {
@@ -225,6 +241,7 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     expect(v.valid).toBe(true);
     expect(v.hashMatch).toBe(true);
     expect(v.signatureValid).toBe(true);
+    expect(v.signatures).toEqual({ ed25519: true, mldsa65: true });
     expect(v.chainValid).toBe(true);
 
     // 6. BSA s.63 certificate export (HTML mode for headless testing)
@@ -238,7 +255,11 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     expect(certRes.body).toContain('The Bharatiya Sakshya Adhiniyam, 2023');
     expect(certRes.body).toContain('PART A');
     expect(certRes.body).toContain('PART B');
-    expect(certRes.body).toContain(item.sha256);
+    expect(certRes.body).toContain('To be filled by the Expert');
+    expect(certRes.body).toContain('Other: SHA3-256');
+    expect(certRes.body.split(item.sha256)).toHaveLength(3);
+    expect(certRes.body.split(item.sha3_256)).toHaveLength(3);
+    expect(certRes.body).not.toContain('System Custodian / Vault Authority');
   });
 
   test('tamper detection: modifying stored file fails re-verification', async () => {
@@ -280,6 +301,29 @@ describe('Evidence Vault and Citizen Bridge (w29)', () => {
     const v2 = JSON.parse(verifyRes2.body);
     expect(v2.valid).toBe(false);
     expect(v2.hashMatch).toBe(false);
+  });
+
+  test('escapes the uploaded filename and description in the s.63 certificate', async () => {
+    const filename = '<img src=x onerror=alert(1)>.pdf';
+    const description = '</td><script>x</script>';
+    const form = new FormData();
+    form.append('file', new Blob([validPdf]), filename);
+    form.append('description', description);
+    form.append('caseRef', 'Fictional-Certificate-Case');
+    form.append('mode', 'identified');
+    form.append('name', 'Fictional Submitter');
+    form.append('phone', '+1-202-555-0100');
+    const upload = await app.inject({ method: 'POST', url: '/evidence', headers: { origin }, body: form as any });
+    expect(upload.statusCode).toBe(201);
+    const { id } = upload.json<{ id: string }>();
+    const certificate = await app.inject({
+      url: `/api/evidence/${id}/certificate?format=html`, headers: { authorization: judgeAuthHeader },
+    });
+    expect(certificate.statusCode).toBe(200);
+    expect(certificate.body).not.toContain(filename);
+    expect(certificate.body).not.toContain(description);
+    expect(certificate.body).toContain('&lt;img src=x onerror=alert(1)&gt;.pdf');
+    expect(certificate.body).toContain('&lt;/td&gt;&lt;script&gt;x&lt;/script&gt;');
   });
 
   test('mobile GET /submit page returns bilingual English + Hindi interface', async () => {
@@ -390,6 +434,31 @@ describe('Production key resolution fail-fast (w37)', () => {
       })).rejects.toThrow();
     } finally {
       testDb.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test.each(['production', 'test'])('requires a PQ seed with a configured Ed25519 file in %s', async environment => {
+    const dir = mkdtempSync(join(tmpdir(), 'courtplus-pq-startup-'));
+    const secret = join(dir, 'db.key');
+    writeFileSync(secret, randomBytes(32).toString('hex'), { mode: 0o600 });
+    const db = openDb(join(dir, 'test.sqlite3'), secret);
+    try {
+      const signingKeyFile = join(dir, 'signing_key.pem');
+      const { privateKey } = generateKeyPairSync('ed25519');
+      writeFileSync(signingKeyFile, privateKey.export({ type: 'pkcs8', format: 'pem' }), { mode: 0o600 });
+      process.env.NODE_ENV = environment;
+      process.env.COURTPLUS_EVIDENCE_KEY = randomBytes(32).toString('hex');
+      process.env.COURTPLUS_SIGNING_KEY_FILE = signingKeyFile;
+      delete process.env.COURTPLUS_PQ_SIGNING_KEY_FILE;
+      const options = { db, origin: 'https://courtplus.example.test', evidenceDir: join(dir, 'vault') };
+      await expect(buildApp(options)).rejects.toThrow(/COURTPLUS_PQ_SIGNING_KEY_FILE/);
+      process.env.COURTPLUS_PQ_SIGNING_KEY_FILE = join(dir, 'pq_key');
+      writeFileSync(process.env.COURTPLUS_PQ_SIGNING_KEY_FILE, randomBytes(32).toString('hex'), { mode: 0o600 });
+      const app = await buildApp(options);
+      await app.close();
+    } finally {
+      db.close();
       rmSync(dir, { recursive: true, force: true });
     }
   });

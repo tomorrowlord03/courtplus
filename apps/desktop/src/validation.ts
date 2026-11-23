@@ -85,7 +85,9 @@ export const roleSchema = z.enum(['legal_aid', 'utrc', 'superintendent', 'dlsa']
 
 type ApiSchemas = { [K in keyof DesktopWorkspaceApi]: z.ZodType<Parameters<DesktopWorkspaceApi[K]>> };
 const draftRequest = z.tuple([
-  z.enum(['S479_3_APPLICATION', 'DLSA_7_DAY', 'AI_ASSISTANCE_NOTE', 'RIGHTS_CARD']),
+  z.enum(['S479_3_APPLICATION', 'DLSA_7_DAY', 'AI_ASSISTANCE_NOTE', 'RIGHTS_CARD',
+    'INTERIM_ORDER_SHEET', 'NOTICE_TO_APPEAR', 'ADJOURNMENT_ORDER', 'JUDGMENT_OUTLINE',
+    'REGULAR_BAIL_APPLICATION', 'ANTICIPATORY_BAIL_APPLICATION', 'LEGAL_NOTICE', 'CHEQUE_BOUNCE_NOTICE']),
   id,
   z.string().min(1),
 ]);

@@ -12,6 +12,7 @@
   "dependencies": {
     "@courtplus/contracts": "0.0.0",
     "@courtplus/engine": "0.0.0",
+    "@courtplus/export": "0.0.0",
     "@fastify/cookie": "^11.0.0",
     "@fastify/cors": "^11.0.0",
     "@fastify/helmet": "^13.0.0",
@@ -25,11 +26,9 @@
     "zod": "^4.0.0"
   },
   "peerDependencies": {
-    "@courtplus/export": "0.0.0",
     "@courtplus/intake": "0.0.0"
   },
   "peerDependenciesMeta": {
-    "@courtplus/export": { "optional": true },
     "@courtplus/intake": { "optional": true }
   },
   "devDependencies": { "@types/node": "^22.0.0", "@types/qrcode": "^1.5.5" }

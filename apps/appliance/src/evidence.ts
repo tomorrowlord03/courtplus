@@ -1,6 +1,6 @@
 import {
   createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey,
-  generateKeyPairSync, randomBytes, randomUUID, sign, verify, type KeyObject,
+  generateKeyPairSync, randomBytes, randomUUID, verify, type KeyObject,
 } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -11,13 +11,17 @@ import type {
   EvidenceReceiptPayload, EvidenceReceiptResponse, EvidenceStatus, EvidenceStatusResponse,
   EvidenceVerification, SubmitterInfo,
 } from '@courtplus/contracts';
+import {
+  encodeTrustPem, evidenceReceiptV2, generatePqKeyPair, parseHybrid, sha3_256, signedPayloadKind,
+  signHybrid, verifyHybrid, type SigningKey,
+} from '@courtplus/export/signing';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { toDataURL } from 'qrcode';
 import { z } from 'zod';
 import type { Options } from './app.js';
 import type { Session } from './auth.js';
 import { audit, canonical, genesis, sha256, type Db } from './db.js';
-import { HttpError, parse } from './http.js';
+import { html, HttpError, parse } from './http.js';
 import { printDraft } from './exports.js';
 import type { Role } from './inputs.js';
 
@@ -198,6 +202,34 @@ export function resolveSigningKey(options?: Options): SigningKeyPair {
   return { keyId, privateKey, publicKey, publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString() };
 }
 
+export function loadPqSeed(edKeyConfigured: boolean): Buffer | undefined {
+  const file = process.env.COURTPLUS_PQ_SIGNING_KEY_FILE;
+  const seed = file && existsSync(file) ? readFileSync(file, 'utf8').trim() : undefined;
+  if (seed === undefined && (edKeyConfigured || process.env.NODE_ENV === 'production')) {
+    throw new Error('COURTPLUS_PQ_SIGNING_KEY_FILE must point to an ML-DSA-65 seed when the Ed25519 key is configured or in production');
+  }
+  if (seed !== undefined && !/^[a-f0-9]{64}$/i.test(seed)) throw new Error('The ML-DSA-65 secret must contain a 32-byte hex seed');
+  return seed === undefined ? undefined : Buffer.from(seed, 'hex');
+}
+
+function evidenceSigner({ privateKey, keyId, publicKeyPem }: SigningKeyPair, edKeyConfigured: boolean) {
+  return {
+    keyId, publicKey: publicKeyPem, privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+    status: 'active', label: 'Evidence vault', ...generatePqKeyPair(loadPqSeed(edKeyConfigured)),
+  } satisfies SigningKey;
+}
+
+const hashDigest = z.string().regex(/^[a-f0-9]{64}$/);
+const evidenceV2Schema = z.strictObject({
+  kind: z.literal(evidenceReceiptV2), id: z.uuid(), sha256: hashDigest, sha3_256: hashDigest,
+  size: z.number().int().nonnegative(), mime: z.string(), receivedAt: z.iso.datetime(), caseRef: z.string(),
+  mode: z.enum(['identified', 'anonymous']), keyId: hashDigest, pqKeyId: hashDigest,
+});
+
+function readHybridReceipt(receipt: string) {
+  return parseHybrid(receipt, (value): value is z.infer<typeof evidenceV2Schema> => evidenceV2Schema.safeParse(value).success);
+}
+
 export interface StoredEvidenceRow {
   id: string;
   case_ref: string;
@@ -258,6 +290,7 @@ export function appendEvidenceLog(
 }
 
 function rowToItem(row: StoredEvidenceRow, actions: EvidenceActionEntry[] = []): EvidenceItem {
+  const hybrid = readHybridReceipt(row.receipt);
   return {
     id: row.id,
     caseRef: row.case_ref,
@@ -267,6 +300,7 @@ function rowToItem(row: StoredEvidenceRow, actions: EvidenceActionEntry[] = []):
     mime: row.mime,
     size: row.size,
     sha256: row.sha256,
+    ...(hybrid && { sha3_256: hybrid.payload.sha3_256, pqSignature: hybrid.signatures.mldsa65 }),
     receivedAt: row.received_at,
     status: row.status,
     submitter: row.mode === 'identified' && row.submitter_name && row.submitter_phone
@@ -291,12 +325,14 @@ export function generateBsaCertificateHtml(item: EvidenceItem, keyId: string, is
   const submitterName = isAnonymous ? 'Anonymous Citizen / Whistleblower (Identity Protected under Law)' : (item.submitter?.name ?? 'Identified Submitter');
   const submitterContact = isAnonymous ? 'None (Anonymous Whistleblower Submission)' : `${item.submitter?.phone ?? ''} ${item.submitter?.email ? `(${item.submitter.email})` : ''}`.trim();
   const formattedSize = `${item.size} bytes (${(item.size / (1024 * 1024)).toFixed(2)} MB)`;
+  const hashRows = `<div>☑ SHA256: <span class="hash">${html(item.sha256)}</span></div>
+    <div>${item.sha3_256 ? '☑' : '☐'} Other: SHA3-256 <span class="hash">${html(item.sha3_256 ?? '')}</span></div>`;
 
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>BSA Section 63 Electronic Evidence Certificate - ${item.id}</title>
+  <title>BSA Section 63 Electronic Evidence Certificate - ${html(item.id)}</title>
   <style>
     body { font-family: 'Noto Sans', system-ui, -apple-system, sans-serif; margin: 32px; color: #0f172a; line-height: 1.5; font-size: 13px; }
     h1 { text-align: center; font-size: 18px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold; }
@@ -317,31 +353,38 @@ export function generateBsaCertificateHtml(item: EvidenceItem, keyId: string, is
 
   <div class="section-title">PART A: To be filled by the Party / Person producing the Electronic Record</div>
   <table>
-    <tr><th>1. Name of Producer</th><td>${submitterName}</td></tr>
-    <tr><th>2. Contact Particulars</th><td>${submitterContact}</td></tr>
-    <tr><th>3. Case Reference</th><td>${item.caseRef || 'N/A'}</td></tr>
-    <tr><th>4. Electronic Record Description</th><td>${item.description} (File: ${item.filename}, ${item.mime}, ${formattedSize})</td></tr>
+    <tr><th>1. Name of Producer</th><td>${html(submitterName)}</td></tr>
+    <tr><th>2. Contact Particulars</th><td>${html(submitterContact)}</td></tr>
+    <tr><th>3. Case Reference</th><td>${html(item.caseRef || 'N/A')}</td></tr>
+    <tr><th>4. Electronic Record Description</th><td>${html(item.description)} (File: ${html(item.filename)}, ${html(item.mime)}, ${html(formattedSize)})</td></tr>
     <tr><th>5. Producing Device / Channel</th><td>CourtPlus Citizen-to-Judge Vault Web Portal (HTTPS / Web Client)</td></tr>
     <tr><th>6. Operational Integrity Declaration</th><td>I state that the electronic record was produced in the lawful course of activity and submitted without alteration to the Court vault.</td></tr>
-    <tr><th>7. Cryptographic Hash Value</th><td><span class="hash">SHA-256: ${item.sha256}</span></td></tr>
-    <tr><th>8. Date & Server Timestamp</th><td>${item.receivedAt}</td></tr>
+    <tr><th>7. Cryptographic Hash Values</th><td>${hashRows}</td></tr>
+    <tr><th>8. Date & Server Timestamp</th><td>${html(item.receivedAt)}</td></tr>
   </table>
 
-  <div class="section-title">PART B: To be filled by the System Custodian / Vault Authority</div>
+  <div class="section-title">PART B: To be filled by the Expert</div>
+  <p>I solemnly affirm that the electronic record was obtained from the source specified below and that the reported hash values are those of the electronic record.</p>
   <table>
-    <tr><th>1. Custodian / System Authority</th><td>${issuer || 'CourtPlus Official Cryptographic Evidence Vault'}</td></tr>
-    <tr><th>2. Vault System Architecture</th><td>Automated tamper-evident appliance node, AES-256-GCM encryption at rest, Ed25519 digital signature over RFC 8785 canonical JSON, append-only SQLite hash-chained audit log.</td></tr>
-    <tr><th>3. Re-verified Cryptographic Hash</th><td><span class="hash">SHA-256: ${item.sha256}</span> (Verified Intact)</td></tr>
-    <tr><th>4. Receipt Identifier & Key ID</th><td>ID: ${item.id} | Signer Key: <span class="hash">${keyId}</span></td></tr>
-    <tr><th>5. Hash Chain Integrity</th><td>Entry Hash: <span class="hash">${item.entryHash}</span><br>Prev Hash: <span class="hash">${item.prevHash}</span></td></tr>
-    <tr><th>6. Current Custody Status</th><td><strong>${item.status.toUpperCase()}</strong></td></tr>
-    <tr><th>7. Statutory Custody Certificate</th><td>I hereby certify that the electronic record specified above was received into lawful cryptographic custody on ${item.receivedAt}, has been preserved encrypted at rest without alteration or tampering, and the system was at all material times operating properly.</td></tr>
+    <tr><th>Expert name</th><td>________________________________</td></tr>
+    <tr><th>Son/daughter/spouse of</th><td>________________________________</td></tr>
+    <tr><th>Residing/employed at</th><td>________________________________</td></tr>
+    <tr><th>Device / digital record source</th><td>☐ Computer / Storage Media &nbsp; ☐ DVR &nbsp; ☐ Mobile &nbsp; ☐ Flash Drive &nbsp; ☐ CD/DVD &nbsp; ☐ Server &nbsp; ☐ Cloud &nbsp; ☐ Other: ____________</td></tr>
+    <tr><th>Device particulars</th><td>Make and model: ____________ &nbsp; Color: ____________ &nbsp; Serial number: ____________<br>IMEI/UIN/UID/MAC/Cloud ID: ________________________<br>Other relevant information: ________________________</td></tr>
+    <tr><th>Cryptographic Hash Values</th><td>${hashRows}<div>Enclose the hash report with the certificate.</div></td></tr>
+    <tr><th>Expert designation</th><td>________________________________</td></tr>
+    <tr><th>Expert signature</th><td>________________________________</td></tr>
+    <tr><th>Date, time and place</th><td>Date (DD/MM/YYYY): ____________ &nbsp; Time (IST): ____________ &nbsp; Place: ____________</td></tr>
   </table>
 
   <div class="seal-box">
-    <div class="seal-title">Official Cryptographic Seal & System Signature</div>
-    <div>Receipt Signature: <span class="hash">${item.receiptSignature}</span></div>
-    <div>Certified under Section 63(4)(c) of Bharatiya Sakshya Adhiniyam, 2023 on ${new Date().toISOString()}.</div>
+    <div class="seal-title">Vault Receipt</div>
+    <div>Issuing office: ${html(issuer || 'CourtPlus Evidence Vault')}</div>
+    <div>Receipt ID: ${html(item.id)} | Signer key: <span class="hash">${html(keyId)}</span></div>
+    <div>Entry hash: <span class="hash">${html(item.entryHash)}</span><br>Previous hash: <span class="hash">${html(item.prevHash)}</span></div>
+    <div>Custody status: ${html(item.status.toUpperCase())}</div>
+    <div>Receipt Signature: <span class="hash">${html(item.receiptSignature)}</span></div>
+    ${item.pqSignature ? '<div>The electronic receipt also carries an ML-DSA-65 signature.</div>' : ''}
   </div>
 
   <div class="citation">
@@ -440,6 +483,7 @@ export function renderSubmitPage(): string {
 
         <form id="evidenceForm" onsubmit="submitForm(event)">
           <input type="hidden" id="mode" name="mode" value="identified">
+          <p class="notice" id="identifiedNotice">DPDP notice: We collect your name, phone, optional email, case reference, description and file for this court case. The court and authorised case staff can access your submission, and opposing parties receive it before it is relied on.</p>
 
           <div class="field" id="nameField">
             <label>Full Name / पूरा नाम</label>
@@ -482,7 +526,7 @@ export function renderSubmitPage(): string {
         <div id="receiptCard" class="receipt-card">
           <div class="receipt-title">Proof Received & Sealed / साक्ष्य सीलबंद प्राप्त हुआ</div>
           <p style="font-size:13px;text-align:center;color:#166534;margin-bottom:10px;">
-            Your file has been cryptographically signed with Ed25519 and encrypted at rest (AES-256-GCM).
+            Your receipt was signed with Ed25519 and ML-DSA-65. Your file is encrypted at rest (AES-256-GCM).
           </p>
 
           <div id="anonymousReceiptCodeSection" style="display:none;">
@@ -495,6 +539,7 @@ export function renderSubmitPage(): string {
           <div style="font-size:13px;line-height:1.6;margin-top:10px;">
             <div><strong>Vault ID:</strong> <span id="displayId" style="font-family:monospace;"></span></div>
             <div><strong>SHA-256:</strong> <span id="displayHash" style="font-family:monospace;font-size:11px;word-break:break-all;"></span></div>
+            <div><strong>SHA3-256:</strong> <span id="displaySha3" style="font-family:monospace;font-size:11px;word-break:break-all;"></span></div>
             <div><strong>Timestamp:</strong> <span id="displayTime"></span></div>
             <div><strong>Mode:</strong> <span id="displayMode"></span></div>
           </div>
@@ -542,8 +587,12 @@ export function renderSubmitPage(): string {
       document.getElementById('nameField').style.display = isAnon ? 'none' : 'block';
       document.getElementById('phoneField').style.display = isAnon ? 'none' : 'block';
       document.getElementById('emailField').style.display = isAnon ? 'none' : 'block';
+      document.getElementById('identifiedNotice').hidden = isAnon;
       document.getElementById('name').required = !isAnon;
       document.getElementById('phone').required = !isAnon;
+      for (const field of ['name', 'phone', 'email']) {
+        document.getElementById(field).disabled = isAnon;
+      }
     }
 
     function switchTab(tab) {
@@ -592,6 +641,7 @@ export function renderSubmitPage(): string {
         document.getElementById('receiptCard').classList.add('active');
         document.getElementById('displayId').textContent = result.id;
         document.getElementById('displayHash').textContent = result.sha256;
+        document.getElementById('displaySha3').textContent = result.sha3_256;
         document.getElementById('displayTime').textContent = result.receivedAt;
         document.getElementById('displayMode').textContent = result.mode === 'anonymous' ? 'Anonymous Tip (Whistleblower)' : 'Identified Submission';
 
@@ -673,7 +723,16 @@ export function registerEvidenceRoutes(
   mkdirSync(evidenceDir, { recursive: true });
 
   const encKey = resolveEvidenceKey(options);
-  const signer = resolveSigningKey(options);
+  const edSigner = resolveSigningKey(options);
+  const signer = evidenceSigner(edSigner, Boolean(options.signingKeyFile ?? process.env.COURTPLUS_SIGNING_KEY_FILE));
+  const signerPem = encodeTrustPem(signer);
+
+  app.get('/api/evidence/signing-key', async (request, reply) => {
+    authorize(request, EVIDENCE_ROLES);
+    return reply.type('application/x-pem-file')
+      .header('content-disposition', 'attachment; filename="courtplus-evidence-signer.pem"')
+      .send(signerPem);
+  });
 
   // Rate limiting tracker
   const ipIdentifiedUploads = new Map<string, { count: number; until: number }>();
@@ -757,12 +816,14 @@ export function registerEvidenceRoutes(
     const row = selectEvidenceByCodeHash.get(codeHash);
     if (!row) throw new HttpError(404, 'NOT_FOUND');
 
+    const hybrid = readHybridReceipt(row.receipt);
     const res: EvidenceStatusResponse = {
       id: row.id,
       status: row.status,
       caseRef: row.case_ref,
       receivedAt: row.received_at,
       sha256: row.sha256,
+      ...(hybrid && { sha3_256: hybrid.payload.sha3_256 }),
       description: row.description,
     };
     return res;
@@ -814,12 +875,13 @@ export function registerEvidenceRoutes(
       throw new HttpError(400, 'FILE_REQUIRED');
     }
 
-    const filename = (file as any).name || 'evidence.bin';
+    const filename = file.name || 'evidence.bin';
     const fileBytes = new Uint8Array(await file.arrayBuffer());
 
     const detected = validateFileBytes(fileBytes, filename);
     const size = fileBytes.byteLength;
     const fileHash = sha256(fileBytes);
+    const sha3 = sha3_256(fileBytes);
     const receivedAt = new Date().toISOString();
     const id = randomUUID();
 
@@ -831,20 +893,22 @@ export function registerEvidenceRoutes(
       statusCodeHash = sha256(receiptCode);
     }
 
-    // Signed receipt: Ed25519 over RFC 8785 JSON
-    const receiptPayload: EvidenceReceiptPayload = {
+    const receiptPayload = {
+      kind: evidenceReceiptV2,
+      keyId: signer.keyId,
+      pqKeyId: signer.pqKeyId,
       id,
       sha256: fileHash,
+      sha3_256: sha3,
       size,
       mime: detected.mime,
       receivedAt,
       caseRef,
       mode,
-    };
-    const canonicalPayload = canonical(receiptPayload);
-    const signatureBytes = sign(null, Buffer.from(canonicalPayload), signer.privateKey);
-    const receiptSignature = signatureBytes.toString('base64url');
-    const signedReceipt = canonical({ payload: receiptPayload, signature: receiptSignature });
+    } satisfies EvidenceReceiptPayload & z.infer<typeof evidenceV2Schema>;
+    const signed = signHybrid(receiptPayload, signer);
+    const { ed25519: receiptSignature, mldsa65: pqSignature } = signed.signatures;
+    const signedReceipt = canonical(signed);
 
     // Encrypt file at rest outside web root
     const encryptedBytes = encryptBuffer(fileBytes, encKey);
@@ -896,6 +960,7 @@ export function registerEvidenceRoutes(
     const response: EvidenceReceiptResponse & { qrDataUrl: string } = {
       id,
       sha256: fileHash,
+      sha3_256: sha3,
       size,
       mime: detected.mime,
       receivedAt,
@@ -903,6 +968,7 @@ export function registerEvidenceRoutes(
       mode,
       receipt: signedReceipt,
       receiptSignature,
+      pqSignature,
       receiptCode,
       entryHash,
       prevHash,
@@ -1005,24 +1071,43 @@ export function registerEvidenceRoutes(
     const row = selectEvidenceById.get(id);
     if (!row) throw new HttpError(404, 'EVIDENCE_NOT_FOUND');
 
-    // 1. Verify file hash
+    const hybrid = readHybridReceipt(row.receipt);
+    const isHybrid = signedPayloadKind(row.receipt) === evidenceReceiptV2;
+    const sha3 = hybrid?.payload.sha3_256;
+    // 1. Verify file hashes against the signed receipt and stored metadata.
     let hashMatch = false;
     try {
       const encryptedData = await readFile(row.file_path);
       const decryptedData = decryptBuffer(encryptedData, encKey);
-      const computedHash = sha256(decryptedData);
-      hashMatch = computedHash === row.sha256;
+      hashMatch = sha256(decryptedData) === row.sha256
+        && (!isHybrid || (hybrid?.payload.sha256 === row.sha256 && sha3_256(decryptedData) === sha3));
     } catch {
       hashMatch = false;
     }
 
-    // 2. Verify signature
+    // 2. Verify the signatures and their link to the recorded upload.
     let signatureValid = false;
+    let signatures: EvidenceVerification['signatures'];
+    let payloadHash: string | undefined;
     try {
-      const parsedReceipt = JSON.parse(row.receipt);
-      const canonicalPayload = canonical(parsedReceipt.payload);
-      const sigBuf = Buffer.from(row.receipt_signature, 'base64url');
-      signatureValid = verify(null, Buffer.from(canonicalPayload), signer.publicKey, sigBuf);
+      if (isHybrid) {
+        signatures = hybrid ? verifyHybrid(hybrid, signer) : { ed25519: false, mldsa65: false };
+        if (hybrid) {
+          const { payload } = hybrid;
+          signatureValid = signatures.ed25519 && signatures.mldsa65 && payload.keyId === signer.keyId
+            && hybrid.signatures.ed25519 === row.receipt_signature
+            && payload.id === row.id && payload.receivedAt === row.received_at && payload.sha256 === row.sha256
+            && payload.caseRef === row.case_ref && payload.mode === row.mode && payload.mime === row.mime && payload.size === row.size;
+          payloadHash = sha256(canonical(payload));
+        }
+      } else {
+        const parsedReceipt = JSON.parse(row.receipt);
+        const canonicalPayload = canonical(parsedReceipt.payload);
+        const sigBuf = Buffer.from(row.receipt_signature, 'base64url');
+        signatureValid = parsedReceipt.signature === row.receipt_signature
+          && verify(null, Buffer.from(canonicalPayload), edSigner.publicKey, sigBuf);
+        payloadHash = sha256(canonicalPayload);
+      }
     } catch {
       signatureValid = false;
     }
@@ -1037,7 +1122,8 @@ export function registerEvidenceRoutes(
         chainValid = false;
         break;
       }
-      if (fields.evidence_id === id) foundEntry = true;
+      if (fields.evidence_id === id && fields.action === 'received' && fields.payload_hash === payloadHash
+        && hash === row.entry_hash && fields.prev_hash === row.prev_hash) foundEntry = true;
       previous = hash;
     }
     if (!foundEntry) chainValid = false;
@@ -1045,8 +1131,10 @@ export function registerEvidenceRoutes(
     const res: EvidenceVerification = {
       valid: hashMatch && signatureValid && chainValid,
       sha256: row.sha256,
+      ...(sha3 && { sha3_256: sha3 }),
       hashMatch,
       signatureValid,
+      ...(signatures && { signatures }),
       chainValid,
       entryHash: row.entry_hash,
       prevHash: row.prev_hash,
@@ -1069,6 +1157,11 @@ export function registerEvidenceRoutes(
       note: a.note || undefined,
     }));
     const item = rowToItem(row, actions);
+    if (!item.sha3_256) {
+      const bytes = decryptBuffer(await readFile(row.file_path), encKey);
+      if (sha256(bytes) !== item.sha256) throw new HttpError(422, 'EVIDENCE_HASH_MISMATCH');
+      item.sha3_256 = sha3_256(bytes);
+    }
     const html = generateBsaCertificateHtml(item, signer.keyId, options.office || 'CourtPlus Evidence Vault');
 
     if (query.format === 'html' || request.headers.accept?.includes('text/html')) {

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { app, BrowserWindow, net, protocol, session, type Session } from 'electron';
-import { microphoneAllowed } from './handlers/recorder';
+import { microphoneAllowed } from './permissions';
 
 export const appUrl = 'courtplus://app/';
 export const pdfUrl = 'courtplus://diagnostics/devanagari.html';
@@ -11,7 +11,7 @@ const printUrl = 'courtplus://print/';
 const printDocuments = new Map<string, string>();
 
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'courtplus', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } },
+  { scheme: 'courtplus', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, codeCache: true } },
 ]);
 
 export const webPreferences = {
@@ -19,6 +19,8 @@ export const webPreferences = {
   sandbox: true,
   nodeIntegration: false,
   webviewTag: false,
+  devTools: !app.isPackaged,
+  v8CacheOptions: 'code' as const,
 };
 
 export function lockDownWindow(window: BrowserWindow): void {

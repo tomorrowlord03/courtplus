@@ -3,12 +3,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { CaseRecord, Person, TranscriptVersion } from '@courtplus/contracts';
 import * as exports from '@courtplus/export';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { verifyAuditChain } from '../src/audit';
-import { sha256, verifyHearingBundle, verifyHearingReceipt } from '../src/asr/receipt';
+import { sha256, signHearingReceipt, verifyHearingBundle, verifyHearingReceipt } from '../src/asr/receipt';
 import { extractiveSummary, summarise } from '../src/asr/summary';
 import { checkVersions, transcriptSha256 } from '../src/asr/transcript';
 import { windows } from '../src/asr/whisper';
+import { createEvidenceHandlers, uploadHearingEvidence } from '../src/handlers/evidence';
 import { createRecorder, microphoneAllowed, registerRecorder, type RecorderPorts } from '../src/handlers/recorder';
 import { createSigner } from '../src/handlers/signer';
 import { openStore, type Store } from '../src/store';
@@ -20,6 +21,7 @@ const keyStorage = {
 };
 const person: Person = { id: 'fictional-person', alias: 'Fictional Accused-01', caseIds: [], priorConviction: 'unknown', otherHolds: 'unknown', prisonerType: 'undertrial' };
 const record: CaseRecord = { id: 'fictional-case', personId: person.id, caseNo: 'FICTIONAL 1/2026', charges: [], custody: [], events: [], pendingStatus: 'trial' };
+const recordingTimeout = 20_000;
 
 /** A 2-second 440 Hz tone as 16-bit PCM WAV: no voices. */
 function tone(seconds = 2, rate = 16_000) {
@@ -50,9 +52,14 @@ async function withRecorder(run: (context: {
   const printed: string[] = [];
   const exportFolder = join(directory, 'exports');
   await (await import('node:fs/promises')).mkdir(exportFolder);
+  const fixture = tone();
   const ports: RecorderPorts = {
     directory: join(directory, 'hearings'),
     findCase: id => id === record.id ? record : undefined,
+    decode: async bytes => {
+      expect(Buffer.from(bytes).equals(fixture.wav)).toBe(true);
+      return fixture.samples.slice();
+    },
     transcribe: async (_samples, _language, progress) => { progress(1, 1); return { segments: fictionalSegments, model: 'test-model' }; },
     modelStatus: async () => ({ available: false, model: 'not installed', sizeMb: 0 }),
     print: async html => { printed.push(html); return new Uint8Array(Buffer.from('%PDF fictional ' + html.length)); },
@@ -84,8 +91,10 @@ describe('hearing recorder', () => {
     const { id, wav, result } = await recordTone(recorder);
     expect(result.audioSha256).toBe(sha256(wav));
     expect(result.audioBytes).toBe(wav.byteLength);
-    const saved = join(ports.directory, id, 'audio.webm');
-    expect(new Uint8Array(await readFile(saved))).toEqual(wav);
+    const saved = join(ports.directory, id, 'audio.webm.enc');
+    expect(await readFile(saved)).not.toEqual(Buffer.from(wav));
+    expect(await recorder.audio(id)).toEqual(wav);
+    expect(await readdir(join(ports.directory, id))).not.toContain('audio.webm');
     expect(await readdir(join(ports.directory, id))).not.toContain('chunks');
 
     const receipt = verifyHearingReceipt(result.receipt!, signer.trustStore());
@@ -97,28 +106,29 @@ describe('hearing recorder', () => {
     expect(entries.map(entry => entry.action)).toEqual(expect.arrayContaining(['hearing.start', 'hearing.record', 'hearing.sign']));
     expect(entries.find(entry => entry.action === 'hearing.record')?.hash).toBe(result.auditHash);
     expect(await recorder.integrity(id)).toEqual({ audioSha256: result.audioSha256, unchanged: true, readOnly: true });
-  }));
+  }), recordingTimeout);
 
   it('keeps the original read-only and detects any change to it', () => withRecorder(async ({ recorder, ports }) => {
     const { id } = await recordTone(recorder);
-    const saved = join(ports.directory, id, 'audio.webm');
+    const saved = join(ports.directory, id, 'audio.webm.enc');
     await expect(writeFile(saved, 'overwritten')).rejects.toThrow();
     await chmod(saved, 0o644);
     await writeFile(saved, 'tampered');
     expect((await recorder.integrity(id)).unchanged).toBe(false);
     await expect(recorder.audio(id)).rejects.toThrow(/no longer matches/);
-    await expect(recorder.transcribe(id, tone().samples, 'en')).rejects.toThrow(/no longer matches/);
+    await expect(recorder.transcribe(id, 'en')).rejects.toThrow(/no longer matches/);
   }));
 
   it('stops without a receipt while the key is locked and signs once unlocked', () => withRecorder(async ({ recorder, signer, store }) => {
     signer.setPassphrase(undefined, 'fictional test passphrase');
     const { id, result } = await recordTone(recorder);
     expect(result.receipt).toBeUndefined();
+    await expect(recorder.transcribe(id, 'en')).rejects.toThrow(/sealed audio receipt is missing/);
     expect(store.auditEntries().some(entry => entry.action === 'hearing.record')).toBe(true);
     await expect(recorder.signRecording(id)).rejects.toThrow(/Unlock/);
     signer.unlock('fictional test passphrase');
     expect(verifyHearingReceipt((await recorder.signRecording(id)).receipt!, signer.trustStore())?.audioSha256).toBe(result.audioSha256);
-  }));
+  }), recordingTimeout);
 
   it('recovers an interrupted recording with its markers, and rejects chunks out of order', () => withRecorder(async ({ store, signer, ports, recorder }) => {
     const { wav } = tone();
@@ -126,21 +136,26 @@ describe('hearing recorder', () => {
     await expect(recorder.chunk(id, 1, wav, { durationMs: 1, markers: [] })).rejects.toThrow(/out of order/);
     await recorder.chunk(id, 0, wav.subarray(0, 30_000), { durationMs: 900, markers: [{ atMs: 100, speaker: 'petitioner_counsel' }] });
     await recorder.chunk(id, 1, wav.subarray(30_000), { durationMs: 2000, markers: [{ atMs: 100, speaker: 'petitioner_counsel' }] });
+    const chunks = join(ports.directory, id, 'chunks');
+    expect(await readdir(chunks)).toEqual(['000000.part.enc', '000001.part.enc']);
+    expect(await readFile(join(chunks, '000000.part.enc'))).not.toEqual(Buffer.from(wav.subarray(0, 30_000)));
+    await writeFile(join(ports.directory, id, 'audio.webm.enc'), 'incomplete seal');
     // A fresh recorder stands in for the app after a crash.
     const restarted = createRecorder(store, signer, ports);
     expect(await restarted.list()).toEqual([expect.objectContaining({ id, state: 'interrupted' })]);
     const recovered = await restarted.recover(id);
     expect(recovered).toMatchObject({ recovered: true, durationMs: 2000, audioSha256: sha256(wav), markers: [{ atMs: 100, speaker: 'petitioner_counsel' }] });
     expect(await restarted.list()).toEqual([expect.objectContaining({ id, state: 'recorded', signed: true })]);
-  }));
+  }), recordingTimeout);
 
-  it('versions transcripts: machine first, edits as new versions tied to the audio hash, then signed', () => withRecorder(async ({ recorder, signer, ports }) => {
+  it('versions transcripts: machine first, edits as new versions tied to the audio hash, then signed', () => withRecorder(async ({ recorder, signer, ports, store }) => {
     const { id, result } = await recordTone(recorder);
-    await expect(recorder.transcribe(id, new Float32Array(16_000 * 30), 'en')).rejects.toThrow(/length does not match/);
-    const machine = await recorder.transcribe(id, tone().samples, 'en');
+    const badDecoder = createRecorder(store, signer, { ...ports, decode: async () => new Float32Array(16_000 * 30) });
+    await expect(badDecoder.transcribe(id, 'en')).rejects.toThrow(/length does not match/);
+    const machine = await recorder.transcribe(id, 'en');
     expect(machine).toMatchObject({ version: 1, kind: 'machine', audioSha256: result.audioSha256, edits: [] });
     expect(machine.segments.map(segment => segment.speaker)).toEqual(['judge', 'witness', 'judge']);
-    await expect(recorder.transcribe(id, tone().samples, 'en')).rejects.toThrow(/already has/);
+    await expect(recorder.transcribe(id, 'en')).rejects.toThrow(/already has/);
 
     const corrected = machine.segments.map(segment => segment.id === 2 ? { ...segment, text: 'The sample witness was examined and exhibit A was noted.' } : segment);
     const edited = await recorder.saveTranscript(id, corrected);
@@ -158,17 +173,62 @@ describe('hearing recorder', () => {
     expect(checkVersions(history)).toBe(true);
 
     // Editing a stored version outside the app breaks the chain.
-    const file = join(ports.directory, id, 'v0002.json');
-    const stored = JSON.parse(await readFile(file, 'utf8')) as TranscriptVersion;
-    stored.segments[0].text = 'Changed outside the app.';
+    const file = join(ports.directory, id, 'v0002.json.enc');
+    const stored = await readFile(file);
+    expect(stored.includes(corrected[1].text)).toBe(false);
+    stored[stored.length - 1] ^= 1;
     await chmod(file, 0o644);
-    await writeFile(file, JSON.stringify(stored));
+    await writeFile(file, stored);
     await expect(recorder.transcripts(id)).rejects.toThrow(/changed outside/);
+  }), recordingTimeout);
+
+  it('migrates legacy audio, transcript and interrupted chunks without changing their contents', () => withRecorder(async ({ recorder, ports, store, signer }) => {
+    const { id, wav } = await recordTone(recorder);
+    const version = await recorder.transcribe(id, 'en');
+    const { id: interrupted } = await recorder.start(record.id, 'audio/webm');
+    const original = [
+      [join(ports.directory, id, 'audio.webm'), wav],
+      [join(ports.directory, id, 'v0001.json'), Buffer.from(JSON.stringify(version))],
+      [join(ports.directory, interrupted, 'chunks', '000000.part'), wav],
+    ] as const;
+    for (const [path, bytes] of original) {
+      await chmod(path + '.enc', 0o600).catch(error => { if (error.code !== 'ENOENT') throw error; });
+      await rm(path + '.enc', { force: true });
+      await writeFile(path, bytes);
+      await chmod(path, 0o400);
+    }
+    const restarted = createRecorder(store, signer, ports);
+    await restarted.list();
+    for (const [path, bytes] of original) {
+      await expect(readFile(path)).rejects.toMatchObject({ code: 'ENOENT' });
+      expect(await readFile(path + '.enc')).not.toEqual(Buffer.from(bytes));
+    }
+    expect(await restarted.audio(id)).toEqual(wav);
+    expect(await restarted.transcripts(id)).toEqual([version]);
+    expect((await restarted.recover(interrupted)).audioSha256).toBe(sha256(wav));
+  }), recordingTimeout);
+
+  it('compares the exact decoder input with a trusted receipt before decoding', () => withRecorder(async ({ recorder, ports, store, signer }) => {
+    const { id } = await recordTone(recorder);
+    const path = join(ports.directory, id, 'recording.json');
+    const metadata = JSON.parse(await readFile(path, 'utf8'));
+    const audioSha256 = '0'.repeat(64);
+    const { receipt, receiptId } = signHearingReceipt('Fictional Office', {
+      subject: 'audio', recordingId: id, caseId: record.id, audioSha256,
+    }, signer.key('Fictional Office'));
+    const receiptPath = join(ports.directory, id, 'receipt.json');
+    for (const file of [path, receiptPath]) await chmod(file, 0o600);
+    await writeFile(path, JSON.stringify({ ...metadata, audioSha256 }));
+    await writeFile(receiptPath, JSON.stringify({ receipt, receiptId }));
+    const decode = vi.fn(ports.decode!);
+    const restarted = createRecorder(store, signer, { ...ports, decode });
+    await expect(restarted.transcribe(id, 'en')).rejects.toThrow(/no longer matches the sealed recording/);
+    expect(decode).not.toHaveBeenCalled();
   }));
 
   it('exports a signed summary and transcript PDF whose bundle verifies', () => withRecorder(async ({ recorder, signer, printed }) => {
     const { id } = await recordTone(recorder);
-    await recorder.transcribe(id, tone().samples, 'en');
+    await recorder.transcribe(id, 'en');
     await expect(recorder.exportPdf(id, 1)).rejects.toThrow(/Sign this transcript/);
     await recorder.signTranscript(id, 1);
     const paths = await recorder.exportPdf(id, 1);
@@ -179,21 +239,44 @@ describe('hearing recorder', () => {
     expect(verifyHearingBundle(bundle)).toEqual({ signature: 'valid', pdf: 'unchanged' });
     expect(verifyHearingBundle({ ...bundle, pdf: Buffer.from('changed') })).toEqual({ signature: 'valid', pdf: 'changed' });
     expect(verifyHearingBundle({ ...bundle, trustStore: [] }).signature).toBe('unknown_signer');
-  }));
+  }), recordingTimeout);
 
-  it('uploads to the evidence store only when the backend has one, and skips silently otherwise', async () => {
+  it('uploads only through the authenticated hearing endpoint and skips unsupported backends', async () => {
+    let origin = '';
+    let token: string | undefined;
+    let role = 'admin';
+    const store = { readSetting: (key: string) => key === 'backendUrl' ? origin : undefined } as Store;
+    createEvidenceHandlers(store, {
+      resourceDirectory: '', boardChanged: vi.fn(), folder: vi.fn(), savePath: vi.fn(), print: vi.fn(),
+    }, { token: () => token, status: () => ({ role, expires: Number.MAX_SAFE_INTEGER, error: '' }) });
+    const bytes = tone().wav;
+    const recording = { id: 'fictional-hearing', audioSha256: sha256(bytes), mime: 'audio/webm', receipt: 'fictional-receipt' };
+    const readAudio = vi.fn(async () => bytes);
+    const send = vi.fn<typeof fetch>();
+    const attempt = () => uploadHearingEvidence(store, recording, 'fictional-case', readAudio, send);
+    expect(await attempt()).toBe('skipped');
+    origin = 'https://fictional-backend.invalid';
+    expect(await attempt()).toBe('skipped');
+    token = 'fictional-token';
+    role = 'legal_aid';
+    expect(await attempt()).toBe('skipped');
+    expect(send).not.toHaveBeenCalled();
+    expect(readAudio).not.toHaveBeenCalled();
+    role = 'admin';
     for (const [status, expected] of [[404, 'skipped'], [201, 'uploaded'], [500, 'failed']] as const) {
-      const calls: string[] = [];
-      await withRecorder(async ({ recorder, store }) => {
-        store.writeSettings({ backendUrl: 'https://fictional-backend.invalid' });
-        const { result } = await recordTone(recorder, true);
-        expect(result.upload).toBe(expected);
-        expect(calls).toEqual(['https://fictional-backend.invalid/evidence']);
-      }, { fetch: async input => { calls.push(String(input)); return new Response(null, { status }); } });
+      send.mockResolvedValueOnce(new Response(null, { status }));
+      expect(await attempt()).toBe(expected);
     }
-    await withRecorder(async ({ recorder }) => {
-      expect((await recordTone(recorder, true)).result.upload).toBe('skipped');
-    }, { fetch: async () => { throw new Error('No backend is configured, so nothing may be sent.'); } });
+    expect(send).toHaveBeenCalledTimes(3);
+    const [url, request] = send.mock.calls[0];
+    expect(url).toBe(origin + '/api/evidence/hearings');
+    expect(request).toMatchObject({ method: 'POST', headers: { authorization: 'Bearer fictional-token' }, redirect: 'error' });
+    expect(request?.signal).toBeUndefined();
+    const form = request?.body as FormData;
+    expect(form.get('phone')).toBeNull();
+    expect(form.get('sha256')).toBe(recording.audioSha256);
+    expect(form.get('receipt')).toBe(recording.receipt);
+    expect(sha256(new Uint8Array(await (form.get('file') as Blob).arrayBuffer()))).toBe(recording.audioSha256);
   });
 });
 
@@ -227,6 +310,7 @@ describe('hearing IPC', () => {
     expect(() => handlers.get('hearing:audio')!({}, '../../escape')).toThrow('INVALID_ARGUMENT');
     expect(() => handlers.get('hearing:start')!({}, 'fictional-case', 'video/webm')).toThrow('INVALID_ARGUMENT');
     expect(() => handlers.get('hearing:chunk')!({}, crypto.randomUUID(), 0, 'not bytes', { durationMs: 0, markers: [] })).toThrow('INVALID_ARGUMENT');
+    expect(() => handlers.get('hearing:transcribe')!({}, crypto.randomUUID(), tone().samples, 'en')).toThrow('INVALID_ARGUMENT');
     expect(handlers.get('hearing:start')!({}, 'fictional-case', 'audio/webm;codecs=opus')).toBe('ok');
     expect(calls).toEqual([['fictional-case', 'audio/webm;codecs=opus']]);
   });

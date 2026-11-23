@@ -3,7 +3,6 @@
 import argparse
 from contextlib import nullcontext
 import json
-import math
 from pathlib import Path
 import random
 import sys
@@ -22,6 +21,7 @@ from transformers import AutoModel
 
 from common import BASE, DATA, OUTPUT, ROLES, STRIDE, WINDOW
 from common import chunks, export_onnx, overlap, split, statutes, tokenizer, truncate, write_json
+from context import contextual_roles
 
 
 class Classifier(nn.Module):
@@ -82,7 +82,8 @@ def precision(device):
 
 def scores(task, predictions, gold, threshold=None):
     if task == "lsi":
-        predicted = predictions >= math.log(threshold / (1 - threshold))
+        threshold = np.asarray(threshold)
+        predicted = predictions >= np.log(threshold / (1 - threshold))
         labels = None
     else:
         predicted = predictions.argmax(axis=1)
@@ -128,19 +129,23 @@ def prepare(args, tok):
     }
     result, test_sizes = {}, {}
     for name, sets in rows.items():
-        sentences, targets = [], []
+        sentences, contextual_ids, targets = [], [], []
         for kind, documents in zip(("CL", "IT"), sets):
             count = 0
             for row in documents:
                 pairs = list(zip(row["text"], row["labels"], strict=True))
-                sentences.extend(text for text, _ in pairs)
+                if args.rr_context:
+                    contextual_ids.extend(contextual_roles(tok, row["text"], args.rr_length))
+                else:
+                    sentences.extend(text for text, _ in pairs)
                 targets.extend(label for _, label in pairs)
                 count += len(pairs)
             if name == "test":
                 test_sizes[kind] = count
-        stop = args.limit or len(sentences)
+        stop = args.limit or len(targets)
+        ids = contextual_ids[:stop] if args.rr_context else truncate(tok, sentences[:stop], args.rr_length)
         result[name] = (
-            [[ids] for ids in truncate(tok, sentences[:stop], args.rr_length)],
+            [[row] for row in ids],
             np.asarray(targets[:stop], dtype=np.int64),
         )
         print(f"{name}: {len(result[name][0])} sentences", flush=True)
@@ -151,7 +156,7 @@ def train(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if not args.cpu and torch.cuda.is_available() else "cpu")
     if device.type == "cpu":
         torch.set_num_threads(min(6, torch.get_num_threads()))
     tok = tokenizer(args.base)
@@ -165,6 +170,10 @@ def train(args):
         counts = targets.sum(axis=0)
         weights = np.sqrt((len(targets) - counts) / np.maximum(1, counts)).clip(1, 25)
         loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(weights, device=device))
+    elif args.rr_context:
+        counts = np.bincount(targets, minlength=len(labels))
+        weights = np.sqrt(counts.max() / np.maximum(1, counts)).clip(1, 8)
+        loss_fn = nn.CrossEntropyLoss(weight=torch.tensor(weights, dtype=torch.float32, device=device))
     location = args.output / args.task
     location.mkdir(parents=True, exist_ok=True)
     checkpoint = location / "best.safetensors"
@@ -192,8 +201,8 @@ def train(args):
                 steps += 1
                 if steps % 100 == 0:
                     print(f"{steps} optimizer steps, {time.monotonic() - started:.0f}s", flush=True)
-            if time.monotonic() - started >= args.minutes * 60:
-                break
+                if time.monotonic() - started >= args.minutes * 60:
+                    break
         logits, gold = predict(model, data["dev"], tok, args, device)
         options = np.linspace(0.15, 0.85, 29) if args.task == "lsi" else [None]
         candidates = [(scores(args.task, logits, gold, t)["macro"], t) for t in options]
@@ -214,6 +223,7 @@ def train(args):
         "split_items": {key: len(value[0]) for key, value in data.items()},
         "training_and_evaluation_seconds": round(time.monotonic() - started),
         "seed": args.seed, "frozen_encoder_layers": args.freeze, "smoke_limit": args.limit,
+        "rr_context": args.rr_context, "epochs_attempted": epoch + 1,
     }
     offset = 0
     if not args.limit:
@@ -226,19 +236,26 @@ def train(args):
         return
     del optimizer, scaler
     export_onnx(model, tok, location, "logits")
-    if args.task == "lsi":
-        from onnxruntime.quantization import QuantType, quantize_dynamic
+    if args.task == "lsi" or args.rr_context:
+        from validation import quantize_weights
 
-        quantize_dynamic(
-            str(location / "model.onnx"), str(location / "model_quantized.onnx"),
-            weight_type=QuantType.QInt8, op_types_to_quantize=["MatMul", "Gemm"],
-        )
+        quantize_weights(location / "model.onnx", location / "model_quantized.onnx")
+    if args.rr_context:
+        from validation import onnx_parity
+
+        test_inputs = data["test"][0]
+        sample = np.linspace(0, len(test_inputs) - 1, min(128, len(test_inputs)), dtype=int)
+        held_out = [test_inputs[i] for i in sample]
+        reference, _ = predict(model, (held_out, None), tok, args, torch.device("cpu"))
+        onnx_parity(location, "rr", held_out, reference, tok.pad_token_id)
     write_json(location / "manifest.json", {
         "labels": labels, "length": WINDOW if args.task == "lsi" else args.rr_length,
         "stride": STRIDE if args.task == "lsi" else 0, "threshold": best_threshold,
         "source": "IL-TUR (ACL 2024), InLegalBERT", "license": "CC BY-NC-SA 4.0",
+        **({"roleContext": "adjacent"} if args.rr_context else {}),
     })
-    checkpoint.unlink()
+    if not args.keep_checkpoint:
+        checkpoint.unlink()
 
 
 if __name__ == "__main__":
@@ -258,5 +275,11 @@ if __name__ == "__main__":
     parser.add_argument("--accumulate", type=int, default=4)
     parser.add_argument("--minutes", type=float, default=45, help="Time budget for optimizer steps")
     parser.add_argument("--rr-length", type=int, default=256)
+    parser.add_argument("--rr-context", action="store_true", help="Use neighboring sentences and weighted role loss")
+    parser.add_argument("--cpu", action="store_true", help="Run on CPU even when CUDA is available")
+    parser.add_argument("--keep-checkpoint", action="store_true", help="Retain selected weights for recalibration")
     parser.add_argument("--no-export", action="store_true")
-    train(parser.parse_args())
+    args = parser.parse_args()
+    if args.rr_context and (args.task != "rr" or not 4 <= args.rr_length <= WINDOW):
+        parser.error("--rr-context requires rr and --rr-length between 4 and 512")
+    train(args)

@@ -54,6 +54,7 @@ const hearingMethods = ['list', 'start', 'chunk', 'stop', 'recover', 'recording'
   'transcribe', 'transcripts', 'saveTranscript', 'signTranscript', 'summary', 'exportPdf', 'modelStatus'];
 contextBridge.exposeInMainWorld('courtplusHearing', {
   ...Object.fromEntries(hearingMethods.map(name => [name, (...args: unknown[]) => ipcRenderer.invoke('hearing:' + name, ...args)])),
+  publishSummary: (id: string, summary: string, approved: true) => ipcRenderer.invoke('hearing:publishSummary', id, summary, approved),
   onProgress: (callback: (progress: unknown) => void) => {
     const listener = (_event: unknown, progress: unknown) => callback(progress);
     ipcRenderer.on('hearing:progress', listener);

@@ -33,10 +33,18 @@ export function dashboardTitle(group: RoleGroup): string {
  * another branch has not merged yet) are simply skipped.
  */
 export const ROLE_NAV: Record<RoleGroup, string[]> = {
-  judge: ['/', '/evidence', '/triage', '/triage/adjournment', '/hearings', '/research', '/drafts', '/cases'],
-  lawyer: ['/', '/cases', '/lawyer/case', '/lawyer', '/research', '/file-evidence', '/drafts'],
-  citizen: ['/rights', '/submit-proof', '/track', '/safeguards'],
+  judge: ['/', '/import', '/evidence', '/triage', '/triage/adjournment', '/hearings', '/research', '/drafts', '/cases'],
+  lawyer: ['/', '/cases', '/lawyer/case', '/lawyer', '/research', '/import', '/file-evidence', '/drafts'],
+  citizen: ['/rights', '/submit-proof', '/track', '/settlement-guide', '/safeguards'],
 };
+
+/** Sidebar groups shown to everyone, in this order; clicking an item switches to that role's view. */
+export const NAV_SECTIONS: { group?: RoleGroup; title: string; paths: string[] }[] = [
+  { group: 'judge', title: 'For Judges', paths: ROLE_NAV.judge },
+  { group: 'lawyer', title: 'For Lawyers', paths: ['/', '/lawyer/case', '/lawyer', '/research', '/import', '/file-evidence', '/drafts'] },
+  { group: 'citizen', title: 'For Citizens', paths: ROLE_NAV.citizen.filter(path => path !== '/safeguards') },
+  { title: 'Common', paths: ['/board', '/persons', '/calendar', '/verify', '/stats', '/sc-return', '/safeguards'] },
+];
 
 // Demo role switch (Settings). Stored per computer; the saved profile role is the default.
 const overrideKey = 'courtplus.roleView';

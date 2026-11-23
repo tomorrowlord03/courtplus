@@ -1,12 +1,15 @@
-import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, randomBytes, scryptSync } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createPrivateKey, createPublicKey, randomBytes, scryptSync } from 'node:crypto';
 import type * as Export from '@courtplus/export' with { 'resolution-mode': 'import' };
 import type { Store } from '../store';
 
 type SigningKey = Export.SigningKey;
 type TrustEntry = Export.TrustEntry;
-/** The PKCS#8 PEM sealed with AES-256-GCM under a scrypt key derived from the passphrase. */
+type PrivateKeys = Pick<SigningKey, 'privateKey' | 'pqPrivateKey'>;
+const signing: typeof import('@courtplus/export/signing', { with: { 'resolution-mode': 'import' } }) =
+  require('@courtplus/export/signing');
+/** Private keys sealed with AES-256-GCM under a scrypt key derived from the passphrase. */
 type Sealed = { salt: string; iv: string; tag: string; data: string };
-type StoredKey = TrustEntry & ({ privateKey: string } | { sealed: Sealed });
+type StoredKey = SigningKey | (TrustEntry & { sealed: Sealed });
 
 const keySetting = 'signing-key';
 const retiredSetting = 'retired-signers';
@@ -19,31 +22,31 @@ function derive(passphrase: string, salt: Buffer) {
   return scryptSync(passphrase.normalize('NFC'), salt, 32, scryptOptions);
 }
 
-function seal(privateKey: string, passphrase: string): Sealed {
+function seal(keys: PrivateKeys, passphrase: string): Sealed {
   const salt = randomBytes(16);
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', derive(passphrase, salt), iv);
-  const data = Buffer.concat([cipher.update(privateKey, 'utf8'), cipher.final()]);
+  const { privateKey, pqPrivateKey } = keys;
+  const data = Buffer.concat([cipher.update(JSON.stringify({ privateKey, pqPrivateKey }), 'utf8'), cipher.final()]);
   return { salt: salt.toString('base64'), iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64'), data: data.toString('base64') };
 }
 
-function open(sealed: Sealed, passphrase: string): string {
+function open(sealed: Sealed, passphrase: string): PrivateKeys {
   try {
     const decipher = createDecipheriv('aes-256-gcm', derive(passphrase, Buffer.from(sealed.salt, 'base64')),
       Buffer.from(sealed.iv, 'base64'));
     decipher.setAuthTag(Buffer.from(sealed.tag, 'base64'));
-    return Buffer.concat([decipher.update(Buffer.from(sealed.data, 'base64')), decipher.final()]).toString('utf8');
+    const text = Buffer.concat([decipher.update(Buffer.from(sealed.data, 'base64')), decipher.final()]).toString('utf8');
+    return text.startsWith('{') ? JSON.parse(text) as PrivateKeys : { privateKey: text };
   } catch {
     throw new Error('Wrong signing key passphrase.');
   }
 }
 
-function publicEntry({ keyId, publicKey, label, status }: TrustEntry): TrustEntry {
-  return { keyId, publicKey, label, status };
-}
+const publicEntry = signing.exportPublicKey;
 
 export function createSigner(store: Store, exports: typeof Export, now: () => number = Date.now) {
-  let unlocked: { keyId: string; privateKey: string; until: number } | undefined;
+  let unlocked: { keyId: string; keys: PrivateKeys; until: number } | undefined;
 
   const stored = (): StoredKey | undefined => {
     const value = store.readSetting(keySetting);
@@ -53,15 +56,24 @@ export function createSigner(store: Store, exports: typeof Export, now: () => nu
 
   function current(label: string): StoredKey {
     const existing = stored();
-    if (existing) return { ...existing, label };
+    if (existing) {
+      if ('sealed' in existing) return { ...existing, label };
+      const upgraded = signing.upgradeSigningKey(existing);
+      if (upgraded !== existing) saveUpgrade(upgraded);
+      return { ...upgraded, label };
+    }
     const generated = exports.generateKeyPair(label);
     store.writeSettings({ [keySetting]: JSON.stringify(generated) }, 'signer.create', { keyId: generated.keyId });
     return generated;
   }
 
-  function privateKeyOf(key: StoredKey): string {
-    if ('privateKey' in key) return key.privateKey;
-    if (unlocked?.keyId === key.keyId && unlocked.until > now()) return unlocked.privateKey;
+  function saveUpgrade(key: StoredKey) {
+    store.writeSettings({ [keySetting]: JSON.stringify(key) }, 'signer.upgrade', { keyId: key.keyId });
+  }
+
+  function privateKeysOf(key: StoredKey): PrivateKeys {
+    if ('privateKey' in key) return { privateKey: key.privateKey, pqPrivateKey: key.pqPrivateKey };
+    if (unlocked?.keyId === key.keyId && unlocked.until > now()) return unlocked.keys;
     unlocked = undefined;
     throw new Error('Unlock the signing key in Settings before exporting a signed draft.');
   }
@@ -69,12 +81,18 @@ export function createSigner(store: Store, exports: typeof Export, now: () => nu
   /** The key used to sign. Throws while a passphrase-protected key is locked. */
   function key(label: string): SigningKey {
     const active = current(label);
-    return { ...publicEntry(active), privateKey: privateKeyOf(active) };
+    return { ...publicEntry(active), ...privateKeysOf(active) };
   }
 
   /** The public half only; never needs the passphrase. */
   function publicKey(label: string): TrustEntry {
-    return publicEntry(current(label));
+    const active = current(label);
+    if ('privateKey' in active || active.binding) {
+      return { ...publicEntry(active), publicKey: signing.encodeTrustPem(active) };
+    }
+    // A pre-binding sealed key can export its Ed25519 key until it is unlocked.
+    const { pqPublicKey, ...ed25519 } = active;
+    return publicEntry(ed25519);
   }
 
   function matches(key: TrustEntry, privateKey: string) {
@@ -84,15 +102,24 @@ export function createSigner(store: Store, exports: typeof Export, now: () => nu
   function unlock(passphrase: string) {
     const active = stored();
     if (!active || !('sealed' in active)) throw new Error('The signing key has no passphrase to unlock.');
-    let privateKey: string;
+    let keys: PrivateKeys;
     try {
-      privateKey = open(active.sealed, passphrase);
+      keys = open(active.sealed, passphrase);
     } catch (error) {
       store.audit('signer.unlock.failed', { keyId: active.keyId });
       throw error;
     }
-    if (!matches(active, privateKey)) throw new Error('The stored signing key is damaged.');
-    unlocked = { keyId: active.keyId, privateKey, until: now() + unlockMs };
+    if (!matches(active, keys.privateKey)) throw new Error('The stored signing key is damaged.');
+    const upgraded = signing.upgradeSigningKey({ ...publicEntry(active), ...keys });
+    if (!active.binding) {
+      saveUpgrade({
+        ...publicEntry(upgraded), binding: signing.keyBinding(upgraded),
+        sealed: active.pqPublicKey ? active.sealed : seal(upgraded, passphrase),
+      });
+    }
+    unlocked = {
+      keyId: active.keyId, keys: { privateKey: upgraded.privateKey, pqPrivateKey: upgraded.pqPrivateKey }, until: now() + unlockMs,
+    };
     store.audit('signer.unlock', { keyId: active.keyId });
     return status();
   }
@@ -108,8 +135,11 @@ export function createSigner(store: Store, exports: typeof Export, now: () => nu
       throw new Error('Use a passphrase of at least ' + minPassphraseLength + ' characters.');
     }
     const active = stored() ?? current('');
-    const privateKey = 'privateKey' in active ? active.privateKey : open(active.sealed, currentPassphrase ?? '');
-    const protectedKey: StoredKey = { ...publicEntry(active), sealed: seal(privateKey, next) };
+    const keys = 'privateKey' in active ? active : open(active.sealed, currentPassphrase ?? '');
+    const upgraded = signing.upgradeSigningKey({ ...publicEntry(active), ...keys });
+    const protectedKey: StoredKey = {
+      ...publicEntry(upgraded), binding: signing.keyBinding(upgraded), sealed: seal(upgraded, next),
+    };
     store.writeSettings({ [keySetting]: JSON.stringify(protectedKey) }, 'signer.passphrase', { keyId: active.keyId });
     unlocked = undefined;
     return status();
@@ -139,24 +169,37 @@ export function createSigner(store: Store, exports: typeof Export, now: () => nu
     };
   }
 
-  function trustStore(): TrustEntry[] {
-    const peers = JSON.parse(store.readSetting('trusted-signers') ?? '[]') as TrustEntry[];
+  const trustedPeers = (): TrustEntry[] => JSON.parse(store.readSetting('trusted-signers') ?? '[]') as TrustEntry[];
+
+  function localEntries(): TrustEntry[] {
     const active = stored();
-    return [...(active ? [publicEntry(active)] : []), ...retired(), ...peers];
+    return [...(active ? [publicEntry(active)] : []), ...retired().map(publicEntry)];
+  }
+
+  function trustStore(): TrustEntry[] {
+    const local = localEntries();
+    const peers = trustedPeers().filter(peer => !local.some(entry => entry.keyId === peer.keyId));
+    return [...local, ...peers.map(peer => {
+      // Entries imported before bindings remain trusted for Ed25519 only.
+      const { pqPublicKey, ...ed25519 } = peer;
+      return publicEntry(peer.binding ? peer : ed25519);
+    })];
   }
 
   function trust(pem: string, label: string): string {
-    if (pem.length > 4096 || !/^-----BEGIN PUBLIC KEY-----/.test(pem)) {
-      throw new Error('Choose an Ed25519 public key in PEM format.');
+    const entry = signing.decodeTrustPem(pem);
+    const { keyId, pqPublicKey } = entry;
+    const existing = trustStore().find(key => key.keyId === keyId);
+    if (existing?.pqPublicKey && pqPublicKey && existing.pqPublicKey !== pqPublicKey) {
+      throw new Error('The trusted ML-DSA-65 key does not match this file.');
     }
-    const parsed = createPublicKey(pem);
-    if (parsed.asymmetricKeyType !== 'ed25519') throw new Error('Choose an Ed25519 public key.');
-    const publicKey = parsed.export({ type: 'spki', format: 'pem' }).toString();
-    const keyId = createHash('sha256').update(parsed.export({ type: 'spki', format: 'der' })).digest('hex');
-    if (!trustStore().some(entry => entry.keyId === keyId)) {
-      const peers = JSON.parse(store.readSetting('trusted-signers') ?? '[]') as TrustEntry[];
-      peers.push({ keyId, publicKey, label, status: 'active' });
-      store.writeSettings({ 'trusted-signers': JSON.stringify(peers) }, 'signer.trust', { keyId });
+    if (localEntries().some(local => local.keyId === keyId)) return keyId;
+    if (!existing || (pqPublicKey && !existing.pqPublicKey)) {
+      const peers = trustedPeers();
+      const updated = [...peers.filter(peer => peer.keyId !== keyId), {
+        ...entry, label: existing?.label ?? label, status: existing?.status ?? 'active',
+      }];
+      store.writeSettings({ 'trusted-signers': JSON.stringify(updated) }, 'signer.trust', { keyId });
     }
     return keyId;
   }

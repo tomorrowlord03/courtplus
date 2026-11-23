@@ -1,5 +1,6 @@
 import { createPublicKey, verify } from 'node:crypto';
 import type { CourtPlusApi } from '@courtplus/contracts';
+import { decodeTrustPem, encodeTrustPem, sha3_256, signedPayloadKind, verifyHybridDraft, type Verification } from '@courtplus/export/signing';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { audit, canonical, sha256, type Db } from './db.js';
@@ -24,13 +25,29 @@ const manifestSchema = z.strictObject({
     kind: z.literal('courtplus-manifest-v1'), keyId: digest, receiptDigest: digest, pdfDigest: digest,
   }),
 });
-type Receipt = z.infer<typeof receiptSchema>;
-type Manifest = z.infer<typeof manifestSchema>;
+const signatures = z.strictObject({ ed25519: signature, mldsa65: z.string().regex(/^[a-zA-Z0-9_-]{4412}$/) });
+const hybridReceipt = z.strictObject({
+  signatures,
+  payload: receiptSchema.shape.payload.extend({
+    kind: z.literal('courtplus-receipt-v2'),
+    pqKeyId: digest,
+    hashes: z.strictObject({ sha256: digest, sha3_256: digest }),
+  }),
+});
+const hybridManifest = z.strictObject({
+  signatures,
+  payload: manifestSchema.shape.payload.extend({
+    kind: z.literal('courtplus-manifest-v2'), pqKeyId: digest, pdfSha3_256: digest,
+  }),
+});
+type Receipt = z.infer<typeof receiptSchema> | z.infer<typeof hybridReceipt>;
+type Manifest = z.infer<typeof manifestSchema> | z.infer<typeof hybridManifest>;
 type Issuer = { office: string; publicKey: string };
 type Stored = { receipt: string; manifest: string; withdrawn: 0 | 1 };
-type Checked = { signature: 'unknown_signer' | 'invalid' } | {
-  signature: 'valid'; issuer: Issuer; receipt: Receipt; manifest: Manifest;
-};
+type Checked = Pick<Verification, 'signatures' | 'legacy'> & (
+  { signature: 'unknown_signer' | 'invalid' } |
+  { signature: 'valid'; issuer: Issuer; receipt: Receipt; manifest: Manifest }
+);
 
 function decode<T>(schema: z.ZodType<T>, json: string): T | undefined {
   try {
@@ -42,17 +59,33 @@ function decode<T>(schema: z.ZodType<T>, json: string): T | undefined {
   }
 }
 
+function storedIssuerKey(pem: string) {
+  // Issuer rows created before bindings can still verify Ed25519 receipts.
+  const pqBlock = pem.indexOf('-----BEGIN ML-DSA-65 PUBLIC KEY-----');
+  if (pqBlock !== -1 && pem.trimEnd().endsWith('-----END ML-DSA-65 PUBLIC KEY-----')) {
+    return decodeTrustPem(pem.slice(0, pqBlock));
+  }
+  return decodeTrustPem(pem);
+}
+
 export function addIssuer(db: Db, office: string, pem: string): string {
   const label = parse(officeName, office);
-  if (!pem.includes('-----BEGIN PUBLIC KEY-----') || pem.includes('PRIVATE KEY')) {
-    throw new Error('Expected an Ed25519 SPKI public key');
-  }
-  const key = createPublicKey(pem);
-  if (key.asymmetricKeyType !== 'ed25519') throw new Error('Expected an Ed25519 key');
-  const keyId = sha256(key.export({ type: 'spki', format: 'der' }));
+  const key = decodeTrustPem(pem);
+  const { keyId } = key;
   db.transaction(() => {
-    db.prepare('INSERT INTO issuers VALUES (?, ?, ?)').run(keyId, key.export({ type: 'spki', format: 'pem' }), label);
-    audit(db, 'operator', 'issuer.add', { keyId, office: label });
+    const existing = db.prepare<[string], Issuer>('SELECT public_key AS publicKey, office FROM issuers WHERE key_id = ?').get(keyId);
+    if (existing) {
+      const old = storedIssuerKey(existing.publicKey);
+      if (existing.office !== label || (old.pqPublicKey && key.pqPublicKey && old.pqPublicKey !== key.pqPublicKey)) {
+        throw new Error('The trusted issuer does not match this office and public key');
+      }
+      if (old.pqPublicKey || !key.pqPublicKey) return;
+      db.prepare('UPDATE issuers SET public_key = ? WHERE key_id = ?').run(encodeTrustPem(key), keyId);
+      audit(db, 'operator', 'issuer.upgrade', { keyId, office: label, pqKeyId: key.pqKeyId });
+    } else {
+      db.prepare('INSERT INTO issuers VALUES (?, ?, ?)').run(keyId, encodeTrustPem(key), label);
+      audit(db, 'operator', 'issuer.add', { keyId, office: label });
+    }
   }).immediate();
   return keyId;
 }
@@ -62,20 +95,42 @@ export function createReceipts(db: Db) {
   const issuer = db.prepare<[string], Issuer>('SELECT public_key AS publicKey, office FROM issuers WHERE key_id = ?');
 
   function check(packageData: { receipt: string; manifest: string }): Checked {
+    if (signedPayloadKind(packageData.receipt) === 'courtplus-receipt-v2') {
+      const hybrid = decode(hybridReceipt, packageData.receipt);
+      const manifest = decode(hybridManifest, packageData.manifest);
+      if (!hybrid || !manifest || hybrid.payload.keyId !== manifest.payload.keyId
+        || hybrid.payload.pqKeyId !== manifest.payload.pqKeyId) return { signature: 'invalid' };
+      const trusted = issuer.get(hybrid.payload.keyId);
+      if (!trusted) return { signature: 'unknown_signer' };
+      if (hybrid.payload.issuer !== trusted.office) return { signature: 'invalid' };
+      const result = verifyHybridDraft({
+        ...packageData,
+        pdfDigest: manifest.payload.pdfDigest,
+        pdfSha3_256: manifest.payload.pdfSha3_256,
+        trustStore: [{ ...storedIssuerKey(trusted.publicKey), status: 'active', label: trusted.office }],
+      });
+      if (!result) return { signature: 'invalid' };
+      if (result.signature !== 'valid') return { signature: result.signature, signatures: result.signatures };
+      return { signature: 'valid', receipt: hybrid, manifest, issuer: trusted, signatures: result.signatures };
+    }
     const receipt = decode(receiptSchema, packageData.receipt);
     const manifest = decode(manifestSchema, packageData.manifest);
     if (!receipt || !manifest || receipt.payload.keyId !== manifest.payload.keyId
       || manifest.payload.receiptDigest !== sha256(canonical(receipt))) return { signature: 'invalid' };
     const trusted = issuer.get(receipt.payload.keyId);
     if (!trusted) return { signature: 'unknown_signer' };
-    const key = createPublicKey(trusted.publicKey);
+    const entry = storedIssuerKey(trusted.publicKey);
+    const key = createPublicKey(entry.publicKey);
     for (const envelope of [receipt, manifest]) {
       const bytes = Buffer.from(envelope.signature, 'base64url');
       if (bytes.toString('base64url') !== envelope.signature
         || !verify(null, Buffer.from(canonical(envelope.payload)), key, bytes)) return { signature: 'invalid' };
     }
     if (receipt.payload.issuer !== trusted.office) return { signature: 'invalid' };
-    return { signature: 'valid', receipt, manifest, issuer: trusted };
+    return {
+      signature: 'valid', receipt, manifest, issuer: trusted,
+      ...(entry.pqPublicKey && { legacy: true, signatures: { ed25519: true, mldsa65: false } }),
+    };
   }
 
   const publish = db.transaction((input: { receipt: string; manifest: string }, actor: string) => {
@@ -102,13 +157,29 @@ export function createReceipts(db: Db) {
     audit(db, actor, 'receipt.withdraw', { id });
   });
 
-  function verifyDigest(input: { receipt: string; manifest: string; pdfDigest: string }): Awaited<ReturnType<CourtPlusApi['verify']>> {
+  function verifyDigest(input: { receipt: string; manifest: string; pdfDigest: string; pdfSha3_256?: string }): Verification {
+    if (input.pdfSha3_256 === undefined && signedPayloadKind(input.manifest) === 'courtplus-manifest-v2') {
+      throw new HttpError(400, 'SHA3_DIGEST_REQUIRED');
+    }
     const checked = check(input);
-    const unchanged = checked.signature === 'valid' && checked.manifest.payload.pdfDigest === input.pdfDigest;
-    return { signature: checked.signature, pdf: unchanged ? 'unchanged' : 'changed', chain: 'not_checked' };
+    const signatureDetails = {
+      ...(checked.signatures && { signatures: checked.signatures }),
+      ...(checked.legacy && { legacy: true }),
+    };
+    if (checked.signature !== 'valid') {
+      return { signature: checked.signature, pdf: 'changed', chain: 'not_checked', ...signatureDetails };
+    }
+    const { payload } = checked.manifest;
+    const hybrid = payload.kind === 'courtplus-manifest-v2';
+    const unchanged = payload.pdfDigest === input.pdfDigest && (!hybrid || payload.pdfSha3_256 === input.pdfSha3_256);
+    return {
+      signature: 'valid', pdf: unchanged ? 'unchanged' : 'changed', chain: 'not_checked',
+      ...signatureDetails,
+      ...(hybrid && { hashes: { sha256: payload.pdfDigest, sha3_256: payload.pdfSha3_256 } }),
+    };
   }
   function verifyBundle({ pdf, ...envelopes }: Parameters<CourtPlusApi['verify']>[0]) {
-    return verifyDigest({ ...envelopes, pdfDigest: sha256(pdf) });
+    return verifyDigest({ ...envelopes, pdfDigest: sha256(pdf), pdfSha3_256: sha3_256(pdf) });
   }
 
   return { check, lookup: (id: string) => lookup.get(id), publish: publish.immediate, withdraw: withdraw.immediate, verifyBundle, verifyDigest };
@@ -146,7 +217,13 @@ export function receiptRoutes(
     }
     const fields = [
       ['Signature', 'Valid'],
+      ...(entry.legacy ? [['Signing algorithm', 'Ed25519 only (older receipt, not quantum-safe)']] : []),
       ['Document fingerprint (SHA-256)', entry.manifest.payload.pdfDigest],
+      ...(entry.manifest.payload.kind === 'courtplus-manifest-v2' ? [
+        ['Ed25519', 'Valid'],
+        ['ML-DSA-65 (FIPS 204, quantum-safe)', 'Valid'],
+        ['Document fingerprint (SHA3-256)', entry.manifest.payload.pdfSha3_256],
+      ] : []),
       ['Issuing office', entry.issuer.office],
       ['Status', stored.withdrawn ? 'Withdrawn' : 'Current'],
       ['Screening status at issue', statusLabels[entry.receipt.payload.result]],

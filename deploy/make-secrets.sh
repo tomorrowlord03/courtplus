@@ -32,3 +32,11 @@ if [ ! -f "${SECRETS_DIR}/db_key" ]; then
 else
   echo "${SECRETS_DIR}/db_key already exists, skipping"
 fi
+
+if [ ! -f "${SECRETS_DIR}/pq_signing_key" ]; then
+  openssl rand -hex 32 > "${SECRETS_DIR}/pq_signing_key"
+  chmod 600 "${SECRETS_DIR}/pq_signing_key"
+  echo "Created ${SECRETS_DIR}/pq_signing_key"
+else
+  echo "${SECRETS_DIR}/pq_signing_key already exists, skipping"
+fi

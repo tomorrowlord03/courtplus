@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { mergeHandoff, reconnectDelay, streamEvents, type Handoff } from '../src/handlers/cloud';
+import { describe, expect, it, vi } from 'vitest';
+import { createCloud, mergeHandoff, reconnectDelay, streamEvents, type Handoff } from '../src/handlers/cloud';
+import type { Store } from '../src/store';
 
 // Fictional handoff; no real case data.
 const base: Handoff = {
@@ -63,4 +64,46 @@ describe('cloud handoff stream', () => {
     await expect(reading).rejects.toThrow(/went quiet/);
     expect(seen).toEqual(['snapshot']);
   });
+});
+
+it('sends both PDF digests to the appliance and preserves the verification details', async () => {
+  const origin = 'https://courtplus.example.test';
+  const settings = new Map([['backendUrl', origin]]);
+  const store = {
+    readSetting: (key: string) => settings.get(key),
+    writeSettings: (entries: Record<string, string>) => {
+      for (const [key, value] of Object.entries(entries)) settings.set(key, value);
+    },
+    audit: vi.fn(),
+  } as unknown as Store;
+  const hashes = { sha256: 'a'.repeat(64), sha3_256: 'b'.repeat(64) };
+  const proof = { receipt: 'fictional receipt', manifest: 'fictional manifest', pdfDigest: hashes.sha256, pdfSha3_256: hashes.sha3_256 };
+  const verdict = {
+    signature: 'valid', pdf: 'unchanged', chain: 'not_checked',
+    signatures: { ed25519: true, mldsa65: true }, hashes,
+  } as const;
+  const fetch = vi.fn((url: string, _options: RequestInit) => {
+    switch (new URL(url).pathname) {
+      case '/api/auth/login':
+        return Response.json({ token: 'a'.repeat(43), role: 'judge', expires: Date.now() + 60_000 });
+      case '/api/handoff/stream':
+        return sse([]);
+      case '/api/verify-digest':
+        return Response.json(verdict);
+      default:
+        throw new Error('Unexpected cloud endpoint ' + url);
+    }
+  });
+  vi.stubGlobal('fetch', fetch);
+  const cloud = createCloud(store, vi.fn());
+  try {
+    await cloud.login('fictional-judge', 'fictional password');
+    expect(await cloud.verifyDigest(proof)).toEqual(verdict);
+    expect(fetch).toHaveBeenCalledWith(origin + '/api/verify-digest', expect.objectContaining({
+      method: 'POST', body: JSON.stringify(proof),
+    }));
+  } finally {
+    cloud.disconnect();
+    vi.unstubAllGlobals();
+  }
 });

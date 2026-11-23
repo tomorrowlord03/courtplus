@@ -1,7 +1,7 @@
 import { ui } from '../lib/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { CaseRecord, HearingApi, HearingListItem, HearingRecording, SpeakerMarker } from '@courtplus/contracts';
+import type { CaseRecord, HearingListItem, HearingRecording, SpeakerMarker } from '@courtplus/contracts';
 import { Empty, ErrorNote, Page, btn, btnPrimary, errMsg } from '../components/ui';
 import { useApp } from '../lib/context';
 import { caseLabel, clock, hearingBridge, speakerName, speakerOptions } from './hearing-tools';
@@ -22,7 +22,7 @@ export function HearingRecorder() {
   return <Recorder hearing={hearing} />;
 }
 
-function Recorder({ hearing }: { hearing: HearingApi }) {
+function Recorder({ hearing }: { hearing: NonNullable<ReturnType<typeof hearingBridge>> }) {
   const { api } = useApp();
   const [cases, setCases] = useState<CaseRecord[]>([]);
   const [caseId, setCaseId] = useState('');
@@ -82,14 +82,14 @@ function Recorder({ hearing }: { hearing: HearingApi }) {
         if (!event.data.size) return;
         const sequence = active.sequence++;
         active.writes = active.writes.then(async () => hearing.chunk(id, sequence, new Uint8Array(await event.data.arrayBuffer()), progress()));
-        active.writes.catch(e => setError('Audio could not be saved: ' + errMsg(e)));
+        active.writes.catch(e => setError(ui('Audio could not be saved:') + ' ' + errMsg(e)));
       };
       session.current = active;
       media.start(5000);
       meter();
       setPhase('recording');
     } catch (e) {
-      setError(e instanceof DOMException && e.name === 'NotAllowedError' ? 'Microphone access was refused.' : errMsg(e));
+      setError(e instanceof DOMException && e.name === 'NotAllowedError' ? ui('Microphone access was refused.') : errMsg(e));
     }
   }
 
@@ -117,7 +117,7 @@ function Recorder({ hearing }: { hearing: HearingApi }) {
       await active.writes;
       setResult(await hearing.stop(active.id, { ...final, upload }));
     } catch (e) {
-      setError(errMsg(e) + ' The audio saved so far can be recovered from the list below.');
+      setError(errMsg(e) + ' ' + ui('The audio saved so far can be recovered from the list below.'));
     } finally {
       active.stream.getTracks().forEach(track => track.stop());
       void active.audio.close();
@@ -171,18 +171,20 @@ function Recorder({ hearing }: { hearing: HearingApi }) {
         <h2>{ui("Who is speaking")}</h2>
         <p className="muted">{ui("Tap when a new person starts speaking. The transcript uses these taps for speaker names; nothing is identified from the voice.")}</p>
         <div className="flex flex-wrap gap-2">
-          {speakerOptions.map(([value, label]) => <button key={value} className={btn} disabled={phase !== 'recording'} onClick={() => mark(value)}>{label}</button>)}
+          {speakerOptions.map(([value, label]) => <button key={value} className={btn} disabled={phase !== 'recording'} onClick={() => mark(value)}>{ui(label)}</button>)}
         </div>
         {markers.length > 0 && <ol className="mt-3 text-sm">{markers.slice(-6).map((marker, index) =>
-          <li key={index}><span className="tabular-nums">{clock(marker.atMs)}</span> {speakerName(marker.speaker)}</li>)}</ol>}
+          <li key={index}><span className="tabular-nums">{clock(marker.atMs)}</span> {ui(speakerName(marker.speaker))}</li>)}</ol>}
       </section>
 
       {result && <section className="panel mt-4" aria-label={ui("Sealed recording")} role="status">
         <h2>{ui("Recording sealed")}</h2>
         <p className="break-all text-sm">SHA-256 {result.audioSha256}</p>
-        <p className="text-sm">{result.receipt ? ui("Signed receipt saved.") : ui("Not signed yet: unlock the signing key in Settings, then sign it from the transcript page. The hash is already in the audit log.")}
-          {result.upload === 'uploaded' && ' Sent to the evidence store.'}{result.upload === 'failed' && ' The evidence store did not accept the upload; the local copy is safe.'}</p>
-        <Link className={btnPrimary + ' mt-2'} to={'/hearings/' + result.id}>{ui("Open transcript")}</Link>
+        <p className="text-sm">{result.receipt ? ui('Signed receipt saved.') : ui('Not signed yet: unlock the signing key in Settings, then sign it from the transcript page. The hash is already in the audit log.')}
+          {result.upload === 'uploaded' && ` ${ui('Sent to the evidence store.')}`}
+          {result.upload === 'skipped' && ` ${ui('Upload skipped. Sign in as a judge or admin on a backend that supports court uploads.')}`}
+          {result.upload === 'failed' && ` ${ui('The evidence store did not accept the upload; the local copy is safe.')}`}</p>
+        <Link className={btnPrimary + ' mt-2'} to={'/hearings/' + result.id}>{ui('Open transcript')}</Link>
       </section>}
 
       <section className="panel mt-4" aria-label={ui("Recorded hearings")}>
@@ -193,8 +195,8 @@ function Recorder({ hearing }: { hearing: HearingApi }) {
             <td>{new Date(item.startedAt).toLocaleString()}</td>
             <td>{caseLabel(byId.get(item.caseId), item.caseId)}</td>
             <td className="tabular-nums">{item.durationMs === undefined ? '—' : clock(item.durationMs)}</td>
-            <td>{item.state === 'interrupted' ? ui("Interrupted") : (item.signed ? 'Sealed and signed' : 'Sealed, not signed')
-              + (item.transcriptVersions ? ` · ${item.transcriptVersions} transcript version(s)` : '')}</td>
+            <td>{item.state === 'interrupted' ? ui('Interrupted') : ui(item.signed ? 'Sealed and signed' : 'Sealed, not signed')
+              + (item.transcriptVersions ? ` · ${item.transcriptVersions} ${ui('transcript version(s)')}` : '')}</td>
             <td>{item.state === 'interrupted'
               ? <button className={btn} onClick={() => void recover(item.id)}>{ui("Recover")}</button>
               : <Link to={'/hearings/' + item.id}>{ui("Transcript")}</Link>}</td>

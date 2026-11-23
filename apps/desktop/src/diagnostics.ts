@@ -6,6 +6,7 @@ import type * as Ort from 'onnxruntime-node';
 import { appendAudit, verifyAuditChain } from './audit';
 import { diagnosticResources, lockDownWindow, pdfUrl, webPreferences } from './renderer';
 import { openEncryptedDatabase } from './store';
+import { timeStartup } from './startup-perf';
 
 type Check = { ok: true; detail: string } | { ok: false; error: string };
 
@@ -136,9 +137,9 @@ async function checkPdf(directory: string, rendererSession: Session): Promise<st
 
 export async function runDiagnostics(directory: string, rendererSession: Session): Promise<DiagnosticsReport> {
   const [sqlcipher, onnx, devanagariPdf] = await Promise.all([
-    check(() => checkSqlCipher(directory)),
-    check(checkOnnx),
-    check(() => checkPdf(directory, rendererSession)),
+    check(() => timeStartup('diagnostic SQLCipher', () => checkSqlCipher(directory))),
+    check(() => timeStartup('diagnostic ONNX', checkOnnx)),
+    check(() => timeStartup('diagnostic Devanagari PDF', () => checkPdf(directory, rendererSession))),
   ]);
   const report = {
     timestamp: new Date().toISOString(),

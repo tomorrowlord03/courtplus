@@ -3,6 +3,7 @@ productName: CourtPlus
 directories:
   output: release
 npmRebuild: false
+asar: true
 files:
   - dist/**/*
   - resources/shell/**/*
@@ -27,6 +28,7 @@ extraResources:
       - "ui/**/*"
       - "model/**/*"
       - "asr/**/*"
+      - "models/**/*"
       - "data/**/*"
       - "assets/**/*"
       - "templates/**/*"
@@ -42,9 +44,8 @@ electronFuses:
 win:
   signAndEditExecutable: false
   target:
-    - target: portable
+    - target: nsis
       arch: [x64]
-    - target: dir
-      arch: [x64]
+# Optional self-extracting build: electron-builder --win portable --x64 --publish never
 portable:
   artifactName: "CourtPlus-${version}-${arch}-portable.${ext}"

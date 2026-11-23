@@ -18,6 +18,7 @@ import { apiInputs, date, digest, envelopes, id, maxVerifyBase64, roles, type Ro
 import { createReceipts, receiptRoutes } from './receipts.js';
 import { exportRoutes } from './exports.js';
 import { registerEvidenceRoutes } from './evidence.js';
+import { registerHearingRoutes } from './hearings.js';
 
 const all = roles.options;
 const editors = ['superintendent', 'dlsa', 'legal_aid'] as const;
@@ -66,8 +67,14 @@ export async function buildApp(options: Options) {
   const { db, origin, now = Date.now } = options;
   const app = Fastify({
     logger: options.logger ? {
-      ...typeof options.logger === 'object' && options.logger,
       redact: ['req.headers.authorization', 'req.headers.cookie', 'req.headers["x-csrf-token"]', 'res.headers["set-cookie"]'],
+      // Privacy: never log client IPs (the anonymous channel promises none are kept) or anonymous receipt codes.
+      serializers: {
+        req: (req: { method?: string; url?: string; id?: string }) => ({
+          id: req.id, method: req.method, url: String(req.url ?? '').replace(/^\/evidence\/status\/[^/?#]+/, '/evidence/status/[code]'),
+        }),
+      },
+      ...typeof options.logger === 'object' && options.logger,
     } : false,
     bodyLimit: 256 * 1024,
     trustProxy: (_, hop) => hop === 0,
@@ -102,10 +109,11 @@ export async function buildApp(options: Options) {
     authorize(request, action === 'withdraw' ? ['admin'] : editors, true));
   app.post('/api/verify-digest', { bodyLimit: 12 * 1024, config: { rateLimit: { max: 30 } } }, async request => {
     authorize(request, all);
-    return receipts.verifyDigest(parse(envelopes.extend({ pdfDigest: digest }), request.body));
+    return receipts.verifyDigest(parse(envelopes.extend({ pdfDigest: digest, pdfSha3_256: digest.optional() }), request.body));
   });
   const exports = await exportRoutes(app, options, cases, receipts, authenticate);
   registerEvidenceRoutes(app, db, options, authenticate, authorize);
+  registerHearingRoutes(app, db, authorize);
   const statsPath = options.statsDir ?? join(root, 'data', 'stats');
   const figures = ['india.json', 'chhattisgarh.json'].flatMap(file => {
     const path = join(statsPath, file);
@@ -184,7 +192,8 @@ export async function buildApp(options: Options) {
   for (const [name, type] of [['cloud.js', 'text/javascript'], ['cloud.css', 'text/css']]) {
     app.get('/' + name, async (_, reply) => reply.type(type).send(readFileSync(join(web, name))));
   }
-  app.get('/cloud-hi.json', async (_, reply) => reply.type('application/json').send(readFileSync(join(root, 'data', 'ui', 'hi.json'))));
+  app.get('/cloud-hi.json', async (_, reply) =>
+    reply.type('application/json').send(readFileSync(join(root, 'data', 'ui', 'hi.json'))));
   app.get('/login', async (_, reply) => page(reply, 'Sign in', [
     '<form id="sign-in">',
     '<label>Account<input name="username" autocomplete="username" required></label>',
@@ -223,7 +232,7 @@ export async function buildApp(options: Options) {
     }
   }
   app.setNotFoundHandler(async (request, reply) => {
-    if (request.method !== 'GET' || !/^\/(?:$|(?:board|cases?|persons?|person|import|drafts|return|sc-return|verify|stats|about|safeguards|evidence|submit-proof|file-evidence)(?:\/[^.]+)?\/?$)/.test(request.url.split('?')[0])) {
+    if (request.method !== 'GET' || !/^\/(?:$|(?:board|cases?|persons?|person|import|drafts|return|sc-return|verify|stats|about|safeguards|evidence|submit-proof|file-evidence|track|settlement-guide)(?:\/[^.]+)?\/?$)/.test(request.url.split('?')[0])) {
       return reply.code(404).send({ error: 'NOT_FOUND' });
     }
     try {

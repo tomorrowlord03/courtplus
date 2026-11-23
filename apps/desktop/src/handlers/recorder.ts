@@ -1,22 +1,27 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
-import { access, chmod, mkdir, open, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { access, chmod, link, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { IpcMain, IpcMainInvokeEvent } from 'electron';
 import type {
   AudioIntegrity, HearingApi, HearingListItem, HearingRecording, HearingSummary, RecordingProgress, SpeakerRole, TranscriptLanguage, TranscriptSegment, TranscriptVersion,
 } from '@courtplus/contracts' with { 'resolution-mode': 'import' };
 import { z } from 'zod';
-import { createHearingManifest, jsonSha256, sha256, signHearingReceipt, type ReceiptFields } from '../asr/receipt';
+import { decodeHearingAudio, sampleRate } from '../asr/decode';
+import { chunkFile, exists, filenames, hearingId, hearingStorage, transcriptFile } from '../asr/hearing-storage';
+import { createHearingManifest, jsonSha256, sha256, signHearingReceipt, verifyHearingReceipt, type ReceiptFields } from '../asr/receipt';
 import { summarise } from '../asr/summary';
 import { checkVersions, editedVersion, machineVersion, type RawSegment } from '../asr/transcript';
 import type { Store } from '../store';
 import { validateArguments } from '../validation';
+import { uploadHearingEvidence } from './evidence';
 import { readSettings } from './settings';
 import type { createSigner } from './signer';
 
-export type Recorder = Omit<HearingApi, 'onProgress'>;
-type Signer = Pick<ReturnType<typeof createSigner>, 'key'>;
+export type Recorder = Omit<HearingApi, 'onProgress' | 'transcribe'> & {
+  transcribe(id: string, language: TranscriptLanguage): Promise<TranscriptVersion>;
+};
+type Signer = Pick<ReturnType<typeof createSigner>, 'key' | 'trustStore'>;
 
 export interface RecorderPorts {
   /** Folder that holds one sub-folder per hearing, inside the app data folder. */
@@ -25,6 +30,7 @@ export interface RecorderPorts {
   transcribe(samples: Float32Array, language: TranscriptLanguage, progress: (done: number, total: number) => void):
     Promise<{ segments: RawSegment[]; model: string }>;
   modelStatus(): Promise<{ available: boolean; model: string; sizeMb: number }>;
+  decode?: typeof decodeHearingAudio;
   print(html: string): Promise<Uint8Array>;
   folder(): Promise<string | undefined>;
   encodeQr(receiptId: string, keyId: string, receiptDigest: string): Promise<string>;
@@ -35,8 +41,6 @@ export interface RecorderPorts {
 const speakers: Record<SpeakerRole, string> = {
   judge: 'Judge', petitioner_counsel: 'Petitioner counsel', respondent_counsel: 'Respondent counsel', witness: 'Witness',
 };
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const sampleRate = 16_000;
 const versionFile = (version: number) => 'v' + String(version).padStart(4, '0') + '.json';
 const escape = (text: string) => text.replace(/[&<>"']/g, char => '&#' + char.charCodeAt(0) + ';');
 const clock = (ms: number) => {
@@ -44,20 +48,20 @@ const clock = (ms: number) => {
   return [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map(part => String(part).padStart(2, '0')).join(':');
 };
 
-/** Writes a file that may never change again: create-only, flushed, then marked read-only. */
-async function writeOnce(path: string, data: string | Uint8Array) {
-  const file = await open(path, 'wx');
+async function writeMetadata(path: string, data: string, replace = false) {
+  const temporary = path + '.' + randomUUID() + '.tmp';
   try {
-    await file.writeFile(data);
-    await file.sync();
+    await writeFile(temporary, data, { flag: 'wx', mode: 0o600, flush: true });
+    if (replace) {
+      await rename(temporary, path);
+    } else {
+      await link(temporary, path);
+      await rm(temporary);
+      await chmod(path, 0o400);
+    }
   } finally {
-    await file.close();
+    await rm(temporary, { force: true });
   }
-  await chmod(path, 0o444);
-}
-
-async function exists(path: string) {
-  return access(path).then(() => true, () => false);
 }
 
 async function readJson<T>(path: string): Promise<T | undefined> {
@@ -69,30 +73,32 @@ async function readJson<T>(path: string): Promise<T | undefined> {
   }
 }
 
-/**
- * Allows microphone capture only for the app's own pages, audio only. Camera, screen and every
- * other permission stay denied.
- */
-export function microphoneAllowed(permission: string, requestingUrl: string, mediaTypes: readonly string[], appOrigins: readonly string[]) {
-  const url = URL.parse(requestingUrl);
-  return permission === 'media' && url !== null && !url.username && !url.password
-    && mediaTypes.length > 0 && mediaTypes.every(type => type === 'audio')
-    && appOrigins.some(origin => {
-      const allowed = new URL(origin);
-      return url.protocol === allowed.protocol && url.host === allowed.host;
-    });
-}
+export { microphoneAllowed } from '../permissions';
 
 export function createRecorder(store: Store, signer: Signer, ports: RecorderPorts): Recorder {
-  const active = new Map<string, { caseId: string; next: number; queue: Promise<unknown> }>();
+  const active = new Map<string, { next: number; queue: Promise<unknown>; closing: boolean }>();
+  const finishing = new Map<string, Promise<HearingRecording>>();
+  const transcribing = new Set<string>();
   const folder = (id: string) => {
-    if (!uuid.test(id)) throw new Error('Unknown hearing recording.');
+    if (!hearingId.test(id)) throw new Error('Unknown hearing recording.');
     return join(ports.directory, id);
   };
-  const audioPath = (id: string) => join(folder(id), 'audio.webm');
+  // The encrypted database already relies on the OS-protected app key.
+  const keySetting = 'hearing-storage-key';
+  let key = store.readSetting(keySetting);
+  if (key === undefined) {
+    key = randomBytes(32).toString('hex');
+    store.writeSettings({ [keySetting]: key }, 'hearing.storage.initialize', {});
+  }
+  if (!/^[0-9a-f]{64}$/.test(key)) throw new Error('The hearing storage key is invalid.');
+  const storage = hearingStorage(ports.directory, Buffer.from(key, 'hex'));
+  const ready = storage.migrate();
+  void ready.catch(() => undefined); // Hearing methods await the same migration and report any failure.
+  const audio = 'audio.webm';
   const issuer = () => readSettings(store).issuer;
 
   async function recording(id: string): Promise<HearingRecording> {
+    await ready;
     const base = await readJson<HearingRecording>(join(folder(id), 'recording.json'));
     if (!base) throw new Error('This hearing has no finished recording.');
     const receipt = await readJson<{ receipt: string; receiptId: string }>(join(folder(id), 'receipt.json'));
@@ -100,66 +106,48 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
     return { ...base, ...receipt, ...upload };
   }
 
-  async function hashFile(path: string) {
-    const hash = createHash('sha256');
-    const file = await open(path, 'r');
-    try {
-      for await (const chunk of file.createReadStream({ autoClose: false })) hash.update(chunk as Buffer);
-    } finally {
-      await file.close();
-    }
-    return hash.digest('hex');
-  }
-
   async function integrity(id: string): Promise<AudioIntegrity> {
     const { audioSha256 } = await recording(id);
-    const readOnly = await access(audioPath(id), constants.W_OK).then(() => false, () => true);
-    return { audioSha256, unchanged: await hashFile(audioPath(id)) === audioSha256, readOnly };
+    const readOnly = await access(storage.pathOf(id, audio), constants.W_OK).then(() => false, () => true);
+    const hash = createHash('sha256');
+    try {
+      for await (const chunk of storage.read(id, audio)) hash.update(chunk);
+      return { audioSha256, unchanged: hash.digest('hex') === audioSha256, readOnly };
+    } catch {
+      return { audioSha256, unchanged: false, readOnly };
+    }
   }
 
-  async function requireUnchanged(id: string) {
-    if (!(await integrity(id)).unchanged) throw new Error('The audio no longer matches the hash recorded when it was stopped.');
+  async function checkedAudio(id: string, expected: string) {
+    const bytes = await storage.readBytes(id, audio).catch(() => {
+      throw new Error('The audio no longer matches the sealed recording, or the encrypted file cannot be read.');
+    });
+    if (sha256(bytes) !== expected) throw new Error('The audio no longer matches the sealed recording.');
+    return bytes;
   }
 
   async function signRecording(id: string): Promise<HearingRecording> {
     const current = await recording(id);
     if (current.receipt) return current;
+    if (!(await integrity(id)).unchanged) throw new Error('The audio no longer matches the hash recorded when it was stopped.');
     const fields: ReceiptFields = {
       subject: 'audio', recordingId: id, caseId: current.caseId, audioSha256: current.audioSha256, audioBytes: current.audioBytes,
       durationMs: current.durationMs, mime: current.mime, startedAt: current.startedAt, stoppedAt: current.stoppedAt,
       markersSha256: jsonSha256(current.markers),
     };
     const { receipt, receiptId } = signHearingReceipt(issuer(), fields, signer.key(issuer()));
-    await writeOnce(join(folder(id), 'receipt.json'), JSON.stringify({ receipt, receiptId }));
+    await writeMetadata(join(folder(id), 'receipt.json'), JSON.stringify({ receipt, receiptId }));
     store.audit('hearing.sign', { recordingId: id, receiptId, audioSha256: current.audioSha256 });
     return recording(id);
   }
 
   async function upload(id: string) {
-    const backend = readSettings(store).backendUrl;
-    let status: HearingRecording['upload'] = 'skipped';
-    if (backend) {
-      const current = await recording(id);
-      const found = ports.findCase(current.caseId);
-      const form = new FormData();
-      form.set('file', new Blob([await readFile(audioPath(id))], { type: 'audio/webm' }), 'hearing-' + id + '.webm');
-      form.set('caseRef', found?.cnr || found?.caseNo || current.caseId);
-      form.set('description', 'Hearing audio recorded in Court+. SHA-256 ' + current.audioSha256);
-      form.set('mode', 'identified');
-      form.set('name', issuer());
-      if (current.receipt) form.set('receipt', current.receipt);
-      try {
-        const response = await (ports.fetch ?? fetch)(backend.replace(/\/+$/, '') + '/evidence', {
-          method: 'POST', body: form, signal: AbortSignal.timeout(120_000),
-        });
-        // No evidence store on this backend yet: skip without bothering the clerk.
-        status = response.ok ? 'uploaded' : [404, 405, 501].includes(response.status) ? 'skipped' : 'failed';
-      } catch {
-        status = 'failed';
-      }
-      if (status === 'uploaded') store.audit('hearing.upload', { recordingId: id, audioSha256: current.audioSha256 });
-    }
-    await writeOnce(join(folder(id), 'upload.json'), JSON.stringify({ upload: status }));
+    const current = await recording(id);
+    const found = ports.findCase(current.caseId);
+    const status = await uploadHearingEvidence(store, current, found?.cnr || found?.caseNo || current.caseId,
+      () => checkedAudio(id, current.audioSha256), ports.fetch);
+    if (status === 'uploaded') store.audit('hearing.upload', { recordingId: id, audioSha256: current.audioSha256 });
+    await writeMetadata(join(folder(id), 'upload.json'), JSON.stringify({ upload: status }));
     return status;
   }
 
@@ -168,24 +156,21 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
     if (!session) throw new Error('Unknown hearing recording.');
     if (await exists(join(folder(id), 'recording.json'))) return recording(id);
     const chunks = join(folder(id), 'chunks');
-    const parts = (await readdir(chunks).catch(() => [])).filter(name => /^\d{6}\.part$/.test(name)).sort();
+    const parts = (await filenames(chunks)).filter(name => name.endsWith('.enc')).map(name => name.slice(0, -4))
+      .filter(name => chunkFile.test(name)).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
     if (!parts.length) throw new Error('No audio was recorded.');
-    // Join the chunks in order into the original audio, hashing exactly the bytes written.
     const hash = createHash('sha256');
     let audioBytes = 0;
-    const output = await open(audioPath(id), 'wx');
-    try {
+    async function* originalAudio() {
       for (const part of parts) {
-        const bytes = await readFile(join(chunks, part));
-        hash.update(bytes);
-        audioBytes += bytes.byteLength;
-        await output.write(bytes);
+        for await (const bytes of storage.read(id, 'chunks/' + part)) {
+          hash.update(bytes);
+          audioBytes += bytes.byteLength;
+          yield bytes;
+        }
       }
-      await output.sync();
-    } finally {
-      await output.close();
     }
-    await chmod(audioPath(id), 0o444);
+    await storage.write(id, audio, originalAudio(), true);
     const audioSha256 = hash.digest('hex');
     const markers = [...progress.markers].filter(marker => marker.atMs <= progress.durationMs).sort((a, b) => a.atMs - b.atMs);
     const entry = store.audit('hearing.record', {
@@ -195,7 +180,7 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
       id, caseId: session.caseId, startedAt: session.startedAt, stoppedAt: new Date().toISOString(), durationMs: progress.durationMs,
       mime: session.mime, audioBytes, audioSha256, markers, auditHash: entry.hash, ...(recovered && { recovered }),
     };
-    await writeOnce(join(folder(id), 'recording.json'), JSON.stringify(result, null, 2));
+    await writeMetadata(join(folder(id), 'recording.json'), JSON.stringify(result, null, 2));
     await rm(chunks, { recursive: true, force: true });
     try {
       return await signRecording(id);
@@ -204,10 +189,25 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
     }
   }
 
+  async function finishOnce(id: string, progress: RecordingProgress, recovered: boolean) {
+    const pending = finishing.get(id);
+    if (pending) return pending;
+    const work = finish(id, progress, recovered);
+    finishing.set(id, work);
+    try {
+      return await work;
+    } finally {
+      finishing.delete(id);
+    }
+  }
+
   async function versions(id: string): Promise<TranscriptVersion[]> {
-    const names = (await readdir(folder(id)).catch(() => [])).filter(name => /^v\d{4}\.json$/.test(name)).sort();
+    await ready;
+    const names = (await filenames(folder(id))).filter(name => name.endsWith('.enc')).map(name => name.slice(0, -4))
+      .filter(name => transcriptFile.test(name)).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
     const list = await Promise.all(names.map(async name => {
-      const version = (await readJson<TranscriptVersion>(join(folder(id), name)))!;
+      const version = await storage.readBytes(id, name).then(bytes => JSON.parse(bytes.toString()) as TranscriptVersion)
+        .catch(() => { throw new Error('The transcript history was changed outside CourtPlus or cannot be read.'); });
       const signed = await readJson<{ receipt: string }>(join(folder(id), name.replace('.json', '.receipt.json')));
       return signed ? { ...version, receipt: signed.receipt } : version;
     }));
@@ -223,7 +223,8 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
 
   async function storeVersion(id: string, next: TranscriptVersion) {
     const { receipt: _unsigned, ...stored } = next;
-    await writeOnce(join(folder(id), versionFile(next.version)), JSON.stringify(stored, null, 2));
+    async function* data() { yield Buffer.from(JSON.stringify(stored, null, 2)); }
+    await storage.write(id, versionFile(next.version), data());
   }
 
   function renderPdf(recordingInfo: HearingRecording, transcript: TranscriptVersion, summary: HearingSummary, qr: string, receiptId: string) {
@@ -251,11 +252,12 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
 
   return {
     list: async () => {
-      const names = await readdir(ports.directory).catch(() => [] as string[]);
-      const items = await Promise.all(names.filter(name => uuid.test(name) && !active.has(name)).map(async (id): Promise<HearingListItem | undefined> => {
+      await ready;
+      const names = await filenames(ports.directory);
+      const items = await Promise.all(names.filter(name => hearingId.test(name) && !active.has(name)).map(async (id): Promise<HearingListItem | undefined> => {
         const session = await readJson<{ caseId: string; startedAt: string }>(join(folder(id), 'session.json'));
         if (!session) return undefined;
-        const transcriptVersions = (await readdir(folder(id))).filter(name => /^v\d{4}\.json$/.test(name)).length;
+        const transcriptVersions = (await filenames(folder(id))).filter(name => name.endsWith('.enc') && transcriptFile.test(name.slice(0, -4))).length;
         const done = await readJson<HearingRecording>(join(folder(id), 'recording.json'));
         if (!done) return { id, caseId: session.caseId, startedAt: session.startedAt, state: 'interrupted', transcriptVersions };
         return {
@@ -266,62 +268,77 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
       return items.filter((item): item is HearingListItem => item !== undefined).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
     },
     start: async (caseId, mime) => {
+      await ready;
       if (!ports.findCase(caseId)) throw new Error('Choose a saved case before recording.');
       const id = randomUUID();
       await mkdir(join(folder(id), 'chunks'), { recursive: true });
-      await writeOnce(join(folder(id), 'session.json'), JSON.stringify({ id, caseId, startedAt: new Date().toISOString(), mime }));
-      active.set(id, { caseId, next: 0, queue: Promise.resolve() });
+      await writeMetadata(join(folder(id), 'session.json'), JSON.stringify({ id, caseId, startedAt: new Date().toISOString(), mime }));
+      active.set(id, { next: 0, queue: Promise.resolve(), closing: false });
       store.audit('hearing.start', { recordingId: id, caseId });
       return { id };
     },
     chunk: (id, sequence, bytes, progress) => {
       const session = active.get(id);
-      if (!session) return Promise.reject(new Error('This hearing is not being recorded.'));
+      if (!session || session.closing) return Promise.reject(new Error('This hearing is not being recorded.'));
       const write = session.queue.then(async () => {
         if (sequence !== session.next) throw new Error('Audio chunk ' + sequence + ' arrived out of order.');
-        await writeOnce(join(folder(id), 'chunks', String(sequence).padStart(6, '0') + '.part'), bytes);
+        await storage.write(id, 'chunks/' + String(sequence).padStart(6, '0') + '.part', (async function* () { yield bytes; })());
         session.next += 1;
-        await writeFile(join(folder(id), 'progress.json'), JSON.stringify(progress));
+        await writeMetadata(join(folder(id), 'progress.json'), JSON.stringify(progress), true);
       });
       session.queue = write.catch(() => undefined);
       return write;
     },
     stop: async (id, { upload: send, ...progress }) => {
       const session = active.get(id);
-      if (!session) throw new Error('This hearing is not being recorded.');
+      if (!session || session.closing) throw new Error('This hearing is not being recorded.');
+      session.closing = true;
       await session.queue;
       active.delete(id);
-      const result = await finish(id, progress, false);
+      const result = await finishOnce(id, progress, false);
       if (send) return { ...result, upload: await upload(id) };
       return result;
     },
     recover: async id => {
+      await ready;
       if (active.has(id)) throw new Error('This hearing is still being recorded.');
-      const progress = await readJson<RecordingProgress>(join(folder(id), 'progress.json')) ?? { durationMs: 0, markers: [] };
-      return finish(id, progress, true);
+      const progress = await readJson<RecordingProgress>(join(folder(id), 'progress.json')).catch(error => {
+        if (!(error instanceof SyntaxError)) throw error;
+        return undefined;
+      }) ?? { durationMs: 0, markers: [] };
+      return finishOnce(id, progress, true);
     },
     recording,
     signRecording,
     integrity,
-    audio: async id => {
-      await requireUnchanged(id);
-      return new Uint8Array(await readFile(audioPath(id)));
-    },
-    transcribe: async (id, samples, language) => {
-      const current = await recording(id);
-      if ((await versions(id)).length) throw new Error('This hearing already has a machine transcript (version 1).');
-      await requireUnchanged(id);
-      const seconds = samples.length / sampleRate;
-      if (current.durationMs > 0 && Math.abs(seconds * 1000 - current.durationMs) > Math.max(3000, current.durationMs * 0.1)) {
-        throw new Error('The decoded audio length does not match the recording.');
+    audio: async id => new Uint8Array(await checkedAudio(id, (await recording(id)).audioSha256)),
+    transcribe: async (id, language) => {
+      if (transcribing.has(id)) throw new Error('This hearing is already being transcribed.');
+      transcribing.add(id);
+      try {
+        const current = await recording(id);
+        if ((await versions(id)).length) throw new Error('This hearing already has a machine transcript (version 1).');
+        const receipt = current.receipt && verifyHearingReceipt(current.receipt, signer.trustStore());
+        if (!receipt || receipt.subject !== 'audio' || receipt.recordingId !== id || receipt.caseId !== current.caseId
+          || receipt.audioSha256 !== current.audioSha256) {
+          throw new Error('Sign the recording with a trusted key before transcribing. The sealed audio receipt is missing or invalid.');
+        }
+        const bytes = await checkedAudio(id, receipt.audioSha256);
+        const samples = await (ports.decode ?? decodeHearingAudio)(bytes);
+        const seconds = samples.length / sampleRate;
+        if (current.durationMs > 0 && Math.abs(seconds * 1000 - current.durationMs) > Math.max(3000, current.durationMs * 0.1)) {
+          throw new Error('The decoded audio length does not match the recording.');
+        }
+        const { segments, model } = await ports.transcribe(samples, language, (done, total) => ports.progress({ id, done, total }));
+        const machine = machineVersion({
+          recordingId: id, audioSha256: current.audioSha256, segments, markers: current.markers, model, language,
+        });
+        await storeVersion(id, machine);
+        store.audit('hearing.transcribe', { recordingId: id, version: 1, textSha256: machine.textSha256, model });
+        return machine;
+      } finally {
+        transcribing.delete(id);
       }
-      const { segments, model } = await ports.transcribe(samples, language, (done, total) => ports.progress({ id, done, total }));
-      const machine = machineVersion({
-        recordingId: id, audioSha256: current.audioSha256, segments, markers: current.markers, model, language,
-      });
-      await storeVersion(id, machine);
-      store.audit('hearing.transcribe', { recordingId: id, version: 1, textSha256: machine.textSha256, model });
-      return machine;
     },
     transcripts: versions,
     saveTranscript: async (id, segments: TranscriptSegment[]) => {
@@ -343,7 +360,7 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
         subject: 'transcript', recordingId: id, caseId: current.caseId, audioSha256: target.audioSha256,
         transcriptVersion: target.version, textSha256: target.textSha256, parentTextSha256: target.parentTextSha256,
       }, signer.key(issuer()));
-      await writeOnce(join(folder(id), versionFile(number).replace('.json', '.receipt.json')), JSON.stringify({ receipt, receiptId }));
+      await writeMetadata(join(folder(id), versionFile(number).replace('.json', '.receipt.json')), JSON.stringify({ receipt, receiptId }));
       store.audit('hearing.transcript.sign', { recordingId: id, version: number, receiptId, textSha256: target.textSha256 });
       return { ...target, receipt };
     },
@@ -374,7 +391,7 @@ export function createRecorder(store: Store, signer: Signer, ports: RecorderPort
   };
 }
 
-const id = z.string().regex(uuid);
+const id = z.string().regex(hearingId);
 const day = 24 * 3600_000;
 const marker = z.strictObject({ atMs: z.number().int().min(0).max(day), speaker: z.enum(['judge', 'petitioner_counsel', 'respondent_counsel', 'witness']) });
 const progress = z.strictObject({ durationMs: z.number().int().min(0).max(day), markers: z.array(marker).max(10_000) });
@@ -393,8 +410,7 @@ const schemas: { [K in keyof Recorder]: z.ZodType<Parameters<Recorder[K]>> } = {
   signRecording: z.tuple([id]),
   integrity: z.tuple([id]),
   audio: z.tuple([id]),
-  // Three hours of 16 kHz audio at most.
-  transcribe: z.tuple([id, z.instanceof(Float32Array).refine(samples => samples.length <= 3 * 3600 * sampleRate), z.enum(['en', 'hi', 'auto'])]),
+  transcribe: z.tuple([id, z.enum(['en', 'hi', 'auto'])]),
   transcripts: z.tuple([id]),
   saveTranscript: z.tuple([id, z.array(segment).max(50_000)]),
   signTranscript: z.tuple([id, version]),

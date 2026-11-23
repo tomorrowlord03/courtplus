@@ -157,7 +157,7 @@ export function EvidenceInbox() {
   }
 
   return (
-    <Page title={ui("Evidence Vault & Judicial Inbox")} note={ui("Tamper-evident vault under Bharatiya Sakshya Adhiniyam, 2023. Encrypted at rest (AES-256-GCM) with Ed25519 digital signature and hash-chained audit logging.")}>
+    <Page title={ui("Evidence Vault & Judicial Inbox")} note={ui("Tamper-evident vault under Bharatiya Sakshya Adhiniyam, 2023. Encrypted at rest (AES-256-GCM) with signed receipts and hash-chained audit logging.")}>
       <ErrorNote error={error} />
 
       {/* TABS & FILTERS */}
@@ -290,6 +290,7 @@ export function EvidenceInbox() {
                       <div>
                         <strong className="text-sm text-emerald-900">{ui("Unchanged since upload")}</strong>
                         <p className="font-mono text-xs text-emerald-800 break-all">SHA-256: {selectedItem.sha256}</p>
+                        {selectedItem.sha3_256 && <p className="font-mono text-xs text-emerald-800 break-all">SHA3-256: {selectedItem.sha3_256}</p>}
                       </div>
                     </div>
                     <button
@@ -305,7 +306,8 @@ export function EvidenceInbox() {
                   {verification && (
                     <div className="mt-2 border-t border-emerald-200 pt-2 text-xs text-emerald-900">
                       <div>{ui("File Bytes Intact:") + " "}{verification.hashMatch ? ui("✓ Verified") : ui("✗ Mismatch")}</div>
-                      <div>{ui("Ed25519 Signature:") + " "}{verification.signatureValid ? ui("✓ Valid") : ui("✗ Invalid")}</div>
+                      <div>{ui("Ed25519 Signature:") + " "}{(verification.signatures?.ed25519 ?? verification.signatureValid) ? ui("✓ Valid") : ui("✗ Invalid")}</div>
+                      {verification.signatures && <div>ML-DSA-65 (FIPS 204, quantum-safe): {verification.signatures.mldsa65 ? ui("✓ Valid") : ui("✗ Invalid")}</div>}
                       <div>{ui("Evidence Hash Chain:") + " "}{verification.chainValid ? ui("✓ Intact") : ui("✗ Broken")}</div>
                     </div>
                   )}

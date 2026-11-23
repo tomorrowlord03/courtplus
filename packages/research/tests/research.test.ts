@@ -4,9 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
+import { contextualRoleInputs } from '../src/context.js';
 import { createResearch, HINT_LABEL } from '../src/index.js';
 import { fuse, loadIndex, rank, terms } from '../src/retrieval.js';
-import { tokenWindows } from '../src/runtime.js';
+import { readJson, tokenWindows, type ModelManifest } from '../src/runtime.js';
 import { selectSummary, sentences } from '../src/summary.js';
 
 const fictionalText = 'Dr. Finch delivered the fictional lantern. The tribunal recorded the delivery. It issued this sample order.';
@@ -26,6 +27,18 @@ describe('research helpers', () => {
     expect(tokenWindows(tokens, 8, 2)).toEqual([[1, 2, 3, 4, 5, 6], [5, 6, 7, 8]]);
     expect(tokenWindows(tokens.slice(0, 6), 8, 2)).toEqual([[1, 2, 3, 4, 5, 6]]);
     expect(tokenWindows(tokens, 8, 0)).toEqual([[1, 2, 3, 4, 5, 6]]);
+  });
+
+  it('preserves target sentences and uses only neighbors from the supplied judgment', () => {
+    const tokens = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14]];
+    expect([...contextualRoleInputs(tokens, 10, { cls: 101, sep: 102 })]).toEqual([
+      [101, 102, 1, 2, 3, 4, 5, 102, 6, 102],
+      [101, 5, 102, 6, 7, 8, 9, 102, 11, 102],
+      [101, 10, 102, 11, 12, 13, 14, 102, 102],
+    ]);
+    expect([...contextualRoleInputs([[21, 22, 23]], 6, { cls: 101, sep: 102 })]).toEqual([
+      [101, 102, 21, 22, 102, 102],
+    ]);
   });
 
   it('preserves source spans and favours one sentence from each requested role', () => {
@@ -90,11 +103,15 @@ const modelTimeout = 180_000;
 
 it.skipIf(!ready('lsi'))('ranks statutes with references and the human-review label', async () => {
   const suggestions = await research.suggestSections(fictionalText);
+  const manifest = await readJson<ModelManifest<{ label: string }>>(join(modelDir, 'lsi', 'manifest.json'));
   expect(suggestions).toHaveLength(5);
   for (const item of suggestions) {
     expect(item).toMatchObject({ act: 'IPC', hint: true, hintLabel: HINT_LABEL, source: expect.stringMatching(/^https:/) });
     expect(item.score).toBeGreaterThan(0);
     expect(item.score).toBeLessThanOrEqual(1);
+    const index = manifest.labels.findIndex(label => label.label === item.label);
+    expect(index).toBeGreaterThanOrEqual(0);
+    expect(item.aboveThreshold).toBe(item.score >= (manifest.thresholds?.[index] ?? manifest.threshold ?? 0.5));
     if (!item.bns.length) expect(item.mappingNote).toBe('BNS equivalent not mapped');
   }
 }, modelTimeout);

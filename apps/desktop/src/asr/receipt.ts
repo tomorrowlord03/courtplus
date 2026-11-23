@@ -47,7 +47,7 @@ export function canonicalJson(value: unknown): string {
 export const jsonSha256 = (value: unknown): string => sha256(canonicalJson(value));
 const digest = /^[a-f0-9]{64}$/;
 
-function privateKeyOf(key: Export.SigningKey): KeyObject {
+export function privateKeyOf(key: Export.SigningKey): KeyObject {
   if (key.status !== 'active') throw new Error('Only an active key may sign');
   const privateKey = createPrivateKey(key.privateKey);
   const publicKey = createPublicKey(key.publicKey);
@@ -58,7 +58,7 @@ function privateKeyOf(key: Export.SigningKey): KeyObject {
   return privateKey;
 }
 
-function seal<T>(payload: T, key: KeyObject): string {
+export function seal<T>(payload: T, key: KeyObject): string {
   return canonicalJson({ payload, signature: sign(null, Buffer.from(canonicalJson(payload)), key).toString('base64url') });
 }
 
@@ -99,15 +99,19 @@ function parse<T extends { kind: string; keyId: string }>(json: string, kind: T[
 function signedBy<T extends { keyId: string }>(envelope: Envelope<T>, trustStore: readonly Export.TrustEntry[]) {
   const entry = trustStore.find(item => item.keyId === envelope.payload.keyId);
   if (!entry) return 'unknown_signer' as const;
+  return verifiesSignature(envelope, entry) ? 'valid' as const : 'invalid' as const;
+}
+
+export function verifiesSignature(envelope: Envelope<unknown>, entry: Export.TrustEntry) {
   try {
     const publicKey = createPublicKey(entry.publicKey);
     const signature = Buffer.from(envelope.signature, 'base64url');
     return publicKey.asymmetricKeyType === 'ed25519'
       && sha256(publicKey.export({ type: 'spki', format: 'der' })) === entry.keyId
       && signature.toString('base64url') === envelope.signature
-      && verify(null, Buffer.from(canonicalJson(envelope.payload)), publicKey, signature) ? 'valid' as const : 'invalid' as const;
+      && verify(null, Buffer.from(canonicalJson(envelope.payload)), publicKey, signature);
   } catch {
-    return 'invalid' as const;
+    return false;
   }
 }
 
@@ -120,7 +124,8 @@ export function verifyHearingReceipt(receipt: string, trustStore: readonly Expor
 export function verifyHearingBundle(input: { pdf: Uint8Array; receipt: string; manifest: string; trustStore: readonly Export.TrustEntry[] }) {
   const receipt = parse<HearingReceipt>(input.receipt, 'courtplus-hearing-receipt-v1');
   const manifest = parse<HearingManifest>(input.manifest, 'courtplus-hearing-manifest-v1');
-  if (!receipt || !manifest || receipt.payload.keyId !== manifest.payload.keyId
+  if (!receipt || receipt.payload.subject !== 'export' || !manifest || receipt.payload.keyId !== manifest.payload.keyId
+    || typeof manifest.payload.pdfSha256 !== 'string' || !digest.test(manifest.payload.pdfSha256)
     || manifest.payload.receiptSha256 !== jsonSha256(receipt)) return { signature: 'invalid', pdf: 'changed' } as const;
   const receiptSignature = signedBy(receipt, input.trustStore);
   const signature = receiptSignature === 'valid' ? signedBy(manifest, input.trustStore) : receiptSignature;

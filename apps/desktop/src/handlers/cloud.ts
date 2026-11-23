@@ -411,11 +411,15 @@ export function createCloud(store: Store, changed: () => void) {
     audit('cloud.receipt.publish', active);
   }
 
-  async function verifyDigest(input: Envelopes & { pdfDigest: string }) {
+  async function verifyDigest(input: Envelopes & { pdfDigest: string; pdfSha3_256?: string }) {
     if (!session) return undefined;
+    const digest = z.string().regex(/^[a-f0-9]{64}$/);
     const schema = z.object({
       signature: z.enum(['valid', 'invalid', 'unknown_signer']), pdf: z.enum(['unchanged', 'changed']),
       chain: z.literal('not_checked'),
+      signatures: z.object({ ed25519: z.boolean(), mldsa65: z.boolean() }).optional(),
+      hashes: z.object({ sha256: digest, sha3_256: digest }).optional(),
+      legacy: z.boolean().optional(),
     });
     const response = await call(session, '/api/verify-digest', input).catch(() => undefined);
     return schema.safeParse(response).data;

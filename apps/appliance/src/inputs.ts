@@ -71,7 +71,7 @@ const encodedBytes = z.strictObject({ $base64: z.string().min(4).max(maxVerifyBa
     return Buffer.from($base64, 'base64');
   });
 
-export const envelopes = z.strictObject({ receipt: z.string().min(1).max(4096), manifest: z.string().min(1).max(2048) });
+export const envelopes = z.strictObject({ receipt: z.string().min(1).max(6144), manifest: z.string().min(1).max(5120) });
 type ApiSchemas = { [K in keyof CourtPlusApi]: z.ZodType<Parameters<CourtPlusApi[K]>> };
 export const apiInputs = {
   listPersons: z.tuple([]),

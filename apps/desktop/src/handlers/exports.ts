@@ -8,8 +8,10 @@ import QRCode from 'qrcode';
 import type { Store } from '../store';
 import { indiaDate } from './board';
 import type { createCloud } from './cloud';
+import { registerEvidenceSigning } from './evidence';
 import { readProfile, readSettings } from './settings';
 import { createSigner } from './signer';
+import { verifyBundle } from './verifier';
 
 interface ExportPorts {
   folder: () => Promise<string | undefined>;
@@ -53,6 +55,7 @@ export function createExports(
   context: (caseId: string) => Context, listCases: () => CaseRecord[],
 ) {
   const signer = createSigner(store, exports);
+  registerEvidenceSigning(store, signer.key);
 
   function prepareDraft(kind: Parameters<CourtPlusApi['exportDraft']>[0], caseId: string, lang: string) {
     const { person, record, cases } = context(caseId);
@@ -73,6 +76,10 @@ export function createExports(
       throw new Error('This case has no recorded confirmer. Import the order again and enter who confirmed the facts.');
     }
     const options = { localizationRoot: ports.localizationRoot };
+    // Court and lawyer drafts prefill only from the confirmed case record (packages/export case-drafts).
+    if (kind !== 'S479_3_APPLICATION' && kind !== 'DLSA_7_DAY' && kind !== 'AI_ASSISTANCE_NOTE' && kind !== 'RIGHTS_CARD') {
+      return { html: exports.renderCaseDraft(kind, { record, today: indiaDate() }, lang, options), person, record, result, settings };
+    }
     const drafts: Record<typeof kind, () => string> = {
       S479_3_APPLICATION: () => exports.renderHtml('S479_3_APPLICATION', {
         person, caseRecord: record, prison, result,
@@ -142,11 +149,7 @@ export function createExports(
     return path;
   };
 
-  const verify: CourtPlusApi['verify'] = async ({ pdf, receipt, manifest }) => {
-    const local = exports.verify({ pdf, receipt, manifest, trustStore: signer.trustStore() });
-    if (local.signature !== 'unknown_signer') return local;
-    return await cloud.verifyDigest({ receipt, manifest, pdfDigest: createHash('sha256').update(pdf).digest('hex') }) ?? local;
-  };
+  const verify: CourtPlusApi['verify'] = bundle => verifyBundle(bundle, exports, signer.trustStore(), cloud.verifyDigest);
 
   return { exportDraft, previewDraft, exportScReturn, verify, signer };
 }

@@ -36,7 +36,7 @@ WORKDIR /srv/courtplus
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y chromium \
  && rm -rf /var/lib/apt/lists/* \
- && install -d -o node -g node -m 0700 /var/lib/courtplus
+ && install -d -o node -g node -m 0700 /var/lib/courtplus /var/lib/courtplus/evidence
 COPY --from=production --chown=node:node /runtime/ ./
 USER node
 EXPOSE 3000
