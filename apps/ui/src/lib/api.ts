@@ -81,7 +81,39 @@ export function createDevStub(): CourtPlusApi {
     verify: () => none('Verify'),
     stats: async () => null,
     role: async () => 'legal_aid',
-    judgeDashboard: () => none('Judge dashboard'),
+    judgeDashboard: async (asOf = new Date().toISOString().slice(0, 10), judgeName) => ({
+      asOf,
+      totalJudges: 1,
+      totalActiveCases: 12,
+      totalDisposedCases: 18,
+      benchClearanceRate: 150,
+      stateNjdg10YearComparison: {
+        district10YearPending: 5256293,
+        chhattisgarh10YearPending: 1166,
+        ratioToNational: 0.02,
+      },
+      judges: [{
+        judgeName: judgeName ?? 'Hon. Bench Judge',
+        courtRoom: 'Courtroom 1',
+        court: 'Sessions Court',
+        activeCases: 12,
+        disposedCases: 18,
+        totalFiled: 30,
+        clearanceRate: 150,
+        disposalVelocity: 12,
+        avgCaseLifespanDays: 140,
+        totalAdjournmentsGranted: 6,
+        adjournmentRatio: 0.33,
+        aging: { under1Year: 5, oneToThreeYears: 4, threeToFiveYears: 2, fiveToTenYears: 1, overTenYears: 0 },
+        timeline: [
+          { date: '2026-03-01', filed: 8, disposed: 10, clearanceRate: 125 },
+          { date: '2026-03-08', filed: 10, disposed: 12, clearanceRate: 120 },
+          { date: '2026-03-15', filed: 6, disposed: 9, clearanceRate: 150 },
+          { date: '2026-03-22', filed: 6, disposed: 11, clearanceRate: 183 },
+        ],
+        byCaseType: { criminal: { pending: 8, disposed: 12 }, civil: { pending: 4, disposed: 6 } },
+      }],
+    }),
   };
 }
 

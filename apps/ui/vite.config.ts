@@ -55,6 +55,11 @@ function copyAssetsPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), copyAssetsPlugin()],
   base: './',
+  server: {
+    fs: {
+      strict: false,
+    },
+  },
   test: { environment: 'jsdom', globals: true, setupFiles: ['./src/test/setup.ts'] },
 });
 
