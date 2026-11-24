@@ -118,6 +118,10 @@ More detail: [FEATURES.md](FEATURES.md), [docs/TECH_STACK.md](docs/TECH_STACK.md
 | Speech recognition model (downloaded at build time) | Whisper, ONNX export from [onnx-community](https://huggingface.co/onnx-community) | MIT |
 | Fonts | Noto fonts, Inter | SIL Open Font License |
 
+## Licence
+
+The Court+ code is released under the [MIT License](LICENSE). Fonts, OCR data, the Chromium seccomp profile, public datasets and dependencies keep their own licences, listed above and next to the files. Models trained on the IL-TUR benchmark are for non-commercial research use (CC BY-NC-SA 4.0) and are not included in this repository.
+
 ## Team
 
 **Team Cookie Eaters - Hack-a-Sol 5.0, IIIT Naya Raipur**
